@@ -4,7 +4,7 @@
 
 
 @layer components {
-  .bodyContainer {
+  .bodyContainer-base-styles {
     @apply w-[90vw] h-[90vh] flex justify-center items-center bg-black mt-3 rounded-xl opacity-[0.1] bg-armyBackgroundColor bg-cover bg-no-repeat;
   }
 
