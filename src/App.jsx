@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import './App.css';
-
+import TitleBar from './components/TitleBar';
 function App() {
   const [count, setCount] = useState(0);
 
   return (
     <>
-      <h1 className='text-3xl font-bold underline text-center'>Hello world!</h1>
+    <TitleBar/>
+     <div className='bodyContainer'>
+
+     </div>
     </>
   );
 }
