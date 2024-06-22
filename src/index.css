@@ -15,7 +15,7 @@
 
   .content {
 
-    @apply relative z-[2] w-full h-full flex justify-center text-white;
+    @apply relative z-[2] w-full h-full flex px-5 pt-4 text-white;
   }
 
 }

@@ -2,7 +2,7 @@ import React from 'react'
 
 function ChatList() {
   return (
-    <div>
+    <div className='chatList'>
       ChatList
     </div>
   )
