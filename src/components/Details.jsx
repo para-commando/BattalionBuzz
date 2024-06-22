@@ -2,8 +2,8 @@ import React from 'react'
 
 function Details() {
   return (
-    <div>
-      
+    <div className='mx-20'>
+      Details section
     </div>
   )
 }

@@ -5,7 +5,17 @@
 
 @layer components {
   .bodyContainer-base-styles {
-    @apply w-[90vw] h-[90vh] flex justify-center items-center bg-black mt-3 rounded-xl opacity-[0.1] bg-armyBackgroundColor bg-cover bg-no-repeat;
+    @apply w-[90vw] h-[90vh] flex overflow-hidden justify-center mt-3 rounded-xl relative;
+  }
+
+  .background-overlay {
+    @apply absolute top-0 left-0 w-full h-full bg-armyBackgroundImg bg-cover bg-no-repeat opacity-[0.1] z-[-1];
+
+  }
+
+  .content {
+
+    @apply relative z-[2] w-full h-full flex justify-center text-white;
   }
 
 }

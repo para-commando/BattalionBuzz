@@ -15,7 +15,7 @@ export const reducer1 = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(reducerOreducerOneAsyncne.pending, (state) => {})
+      .addCase(reducerOneAsync.pending, (state) => {})
       .addCase(reducerOneAsync.fulfilled, (state, action) => {})
       .addCase(reducerOneAsync.rejected, (state, action) => {});
   },

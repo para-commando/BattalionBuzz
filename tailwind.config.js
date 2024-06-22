@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        armyBackgroundColor: "url('/src/assets/combatHelicopter.jpg')",
+        armyBackgroundImg: "url('/src/assets/combatHelicopter.jpg')",
       },
     },
   },
