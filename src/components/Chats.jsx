@@ -10,13 +10,22 @@ import documentsIcon from '../assets/docs.png';
 import CameraIcon from '../assets/camera.png';
 import mediaIcon from '../assets/media.png';
 import microphoneIcon from '../assets/microphone.png';
+import EmojiPicker from 'emoji-picker-react';
 
 function Chats() {
   const [showOptions, setShowOptions] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [userInputText, setUserInputText] = useState('');
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
   };
+
+  const handleEmojiClick = (params) => {
+    setUserInputText(userInputText + params.emoji);
+    return;
+  };
+
   return (
     <div className='border-r-2 w-[670px] px-7 relative flex flex-col items-center'>
       <div className='flex w-full justify-between border-b-2 pb-4 relative'>
@@ -76,6 +85,8 @@ function Chats() {
       <div className='UserInputInChatsWindow flex items-center bg-green-950 rounded-full px-2 h-14  box-border w-[98%] absolute bottom-2  '>
         <input
           type='text'
+          value={userInputText}
+          onChange={(e) => setUserInputText(e.target.value)}
           className='w-[70%] rounded-full pl-4 text-black h-9 text-lg'
           placeholder='Your Intel goes here...'
         />
@@ -88,12 +99,12 @@ function Chats() {
           />
         </div>
         {showOptions && (
-          <div className='options flex items-center'>
-            <div title='emojis' className='emojisOption'>
+          <div className='options flex items-center' onClick={toggleOptions}>
+            <div title='microphone' className='Microphone invert'>
               <img
-                src={emojisIcon}
-                className='w-9 h-9 mx-1 cursor-pointer'
-                alt='emojis'
+                src={microphoneIcon}
+                className='w-7 h-7 mx-2 cursor-pointer'
+                alt='microphone'
               />
             </div>
             <div title='Documents' className='DocumentOption invert'>
@@ -112,11 +123,25 @@ function Chats() {
             </div>
           </div>
         )}
-        <div title='microphone' className='Microphone invert'>
-          <img
-            src={microphoneIcon}
-            className='w-7 h-7 mx-2 cursor-pointer'
-            alt='microphone'
+        <div
+          title='emojis'
+          className='emojisOption absolute bottom-16 right-0'
+          onClick={() => {
+            setShowEmojiPicker(!showEmojiPicker);
+          }}
+        >
+          {!showEmojiPicker && (
+            <img
+              src={emojisIcon}
+              className='w-9 h-9 mx-1 cursor-pointer'
+              alt='emojis'
+            />
+          )}
+          <EmojiPicker
+            height={400}
+            width={400}
+            open={showEmojiPicker}
+            onEmojiClick={handleEmojiClick}
           />
         </div>
 
