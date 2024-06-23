@@ -38,7 +38,7 @@ function ChatList() {
             onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
           />
         </div>
-        <div className='overflow-y-scroll max-h-[85%] pb-5'>
+        <div className='overflow-y-auto max-h-[85%] pb-5'>
           {users.map((currUser) => {
             return (
               <div className='Users flex items-center border-2 relative py-1 rounded-full mb-2'>
