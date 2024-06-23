@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef,useEffect } from 'react';
 import informationIcon from '../assets/information.png';
 import videoCameraIcon from '../assets/videoCamera.png';
 import avatarIcon from '../assets/avatarIcon.png';
@@ -16,6 +16,7 @@ function Chats() {
   const [showOptions, setShowOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [userInputText, setUserInputText] = useState('');
+  const emojiPickerRef = useRef(null);
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
@@ -23,9 +24,24 @@ function Chats() {
 
   const handleEmojiClick = (params) => {
     setUserInputText(userInputText + params.emoji);
+  
     return;
   };
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  }, []);
 
+  const handleClickOutside = (event) => {
+    if (
+      emojiPickerRef.current &&
+      !emojiPickerRef.current.contains(event.target)
+    ) {
+      setShowEmojiPicker(false);
+    }
+  };
   return (
     <div className='border-r-2 w-[670px] px-7 relative flex flex-col items-center'>
       <div className='flex w-full justify-between border-b-2 pb-4 relative'>
@@ -128,6 +144,7 @@ function Chats() {
           className='emojisOption absolute bottom-16 right-0'
           onClick={() => {
             setShowEmojiPicker(!showEmojiPicker);
+           
           }}
         >
           {!showEmojiPicker && (
@@ -137,12 +154,15 @@ function Chats() {
               alt='emojis'
             />
           )}
-          <EmojiPicker
-            height={400}
-            width={400}
-            open={showEmojiPicker}
-            onEmojiClick={handleEmojiClick}
-          />
+          <div ref={emojiPickerRef}>
+            {showEmojiPicker && (
+              <EmojiPicker
+                height={400}
+                width={400}
+                onEmojiClick={handleEmojiClick}
+              />
+            )}
+          </div>
         </div>
 
         <div title='Camera' className='Camera invert'>
