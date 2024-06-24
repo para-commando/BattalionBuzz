@@ -20,50 +20,50 @@ function Chats() {
 
   const messages = [
     {
-      message: 'Good evening, Major Vihaan. How are you holding up? I trust the recent operations have not been too taxing. Let’s catch up and debrief on the latest missions when you have the time. Over.',
+      message: 'Commander, report your status.',
       isUserMessage: false,
       userName: 'Major Videep',
       time: '10:30 PM, yesterday',
     },
     {
-      message: 'Evening, Major Videep. All is well on my end. The operations were challenging but successful. I’ve been reviewing our tactical approach and have some insights to share. When can we debrief? Over.',
+      message:
+        'Sir, we are holding our position and awaiting further instructions.',
       isUserMessage: true,
       userName: 'Major Vihaan',
       time: '10:31 PM, yesterday',
+      image:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/IAF_Tejas_full_size_%2832941198511%29.jpg/330px-IAF_Tejas_full_size_%2832941198511%29.jpg',
     },
     {
-      message: 'Copy that, Major Vihaan. I have some after-action reports that could benefit from your insights. Let’s coordinate our schedules and meet in the war room for a thorough analysis. Over.',
+      message: 'Keep the perimeter secure. Reinforcements are on the way.',
       isUserMessage: false,
       userName: 'Major Videep',
-      time: '10:30 PM, yesterday',
+      time: '10:32 PM, yesterday',
+      image:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/RB005_-_Dassault_Rafale_-_Indian_Air_Force_-_50976863128.jpg/330px-RB005_-_Dassault_Rafale_-_Indian_Air_Force_-_50976863128.jpg',
     },
     {
-      message: 'Roger that, Major Videep. I had a successful recon mission last weekend. The terrain was rough, but the intel gathered was invaluable. I’ve got some photos and data points to discuss. Over.',
+      message: 'Roger that, Sir. We have eyes on the target.',
       isUserMessage: true,
       userName: 'Major Vihaan',
-      time: '10:31 PM, yesterday',
+      time: '10:33 PM, yesterday',
     },
     {
-      message: 'Acknowledged, Major Vihaan. Your recon intel will be crucial for our upcoming operations. I’ve also been strategizing some new maneuvers and would appreciate your feedback. Let’s synchronize our plans. Over.',
+      message: 'Maintain stealth and proceed with caution. Over and out.',
       isUserMessage: false,
       userName: 'Major Videep',
-      time: '10:30 PM, yesterday',
+      time: '10:34 PM, yesterday',
     },
     {
-      message: 'Understood, Major Videep. I attended a tactical seminar recently; the insights were profound. I have materials and notes that could enhance our strategies. Let’s set a meeting to go over them in detail. Over.',
+      message: 'Understood, Sir. Awaiting your signal.',
       isUserMessage: true,
       userName: 'Major Vihaan',
-      time: '10:31 PM, yesterday',
-    },
-    {
-      message: 'Affirmative, Major Vihaan. I’ve been honing new skills relevant to our operations. Your input would be invaluable. Perhaps we can collaborate on a joint training exercise soon. Awaiting your orders. Over.',
-      isUserMessage: false,
-      userName: 'Major Videep',
-      time: '10:30 PM, yesterday',
+      time: '10:35 PM, yesterday',
+      image:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/IAF_LCH_in_flight.jpg/330px-IAF_LCH_in_flight.jpg',
     },
   ];
-  
-  
+
   const toggleOptions = () => {
     setShowOptions(!showOptions);
   };
@@ -141,16 +141,28 @@ function Chats() {
                 alt='user profile'
               />
               <div className='texts flex flex-col justify-start'>
-                <p
-                  className={
-                    message.isUserMessage
-                      ? 'bg-green-950 text-white rounded-3xl p-2'
-                      : 'bg-green-800 text-whitle rounded-3xl p-2'
-                  }
-                >
-                  {message.message}
-                </p>
-                <span className='text-white text-[12px] ml-3'>{message.time}</span>
+                {message?.message && (
+                  <p
+                    className={
+                      message.isUserMessage
+                        ? 'bg-green-950 text-white rounded-3xl p-2'
+                        : 'bg-green-800 text-whitle rounded-3xl p-2'
+                    }
+                  >
+                    {message.message}
+                  </p>
+                )}
+                {message?.image && (
+                  <img
+                    title='Image in chats'
+                    src={message.image}
+                    className={'w-17 h-17 mx-2 cursor-pointer rounded-lg mt-1'}
+                    alt='image in chats'
+                  />
+                )}
+                <span className='text-white text-[12px] ml-3'>
+                  {message.time}
+                </span>
               </div>
             </div>
           );
