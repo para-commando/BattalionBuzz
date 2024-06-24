@@ -1,4 +1,4 @@
-import React, { useState, useRef,useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import informationIcon from '../assets/information.png';
 import videoCameraIcon from '../assets/videoCamera.png';
 import avatarIcon from '../assets/avatarIcon.png';
@@ -23,8 +23,9 @@ function Chats() {
   };
 
   const handleEmojiClick = (params) => {
+    console.log("🚀 ~ handleEmojiClick ~ params:", params)
     setUserInputText(userInputText + params.emoji);
-  
+
     return;
   };
   useEffect(() => {
@@ -35,10 +36,8 @@ function Chats() {
   }, []);
 
   const handleClickOutside = (event) => {
-    if (
-      emojiPickerRef.current &&
-      !emojiPickerRef.current.contains(event.target)
-    ) {
+    console.log("🚀 ~ handleClickOutside ~ event:", event)
+    if (!emojiPickerRef.current.contains(event.target)) {
       setShowEmojiPicker(false);
     }
   };
@@ -139,27 +138,23 @@ function Chats() {
             </div>
           </div>
         )}
-        <div
-          title='emojis'
-          className='emojisOption absolute bottom-16 right-0'
-          onClick={() => {
-            setShowEmojiPicker(!showEmojiPicker);
-           
-          }}
-        >
-          {!showEmojiPicker && (
-            <img
-              src={emojisIcon}
-              className='w-9 h-9 mx-1 cursor-pointer'
-              alt='emojis'
-            />
-          )}
-          <div ref={emojiPickerRef}>
+        <div ref={emojiPickerRef} title='emojis' className='emojisOption'>
+          <img
+            src={emojisIcon}
+            className='w-9 h-9 mx-1 cursor-pointer'
+            alt='emojis'
+            onClick={() => {
+              setShowEmojiPicker(!showEmojiPicker);
+            }}
+          />
+
+          <div className=' absolute bottom-16 right-0'>
             {showEmojiPicker && (
               <EmojiPicker
                 height={400}
                 width={400}
                 onEmojiClick={handleEmojiClick}
+                // onEmojiSelect={handleEmojiClick}
               />
             )}
           </div>
