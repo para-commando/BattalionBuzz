@@ -18,12 +18,58 @@ function Chats() {
   const [userInputText, setUserInputText] = useState('');
   const emojiPickerRef = useRef(null);
 
+  const messages = [
+    {
+      message: 'Good evening, Major Vihaan. How are you holding up? I trust the recent operations have not been too taxing. Let’s catch up and debrief on the latest missions when you have the time. Over.',
+      isUserMessage: false,
+      userName: 'Major Videep',
+      time: '10:30 PM, yesterday',
+    },
+    {
+      message: 'Evening, Major Videep. All is well on my end. The operations were challenging but successful. I’ve been reviewing our tactical approach and have some insights to share. When can we debrief? Over.',
+      isUserMessage: true,
+      userName: 'Major Vihaan',
+      time: '10:31 PM, yesterday',
+    },
+    {
+      message: 'Copy that, Major Vihaan. I have some after-action reports that could benefit from your insights. Let’s coordinate our schedules and meet in the war room for a thorough analysis. Over.',
+      isUserMessage: false,
+      userName: 'Major Videep',
+      time: '10:30 PM, yesterday',
+    },
+    {
+      message: 'Roger that, Major Videep. I had a successful recon mission last weekend. The terrain was rough, but the intel gathered was invaluable. I’ve got some photos and data points to discuss. Over.',
+      isUserMessage: true,
+      userName: 'Major Vihaan',
+      time: '10:31 PM, yesterday',
+    },
+    {
+      message: 'Acknowledged, Major Vihaan. Your recon intel will be crucial for our upcoming operations. I’ve also been strategizing some new maneuvers and would appreciate your feedback. Let’s synchronize our plans. Over.',
+      isUserMessage: false,
+      userName: 'Major Videep',
+      time: '10:30 PM, yesterday',
+    },
+    {
+      message: 'Understood, Major Videep. I attended a tactical seminar recently; the insights were profound. I have materials and notes that could enhance our strategies. Let’s set a meeting to go over them in detail. Over.',
+      isUserMessage: true,
+      userName: 'Major Vihaan',
+      time: '10:31 PM, yesterday',
+    },
+    {
+      message: 'Affirmative, Major Vihaan. I’ve been honing new skills relevant to our operations. Your input would be invaluable. Perhaps we can collaborate on a joint training exercise soon. Awaiting your orders. Over.',
+      isUserMessage: false,
+      userName: 'Major Videep',
+      time: '10:30 PM, yesterday',
+    },
+  ];
+  
+  
   const toggleOptions = () => {
     setShowOptions(!showOptions);
   };
 
   const handleEmojiClick = (params) => {
-    console.log("🚀 ~ handleEmojiClick ~ params:", params)
+    console.log('🚀 ~ handleEmojiClick ~ params:', params);
     setUserInputText(userInputText + params.emoji);
 
     return;
@@ -36,7 +82,7 @@ function Chats() {
   }, []);
 
   const handleClickOutside = (event) => {
-    console.log("🚀 ~ handleClickOutside ~ event:", event)
+    console.log('🚀 ~ handleClickOutside ~ event:', event);
     if (!emojiPickerRef.current.contains(event.target)) {
       setShowEmojiPicker(false);
     }
@@ -74,28 +120,41 @@ function Chats() {
           />
         </div>
       </div>
-      <div className='UserChatDetailsInChatsWindow relative w-full'>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad vitae illo
-        eveniet ratione tempora, pariatur debitis. Enim doloribus eum, nihil
-        dolor nulla veritatis. Nobis, error ipsam sint numquam earum ea iure cum
-        ut quisquam accusantium odit ab unde repudiandae dignissimos officia
-        placeat dolorum odio tempore. Deserunt animi ullam omnis fuga temporibus
-        totam aut atque, delectus itaque accusamus porro ea dolorum. Ratione
-        blanditiis placeat ducimus eligendi fugiat odio molestias ut, dolore
-        natus quibusdam nisi fugit nulla maiores provident necessitatibus
-        facilis ex commodi vero nemo tenetur recusandae. Odit dolorem dolorum,
-        laudantium eius, sint exercitationem veniam, eaque unde fugit placeat
-        voluptates. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-        Eveniet tenetur, iure, sapiente deserunt nisi exercitationem incidunt
-        itaque minima eius est autem debitis nihil optio quaerat, id suscipit
-        porro ex qui quos ad odit doloribus? Eius at consequatur voluptates
-        labore iure nihil? Aperiam suscipit quis accusantium sint aliquam dicta
-        deleniti delectus a sed architecto. Sit, mollitia sed eius laboriosam
-        earum culpa quam praesentium harum est neque omnis tenetur dolorem
-        exercitationem magni ipsa veniam modi explicabo odio qui? Deserunt
-        molestias excepturi qui, nulla reiciendis rem accusamus explicabo
-        voluptas vero non provident, fuga odio nihil quis facere consectetur
-        quia molestiae voluptatem vel!
+      <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[600px] mt-2'>
+        {messages.map((message) => {
+          return (
+            <div
+              className={
+                message.isUserMessage
+                  ? 'flex flex-col self-end p-2 w-[70%] '
+                  : 'flex flex-col self-start p-2  w-[70%]'
+              }
+            >
+              <img
+                title='user profile'
+                src={avatarIcon}
+                className={
+                  message.isUserMessage
+                    ? 'hidden'
+                    : 'w-7 h-7 mx-2 cursor-pointer'
+                }
+                alt='user profile'
+              />
+              <div className='texts flex flex-col justify-start'>
+                <p
+                  className={
+                    message.isUserMessage
+                      ? 'bg-green-950 text-white rounded-3xl p-2'
+                      : 'bg-green-800 text-whitle rounded-3xl p-2'
+                  }
+                >
+                  {message.message}
+                </p>
+                <span className='text-white text-[12px] ml-3'>{message.time}</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <div className='UserInputInChatsWindow flex items-center bg-green-950 rounded-full px-2 h-14  box-border w-[98%] absolute bottom-2  '>
         <input
@@ -114,7 +173,7 @@ function Chats() {
           />
         </div>
         {showOptions && (
-          <div className='options flex items-center' onClick={toggleOptions}>
+          <div className='options flex items-center'>
             <div title='microphone' className='Microphone invert'>
               <img
                 src={microphoneIcon}
