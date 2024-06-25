@@ -88,7 +88,7 @@ function Chats() {
     }
   };
   return (
-    <div className='border-r-2 w-[670px] px-7 relative flex flex-col items-center'>
+    <div className='border-r-2 w-[900px] px-2 relative flex flex-col items-center'>
       <div className='flex w-full justify-between border-b-2 pb-4 relative'>
         <div className='UserInfoInChatsWindow flex items-center gap-3'>
           <img

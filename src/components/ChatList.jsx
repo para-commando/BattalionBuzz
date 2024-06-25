@@ -17,23 +17,23 @@ function ChatList() {
   ];
   return (
     <>
-      <div className='chatList h-full mb-24'>
-        <div className='search flex items-center mb-5 gap-6'>
-          <div className='searchBar flex relative'>
+      <div className='chatList h-full mb-24 w-full px-2'>
+        <div className='search flex items-center mb-5 gap-2 w-full'>
+          <div className='searchBar flex relative w-full'>
             <img
               src={searchIcon}
-              className='w-7 h-7 mx-2 mt-1 cursor-pointer absolute -left-1 bg-white rounded-[6px]'
+              className='w-6 h-6 mx-2 mt-1 cursor-pointer absolute -left-1 bg-white rounded-[6px]'
               alt='Search Icon'
             />
             <input
               type='text'
               placeholder='Search...'
-              className='w-80 h-9 rounded-full pl-10 text-black'
+              className='w-[297px] h-8 rounded-full pl-10 text-black'
             />
           </div>
           <img
             src={addUsersButtonDisplay ? disableAddUsersIcon : addUsersIcon}
-            className='w-8 h-8 mx-2 cursor-pointer '
+            className='w-7 h-7 mx-2 cursor-pointer '
             alt='add users icon'
             onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
           />
