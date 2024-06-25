@@ -11,9 +11,36 @@ function Details() {
 
   const sharedMediaListDetails = useRef(null);
   const radioSilenceRef = useRef(null);
+  const sharedMediaList = [
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+  ];
   const radioSilenceChat = (params) => {
     if (isNotRadioSilenced) {
-      alert('Radio silenced...')
+      alert('Radio silenced...');
       radioSilenceRef.current.innerText = 'Radio-Silenced';
       radioSilenceRef.current.style.backgroundColor = 'black';
       setIsNotRadioSilenced(false);
@@ -71,71 +98,26 @@ function Details() {
 
         {toggleImgListDetailsSection && (
           <div className=' ml-4 photos '>
-            <div className='photoItem flex items-center gap-2 mb-2'>
-              <img
-                src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80'
-                className='w-6 h-6 rounded-full'
-                alt=''
-              />
-              <span className='text-[14px]'>Photo_2024_2.png</span>
-              <img
-                src={showImageInChatIcon}
-                className='w-5 h-5 ml-8 cursor-pointer '
-                alt=''
-              />
-            </div>
-            <div className='photoItem flex items-center gap-2 mb-2'>
-              <img
-                src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80'
-                className='w-6 h-6 rounded-full'
-                alt=''
-              />
-              <span className='text-[14px]'>Photo_2024_2.png</span>{' '}
-              <img
-                src={showImageInChatIcon}
-                className='w-5 h-5 ml-8 cursor-pointer '
-                alt=''
-              />
-            </div>
-            <div className='photoItem flex items-center gap-2 mb-2'>
-              <img
-                src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80'
-                className='w-6 h-6 rounded-full'
-                alt=''
-              />
-              <span className='text-[14px]'>Photo_2024_2.png</span>{' '}
-              <img
-                src={showImageInChatIcon}
-                className='w-5 h-5 ml-8 cursor-pointer '
-                alt=''
-              />
-            </div>
-            <div className='photoItem flex items-center gap-2 mb-2'>
-              <img
-                src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80'
-                className='w-6 h-6 rounded-full'
-                alt=''
-              />
-              <span className='text-[14px]'>Photo_2024_2.png</span>{' '}
-              <img
-                src={showImageInChatIcon}
-                className='w-5 h-5 ml-8 cursor-pointer '
-                alt=''
-              />
-            </div>
-            <div className='photoItem flex items-center gap-2 mb-2'>
-              <img
-                src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80'
-                className='w-6 h-6 rounded-full'
-                alt=''
-              />
-              <span className='text-[14px]'>Photo_2024_2.png</span>{' '}
-              <img
-                src={showImageInChatIcon}
-                className='w-5 h-5 ml-8 cursor-pointer '
-                alt=''
-              />
-            </div>
+            {sharedMediaList.map((item, index) => {
+              return (
+                <div
+                  key={index}
+                  className='photoItem flex items-center gap-2 mb-2'
+                >
+                  <img
+                    src={item.imgLink}
+                    className='w-6 h-6 rounded-full'
+                    alt=''
+                  />
+                  <span className='text-[14px]'>{item.imgName}</span>
+                  <img
+                    src={showImageInChatIcon}
+                    className='w-5 h-5 ml-8 cursor-pointer '
+                    alt=''
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
         <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
