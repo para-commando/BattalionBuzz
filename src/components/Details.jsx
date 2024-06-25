@@ -7,10 +7,26 @@ import showImageInChatIcon from '../assets/eye.png';
 function Details() {
   const [toggleImgListDetailsSection, setToggleImgListDetailsSection] =
     useState(false);
+  const [isNotRadioSilenced, setIsNotRadioSilenced] = useState(true);
+
   const sharedMediaListDetails = useRef(null);
+  const radioSilenceRef = useRef(null);
+  const radioSilenceChat = (params) => {
+    if (isNotRadioSilenced) {
+      alert('Radio silenced...')
+      radioSilenceRef.current.innerText = 'Radio-Silenced';
+      radioSilenceRef.current.style.backgroundColor = 'black';
+      setIsNotRadioSilenced(false);
+      return;
+    }
+    radioSilenceRef.current.innerText = 'Radio-Silence';
+    radioSilenceRef.current.style.backgroundColor = 'rgb(153 27 27 / 1)';
+    setIsNotRadioSilenced(true);
+    return;
+  };
 
   return (
-    <div className='w-[310px]'>
+    <div className='w-[310px] relative'>
       <div className='flex flex-col items-center gap-3  mx-2 border-b-2 justify-center  '>
         <img
           src={avatarIcon}
@@ -32,7 +48,7 @@ function Details() {
           <div className='title flex justify-between items-center'>
             <span className='text-lg'>Chat settings</span>
             <img
-              src= {toggleViewIcon}
+              src={toggleViewIcon}
               className='invert w-6 h-6 mx-2 cursor-pointer'
               alt=''
             />
@@ -43,7 +59,7 @@ function Details() {
             <span className='text-lg'>Shared Media</span>
             <img
               ref={sharedMediaListDetails}
-              src= {toggleViewIcon}
+              src={toggleViewIcon}
               className='invert w-6 h-6 mx-2 cursor-pointer'
               alt=''
               onClick={(e) =>
@@ -126,12 +142,19 @@ function Details() {
           <div className='title flex justify-between items-center'>
             <span className='text-lg'>Shared Docs</span>
             <img
-              src= {toggleViewIcon}
+              src={toggleViewIcon}
               className='invert w-6 h-6 mx-2 cursor-pointer'
               alt=''
             />
           </div>
         </div>
+      </div>
+      <div
+        ref={radioSilenceRef}
+        className='radioSilence bg-red-800 rounded-xl px-[9px] py-[11px] text-center absolute bottom-3 w-full mx-3'
+        onClick={() => radioSilenceChat()}
+      >
+        Radio Silence
       </div>
     </div>
   );
