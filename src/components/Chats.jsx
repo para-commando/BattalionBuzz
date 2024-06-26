@@ -17,6 +17,11 @@ function Chats() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [userInputText, setUserInputText] = useState('');
   const emojiPickerRef = useRef(null);
+  const showLatestMessage = useRef(null);
+  useEffect(() => {
+    showLatestMessage?.current?.scrollIntoView({behavior:"smooth"})  
+
+  }, []);
 
   const messages = [
     {
@@ -88,7 +93,7 @@ function Chats() {
     }
   };
   return (
-    <div className='border-r-2 w-[900px] px-2 relative flex flex-col items-center'>
+    <div className='border-r-2 w-full px-2 relative flex flex-col items-center'>
       <div className='flex w-full justify-between border-b-2 pb-4 relative'>
         <div className='UserInfoInChatsWindow flex items-center gap-3'>
           <img
@@ -167,6 +172,7 @@ function Chats() {
             </div>
           );
         })}
+        <div ref={showLatestMessage}></div>
       </div>
       <div className='UserInputInChatsWindow flex items-center bg-green-950 rounded-full px-2 h-14  box-border w-[98%] absolute bottom-2  '>
         <input

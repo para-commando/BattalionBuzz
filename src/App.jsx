@@ -14,7 +14,7 @@ function App() {
       <TitleBar />
       <div className='bodyContainer-base-styles'>
         <div className="background-overlay"></div>
-        <div className="content">
+        <div className="content flex justify-center">
           <List />
           <Chats />
           <Details />

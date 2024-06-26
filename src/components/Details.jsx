@@ -53,7 +53,7 @@ function Details() {
   };
 
   return (
-    <div className='w-[310px] relative'>
+    <div className='w-[450px] relative'>
       <div className='flex flex-col items-center gap-3  mx-2 border-b-2 justify-center  '>
         <img
           src={avatarIcon}
