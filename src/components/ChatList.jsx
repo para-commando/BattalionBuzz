@@ -13,11 +13,15 @@ function ChatList() {
     { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
     { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
     { name: 'Major Videep11', hasSentMessage: true, profileImg: avatarIcon },
- 
+    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
+    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
+    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
+    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
+    { name: 'Major Videep11', hasSentMessage: true, profileImg: avatarIcon },
   ];
   return (
     <>
-      <div className='chatList h-full mb-24 w-full px-2'>
+      <div className='chatList h-[532px]  w-full px-2 overflow-y-auto'>
         <div className='search flex items-center mb-5 gap-2 w-full'>
           <div className='searchBar flex relative w-full'>
             <img
