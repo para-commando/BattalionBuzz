@@ -37,6 +37,36 @@ function Details() {
         'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
       imgName: 'Photo_2024_2.png',
     },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    },
+    {
+      imgLink:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
+      imgName: 'Photo_2024_2.png',
+    }
   ];
   const radioSilenceChat = (params) => {
     if (isNotRadioSilenced) {
@@ -53,7 +83,7 @@ function Details() {
   };
 
   return (
-    <div className='w-[450px] relative'>
+    <div className='w-[480px] relative'>
       <div className='flex flex-col items-center gap-3  mx-2 border-b-2 justify-center  '>
         <img
           src={avatarIcon}
@@ -70,7 +100,7 @@ function Details() {
         </div>
       </div>
       <div className='border-b-2 p-2 mx-2'></div>
-      <div className='options pt-3 mx-1'>
+      <div className='options pt-3 mx-1 overflow-y-auto h-[370px] w-full'>
         <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
           <div className='title flex justify-between items-center'>
             <span className='text-lg'>Chat settings</span>
@@ -97,7 +127,7 @@ function Details() {
         </div>
 
         {toggleImgListDetailsSection && (
-          <div className=' ml-4 photos '>
+          <div className=' ml-4 photos overflow-y-auto h-[200px]'>
             {sharedMediaList.map((item, index) => {
               return (
                 <div
