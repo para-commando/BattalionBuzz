@@ -125,7 +125,7 @@ function Chats() {
           />
         </div>
       </div>
-      <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[600px] mt-2'>
+      <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[525px] mt-2'>
         {messages.map((message) => {
           return (
             <div

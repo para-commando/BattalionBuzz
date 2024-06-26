@@ -5,7 +5,7 @@
 
 @layer components {
   .bodyContainer-base-styles {
-    @apply w-[90vw] h-[100vh] flex justify-center mt-3 rounded-xl relative mb-12;
+    @apply w-[90vw] h-[90vh] flex justify-center mt-3 rounded-xl relative mb-12;
   }
 
   .background-overlay {
