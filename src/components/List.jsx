@@ -6,7 +6,7 @@ function List() {
     <div className='w-[420px] border-r-2 pr-5 '>
       <UserInfo />
       <ChatList />
-      <div className='logoutButton bg-blue-700 px-2 py-3 rounded-full text-center'>
+      <div className='logoutButton bg-blue-700 px-2 py-3 rounded-full text-center cursor-pointer'>
         Log out
       </div>
     </div>
