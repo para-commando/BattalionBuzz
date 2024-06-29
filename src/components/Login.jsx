@@ -1,6 +1,5 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import SignUp from './SignUp';
 
 function Login() {
   const {
@@ -10,14 +9,10 @@ function Login() {
     formState: { errors },
   } = useForm();
   const onSubmit = (data) => console.log(data);
-  const isNewUser = true;
 
   console.log(watch('example')); // watch input value by passing the name of it
   return (
     <>
-      {isNewUser ? (
-        <SignUp />
-      ) : (
         <div>
           <div className='item flex flex-col gap-14 justify-center items-center'>
             <h1 className='text-3xl font-bold p-5'>Login to your account,</h1>
@@ -73,10 +68,9 @@ function Login() {
               </form>
             </div>
           </div>
-          <div className='separator'></div>
-          <div className='item'></div>
         </div>
-      )}
+
+
     </>
   );
 }

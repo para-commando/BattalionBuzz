@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+
 import { useForm } from 'react-hook-form';
 
 function SignUp() {
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -71,22 +74,59 @@ function SignUp() {
               </div>
             </div>
             <div className='mb-5 flex flex-col justify-center items-center'>
-              <input
-                className='text-black w-[548px] p-1 rounded-xl text-center'
-                {...register('password', {
-                  required: true,
-                  min: 7,
-                  max: 20,
-                  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
-                })}
-                placeholder='Password'
-                type='password'
-              />
-              <div className='flex justify-center items-center'>
+              <div className='relative w-[548px]'>
+                <input
+                  className='text-black w-full p-1 rounded-xl text-center'
+                  {...register('password', {
+                    required: true,
+                    minLength: 7,
+                    maxLength: 20,
+                    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/,
+                  })}
+                  placeholder='Password'
+                  type={showPassword ? 'text' : 'password'}
+                />
+                <button
+                  type='button'
+                  className='absolute right-3 top-1/2 transform -translate-y-1/2'
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <div className='text-red-500 w[548px] flex justify-center items-center'>
                 {errors.password && (
                   <span className='text-red-500 w[548px] text-wrap break-words'>
-                    Password must contain atleast one uppercase, one lowercase,
+                    Password must contain at least one uppercase, one lowercase,
                     one number and one special character
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className='mb-5 flex flex-col justify-center items-center'>
+              <div className='relative w-[548px]'>
+                <input
+                  className='text-black w-full p-1 rounded-xl text-center'
+                  {...register('confirmPassword', {
+                    required: true,
+                    validate: (value) => value === watch('password') || 'Passwords do not match',
+                  })}
+                  placeholder='Confirm Password'
+                  type={showConfirmPassword ? 'text' : 'password'}
+                />
+                <button
+                  type='button'
+                  className='absolute right-3 top-1/2 transform -translate-y-1/2'
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <div className='text-red-500 w[548px] flex justify-center items-center'>
+                {errors.confirmPassword && (
+                  <span className='text-red-500 w[548px] text-wrap break-words'>
+                    {errors.confirmPassword.message}
                   </span>
                 )}
               </div>

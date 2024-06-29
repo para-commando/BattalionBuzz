@@ -5,11 +5,16 @@ import TitleBar from './components/TitleBar';
 import List from './components/List';
 import Details from './components/Details';
 import Chats from './components/Chats';
-import Login from './components/Login';
+import LandingPage from './components/LandingPage';
+import { useSelector, useDispatch } from 'react-redux';
 
-function App() {
-  const [count, setCount] = useState(0);
-  const user = false;
+function App() { 
+
+  const user = useSelector((state) => {
+    console.log("🚀 ~ App ~ state:", state)
+    return state.userAuthReducerExport.valueIsUserValidated
+  })
+  const dispatch = useDispatch();
   return (
     <>
       <TitleBar />
@@ -23,7 +28,7 @@ function App() {
               <Details />{' '}
             </>
           ) : (
-            <Login />
+            <LandingPage />
           )}
         </div>
       </div>
