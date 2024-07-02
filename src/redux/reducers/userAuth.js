@@ -4,7 +4,7 @@ export const userAuthReducers = createSlice({
   name: 'userAuth',
   initialState: {
     valueIsUserNew: false,
-    valueIsUserValidated: false,
+    valueIsUserValidated: true,
 
   },
   reducers: {

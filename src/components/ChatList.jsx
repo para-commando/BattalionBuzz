@@ -3,7 +3,7 @@ import searchIcon from '../assets/search.png';
 import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
 import avatarIcon from '../assets/avatarIcon.png';
-
+import AddUser from './AddUser';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
   const users = [
@@ -61,6 +61,7 @@ function ChatList() {
             );
           })}
         </div>
+      <AddUser/>
       </div>
     </>
   );
