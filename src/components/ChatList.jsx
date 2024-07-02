@@ -6,6 +6,7 @@ import avatarIcon from '../assets/avatarIcon.png';
 import AddUser from './AddUser';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
+  
   const users = [
     { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
     { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
@@ -32,7 +33,7 @@ function ChatList() {
             <input
               type='text'
               placeholder='Search...'
-              className='w-[297px] h-8 rounded-full pl-10 text-black'
+              className='w-[335px] h-8 rounded-full pl-10 text-black'
             />
           </div>
           <img
@@ -61,7 +62,7 @@ function ChatList() {
             );
           })}
         </div>
-      <AddUser/>
+     {addUsersButtonDisplay && <AddUser/>}
       </div>
     </>
   );

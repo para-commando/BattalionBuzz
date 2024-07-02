@@ -3,10 +3,10 @@ import avatarIcon from '../assets/avatarIcon.png';
 
 function AddUser() {
   return (
-    <div className='addUser absolute top-[140px] left-[340px] bg-blue-400 rounded-3xl p-7 z-10'>
+    <div className='addUser absolute top-[140px] left-[340px] bg-black rounded-3xl p-7 z-10 bg-opacity-[0.8]'>
       <form className='flex gap-1 justify-center'>
-        <input type='text' placeholder='callSign...' className='rounded-2xl pl-2' name='callSignAddUser' />
-        <button className='text-[12px] bg-purple-500 rounded-2xl px-2'>Search</button>
+        <input type='text' placeholder='callSign...' className='rounded-2xl pl-2 text-black' name='callSignAddUser' />
+        <button className='text-[12px] bg-green-900 rounded-2xl px-2'>Search</button>
       </form>
       <div className='displayUsers p-3 h-24 overflow-y-auto'>
         <div className='user p-2 details flex gap-1 items-center justify-center'>
