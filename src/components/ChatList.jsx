@@ -4,9 +4,14 @@ import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
 import avatarIcon from '../assets/avatarIcon.png';
 import AddUser from './AddUser';
+import {
+  isDetailsVisible,
+  isChatsVisible,
+} from '../redux/reducers/toggleViewReducers';
+import { useSelector, useDispatch } from 'react-redux';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
-  
+
   const users = [
     { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
     { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
@@ -20,6 +25,10 @@ function ChatList() {
     { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
     { name: 'Major Videep11', hasSentMessage: true, profileImg: avatarIcon },
   ];
+  const isUserChatsVisible = useSelector((state) => {
+    return state.toggleViewReducersExport.valueIsChatsVisible;
+  });
+  const dispatch = useDispatch();
   return (
     <>
       <div className='chatList h-[625px]  w-full px-2 overflow-y-auto'>
@@ -46,7 +55,13 @@ function ChatList() {
         <div className='overflow-y-auto max-h-[85%] pb-5'>
           {users.map((currUser) => {
             return (
-              <div className='Users flex items-center border-2 relative py-1 rounded-full mb-2'>
+              <div
+                className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
+                onClick={() => {
+                  dispatch(isChatsVisible(!isUserChatsVisible));
+                  dispatch(isDetailsVisible(false));
+                }}
+              >
                 <img
                   src={currUser.profileImg}
                   className='w-10 h-10 mx-2 rounded-full cursor-pointer'
@@ -62,7 +77,7 @@ function ChatList() {
             );
           })}
         </div>
-     {addUsersButtonDisplay && <AddUser/>}
+        {addUsersButtonDisplay && <AddUser />}
       </div>
     </>
   );
