@@ -7,7 +7,7 @@ import { isUserNew, isUserValidated } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
 
 function UserInfo() {
-  const user = useSelector((state) => state.userAuth.valueUserData.data);
+  const user = useSelector((state) => state.userAuthReducerExport.valueUserData.data);
   const dispatch = useDispatch();
 
   return (
@@ -15,7 +15,7 @@ function UserInfo() {
       <div className='user flex items-center w-full'>
         <img
           src={user.profileImg}
-          className='w-14 h-14 mx-2  rounded-full cursor-pointer'
+          className='w-14 h-14 mx-2  rounded-full cursor-pointer object-cover object-top'
           alt=''
         />
         <h2 className='font-bold text-xl'>{user.name}</h2>

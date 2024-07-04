@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { isUserNew, isUserValidated } from '../redux/reducers/userAuth';
+import { isUserNew, isUserValidated,loginUser } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
 
 function Login() {
@@ -14,6 +14,7 @@ function Login() {
 
   const onSubmit = (data) => {
     dispatch(isUserValidated(true));
+    dispatch(loginUser({data:data}))
     console.log(data);
   };
 

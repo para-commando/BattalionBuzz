@@ -76,7 +76,7 @@ export const userAuthReducers = createSlice({
   name: 'userAuth',
   initialState: {
     valueIsUserNew: false,
-    valueIsUserValidated: true,
+    valueIsUserValidated: false,
     valueUserData: {
       data: {},
       chats: [],
@@ -96,12 +96,15 @@ export const userAuthReducers = createSlice({
         state.status = 'loading';
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        if (action.data) {
+        console.log("🚀 ~ .addCase ~ action:", action.payload)
+        console.log("🚀 ~ .addCase ~ state.valueUserData:", state.valueUserData)
+        if (action.payload.data) {
           state.valueUserData = action.payload;
         } else {
           alert('Invalid Credentials. Please try again');
         }
       })
+     
       .addCase(loginUser.rejected, (state, action) => {
         alert('something went wrong. Please try again');
       });

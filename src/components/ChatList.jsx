@@ -11,20 +11,10 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
-
-  const users = [
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep11', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep11', hasSentMessage: true, profileImg: avatarIcon },
-  ];
+   
+  const users =  useSelector((state) => {
+    return state.userAuthReducerExport.valueUserData.chats;
+  });;
   const isUserChatsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
@@ -42,7 +32,7 @@ function ChatList() {
             <input
               type='text'
               placeholder='Search...'
-              className='w-[335px] h-8 rounded-full pl-10 text-black'
+              className='w-[100%] h-8 rounded-full pl-10 text-black'
             />
           </div>
           <img
@@ -64,7 +54,7 @@ function ChatList() {
               >
                 <img
                   src={currUser.profileImg}
-                  className='w-10 h-10 mx-2 rounded-full cursor-pointer'
+                  className='w-10 h-10 mx-2 rounded-full cursor-pointer object-cover object-top'
                   alt=''
                 />
                 <span className='text-lg ml-4'>{currUser.name}</span>
