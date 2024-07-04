@@ -129,7 +129,8 @@ function Chats() {
                 className='w-7 h-7 mx-2 cursor-pointer '
                 alt=''
                 onClick={() => {
-                  dispatch(isDetailsVisible(!isUserDetailsVisible));
+                  dispatch(isDetailsVisible(!isUserDetailsVisible))
+                  setShowOptions(!showOptions);
                 }}
               />
               <img

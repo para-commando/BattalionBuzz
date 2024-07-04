@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 function UserInfo() {
   const dispatch = useDispatch();
-
+  
   return (
     <div className='flex items-center gap-1 mb-7 w-full'>
       <div className='user flex items-center w-full'>
