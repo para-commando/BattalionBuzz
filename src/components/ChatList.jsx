@@ -3,25 +3,25 @@ import searchIcon from '../assets/search.png';
 import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
 import avatarIcon from '../assets/avatarIcon.png';
-
+import AddUser from './AddUser';
+import {
+  isDetailsVisible,
+  isChatsVisible,
+} from '../redux/reducers/toggleViewReducers';
+import { useSelector, useDispatch } from 'react-redux';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
-  const users = [
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep11', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep', hasSentMessage: true, profileImg: avatarIcon },
-    { name: 'Major Videep11', hasSentMessage: true, profileImg: avatarIcon },
-  ];
+   
+  const users =  useSelector((state) => {
+    return state.userAuthReducerExport.valueUserData.chats;
+  });;
+  const isUserChatsVisible = useSelector((state) => {
+    return state.toggleViewReducersExport.valueIsChatsVisible;
+  });
+  const dispatch = useDispatch();
   return (
     <>
-      <div className='chatList h-[532px]  w-full px-2 overflow-y-auto'>
+      <div className='chatList h-[625px]  w-full px-2 overflow-y-auto'>
         <div className='search flex items-center mb-5 gap-2 w-full'>
           <div className='searchBar flex relative w-full'>
             <img
@@ -32,7 +32,7 @@ function ChatList() {
             <input
               type='text'
               placeholder='Search...'
-              className='w-[297px] h-8 rounded-full pl-10 text-black'
+              className='w-[100%] h-8 rounded-full pl-10 text-black'
             />
           </div>
           <img
@@ -45,10 +45,16 @@ function ChatList() {
         <div className='overflow-y-auto max-h-[85%] pb-5'>
           {users.map((currUser) => {
             return (
-              <div className='Users flex items-center border-2 relative py-1 rounded-full mb-2'>
+              <div
+                className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
+                onClick={() => {
+                  dispatch(isChatsVisible(!isUserChatsVisible));
+                  dispatch(isDetailsVisible(false));
+                }}
+              >
                 <img
                   src={currUser.profileImg}
-                  className='w-10 h-10 mx-2 rounded-full cursor-pointer'
+                  className='w-10 h-10 mx-2 rounded-full cursor-pointer object-cover object-top'
                   alt=''
                 />
                 <span className='text-lg ml-4'>{currUser.name}</span>
@@ -61,6 +67,7 @@ function ChatList() {
             );
           })}
         </div>
+        {addUsersButtonDisplay && <AddUser />}
       </div>
     </>
   );

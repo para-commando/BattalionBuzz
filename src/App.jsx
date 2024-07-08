@@ -8,13 +8,15 @@ import Chats from './components/Chats';
 import LandingPage from './components/LandingPage';
 import { useSelector, useDispatch } from 'react-redux';
 
-function App() { 
-
+function App() {
   const user = useSelector((state) => {
-    console.log("🚀 ~ App ~ state:", state)
-    return state.userAuthReducerExport.valueIsUserValidated
-  })
-  const dispatch = useDispatch();
+    console.log('🚀 ~ App ~ state:', state);
+    return state.userAuthReducerExport.valueIsUserValidated;
+  });
+  const isUserDetailsVisible = useSelector((state) => {
+    return state.toggleViewReducersExport.valueIsDetailsVisible;
+  });
+
   return (
     <>
       <TitleBar />
@@ -25,7 +27,7 @@ function App() {
             <>
               <List />
               <Chats />
-              <Details />{' '}
+              <Details />
             </>
           ) : (
             <LandingPage />

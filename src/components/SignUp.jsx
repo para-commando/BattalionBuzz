@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { isUserNew, isUserValidated } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import {auth} from '../lib/firebase.js';
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -14,10 +16,11 @@ function SignUp() {
   } = useForm();
   const dispatch = useDispatch();
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     dispatch(isUserValidated(true));
-
-    console.log(data);
+    data.email = data.callSign+"."+data.regiment+"@gmail.com"
+   await createUserWithEmailAndPassword(auth, data.email, data.password); 
+   
   };
   console.log(watch('example')); // watch input value by passing the name of it
   return (
