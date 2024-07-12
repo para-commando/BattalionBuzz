@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../lib/firebase.js';
 import { doc, setDoc } from 'firebase/firestore';
+import { uploadData } from '../lib/upload.js';
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -38,6 +39,8 @@ function SignUp() {
       setDoc(doc(db, 'chats',  data.id), {
        chats:[]
       });
+      const imgUrl= await uploadData( avatarIcon);
+       
       dispatch(isUserValidated(true));
     } catch (error) {
       console.log('🚀 ~ onSubmit ~ error:', error);
