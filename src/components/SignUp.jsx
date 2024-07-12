@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form';
 import { isUserNew, isUserValidated } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../lib/firebase.js';
+import { auth, db } from '../lib/firebase.js';
+import { doc, setDoc } from 'firebase/firestore';
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -17,10 +18,32 @@ function SignUp() {
   const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
-    dispatch(isUserValidated(true));
-    data.email = data.callSign+"."+data.regiment+"@gmail.com"
-   await createUserWithEmailAndPassword(auth, data.email, data.password); 
-   
+    try {
+     
+      data.email = data.callSign + '.' + data.regiment + '@gmail.com';
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      ).catch((error) => {
+        console.log('🚀 ~ onSubmit ~ error:', error);
+      });
+      data.id = userCredential.user.uid;
+      data.radioSilencedUsers=[];
+      console.log("🚀 ~ onSubmit ~ data:", data)
+      debugger
+      setDoc(doc(db, 'users',  data.id), {
+        ...data,
+      });
+      setDoc(doc(db, 'chats',  data.id), {
+       chats:[]
+      });
+      dispatch(isUserValidated(true));
+    } catch (error) {
+      console.log('🚀 ~ onSubmit ~ error:', error);
+      alert("something went wrong. Please try again");
+      throw error;
+    }
   };
   console.log(watch('example')); // watch input value by passing the name of it
   return (
