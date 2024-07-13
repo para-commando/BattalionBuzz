@@ -1,9 +1,18 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useForm } from 'react-hook-form';
-import { isUserNew, isUserValidated,loginUser } from '../redux/reducers/userAuth';
+import {
+  isUserNew,
+  isUserValidated,
+  loginUser,
+} from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
-
-function Login() {
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
+import { auth, db } from '../lib/firebase.js';
+import { doc, setDoc } from 'firebase/firestore';
+ function Login() {
   const {
     register,
     handleSubmit,
@@ -11,14 +20,28 @@ function Login() {
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
-
+  const [showLoading, setShowLoading] = useState(false);
+  const [showSubmit, setShowSubmit] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const onSubmit = (data) => {
-    dispatch(isUserValidated(true));
-    dispatch(loginUser({data:data}))
-    console.log(data);
+    try {
+      setIsSubmitting(true);
+      setShowSubmit(false)
+      dispatch(loginUser({ data: data }));
+      console.log(data);
+      dispatch(isUserValidated(true));
+    } catch (err) {
+      console.log(err);
+    }
+    finally{
+      setShowSubmit(true)
+      setShowLoading(false);
+      setIsSubmitting(false);
+    }
+   
   };
 
-   return (
+  return (
     <>
       <div>
         <div className='item flex flex-col gap-14 justify-center items-center'>
@@ -39,6 +62,7 @@ function Login() {
                     max: 30,
                     pattern: /^(?=.*[a-z])(?=.*[A-Z])[A-Za-z\d]+$/,
                   })}
+                  disabled={isSubmitting}
                 />
                 <div className='text-red-500 w[548px] flex justify-center items-center'>
                   {errors.callSign && <span>Invalid Call Sign</span>}
@@ -57,6 +81,7 @@ function Login() {
                   })}
                   placeholder='Password'
                   type='password'
+                  disabled={isSubmitting}
                 />
                 <div className='flex justify-center items-center'>
                   {errors.password && (
@@ -67,12 +92,24 @@ function Login() {
                   )}
                 </div>
               </div>
-              <div className='flex justify-center'>
+              {showSubmit && (
+              <div
+                className='flex justify-center'
+                onClick={(e) => {
+                  setShowLoading(true);
+                }}
+              >
                 <input
-                  className='bg-green-800 px-9 py-2 rounded-3xl cursor-pointer'
+                  className='bg-green-800 px-9 py-2 rounded-3xl cursor-pointer hover:bg-green-900'
                   type='submit'
                 />
               </div>
+            )}
+            {showLoading && (
+              <div className='flex items-center justify-cente w-15 h-15 '>
+                <div className='loader'></div>
+              </div>
+            )}
             </form>
           </div>
         </div>
