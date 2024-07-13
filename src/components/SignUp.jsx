@@ -14,9 +14,14 @@ function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [avatar, setAvatar] = useState({
     file: null,
-    url: '',
+    url: 'https://preview.redd.it/a-commando-from-the-elite-garud-special-forces-of-the-air-v0-ubqtdla4toja1.jpg?width=1080&crop=smart&auto=webp&s=c5dbb3466fef9dd74a111bf9df83e470c8917f43',
   });
   const [showImgUpload, setShowImgUpload] = useState(false);
+  const [showDefaultImageUpload, setShowDefaultImageUpload] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
+  const [showSubmit, setShowSubmit] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const first = useRef(null);
   const {
     register,
@@ -27,7 +32,10 @@ function SignUp() {
   const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
-     try {
+    try {
+      setIsSubmitting(true);
+      setShowSubmit(false)
+
       data.email = data.callSign + '.' + data.regiment + '@gmail.com';
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -41,11 +49,12 @@ function SignUp() {
         const imgUrl = await uploadData(data.profilePic[0]);
         data.imgUrl = imgUrl;
 
-       // deleting profile pic after use
+        // deleting profile pic after use
         delete data.profilePic;
       } else {
         console.log('no profile pic uploaded');
-        data.imgUrl = 'none';
+        data.imgUrl =
+          'https://preview.redd.it/a-commando-from-the-elite-garud-special-forces-of-the-air-v0-ubqtdla4toja1.jpg?width=1080&crop=smart&auto=webp&s=c5dbb3466fef9dd74a111bf9df83e470c8917f43';
       }
 
       setDoc(doc(db, 'users', data.id), {
@@ -54,15 +63,22 @@ function SignUp() {
       setDoc(doc(db, 'chats', data.id), {
         chats: [],
       });
-      
       dispatch(isUserValidated(true));
     } catch (error) {
-      console.log('🚀 ~ onSubmit ~ error:', error);
-      alert('something went wrong. Please try again');
+      let errorMessage ="Something went wrong, please try again"
+      if(error.code="auth/email-already-in-use"){
+       errorMessage = "Either Call-Sign or regiment name already taken, please change either or both";
+      }
+      console.log('🚀 ~ onSubmit ~ error:', JSON.stringify(error));
+      alert(errorMessage);
       throw error;
     }
+    finally{
+      setShowSubmit(true)
+      setShowLoading(false);
+      setIsSubmitting(false);
+    }
   };
-  console.log(watch('example')); // watch input value by passing the name of it
   return (
     <div>
       <div className='item flex flex-col gap-14 justify-center items-center'>
@@ -75,23 +91,29 @@ function SignUp() {
             <div className='flex gap-2 pb-2'>
               <img
                 className='w-16 h-16 mx-2 rounded-full cursor-pointer object-cover object-top'
-                src={avatar.url || avatarIcon}
+                src={avatar.url}
                 alt=''
               />
-              <span
-                onClick={() => {
-                  setAvatar({ file: null, url: '' });
-                  // first.current.style.display = 'none';
-                  setShowImgUpload(false);
-                }}
-                className='self-center p-2 bg-white text-black cursor-pointer rounded-xl '
-              >
-                use default image
-              </span>
+              {showDefaultImageUpload && (
+                <span
+                  onClick={() => {
+                    setAvatar({
+                      file: null,
+                      url: 'https://preview.redd.it/a-commando-from-the-elite-garud-special-forces-of-the-air-v0-ubqtdla4toja1.jpg?width=1080&crop=smart&auto=webp&s=c5dbb3466fef9dd74a111bf9df83e470c8917f43',
+                    });
+                    // first.current.style.display = 'none';
+                    setShowImgUpload(false);
+                  }}
+                  className='self-center p-2 bg-white text-black cursor-pointer rounded-xl '
+                >
+                  use default image
+                </span>
+              )}
               <span
                 onClick={() => {
                   // first.current.style.display = 'block';
                   setShowImgUpload(true);
+                  setShowDefaultImageUpload(true);
                 }}
                 className='self-center p-2 bg-white text-black cursor-pointer rounded-xl '
               >
@@ -139,6 +161,7 @@ function SignUp() {
                       }
                     }
                   }}
+                  disabled={isSubmitting}
                 />
                 <div className='text-red-500 w[548px] flex justify-center items-center'>
                   {errors.profilePic && (
@@ -159,6 +182,7 @@ function SignUp() {
                   max: 30,
                   pattern: /^(?=.*[a-z])(?=.*[A-Z])[A-Za-z\d]+$/,
                 })}
+                disabled={isSubmitting}
               />
               <div className='text-red-500 w[548px] flex justify-center items-center'>
                 {errors.callSign && <span>Invalid Call Sign</span>}
@@ -175,6 +199,7 @@ function SignUp() {
                   max: 40,
                   pattern: /^(?=.*[a-z])(?=.*[A-Z])[A-Za-z]+$/i,
                 })}
+                disabled={isSubmitting}
               />
               <div className='text-red-500 w[548px] flex justify-center items-center'>
                 {errors.regiment && <span>Invalid Regiment name</span>}
@@ -190,6 +215,7 @@ function SignUp() {
                   required: true,
                   pattern: /^\d{10}$/,
                 })}
+                disabled={isSubmitting}
               />
               <div className='text-red-500 w-[548px] flex justify-center items-center'>
                 {errors.mobileNumber && (
@@ -210,10 +236,11 @@ function SignUp() {
                   })}
                   placeholder='Password'
                   type={showPassword ? 'text' : 'password'}
+                  disabled={isSubmitting}
                 />
                 <button
                   type='button'
-                  className='absolute right-3 top-1/2 transform -translate-y-1/2'
+                  className='absolute right-0 top-1/2 transform -translate-y-1/2 bg-black p-[4px] rounded-xl'
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? 'Hide' : 'Show'}
@@ -241,10 +268,11 @@ function SignUp() {
                   })}
                   placeholder='Confirm Password'
                   type={showConfirmPassword ? 'text' : 'password'}
+                  disabled={isSubmitting}
                 />
                 <button
                   type='button'
-                  className='absolute right-3 top-1/2 transform -translate-y-1/2'
+                  className='absolute right-0 top-1/2 transform -translate-y-1/2 bg-black p-[4px] rounded-xl'
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? 'Hide' : 'Show'}
@@ -258,12 +286,24 @@ function SignUp() {
                 )}
               </div>
             </div>
-            <div className='flex justify-center'>
-              <input
-                className='bg-green-800 px-9 py-2 rounded-3xl cursor-pointer'
-                type='submit'
-              />
-            </div>
+            {showSubmit && (
+              <div
+                className='flex justify-center'
+                onClick={(e) => {
+                  setShowLoading(true);
+                }}
+              >
+                <input
+                  className='bg-green-800 px-9 py-2 rounded-3xl cursor-pointer hover:bg-green-900'
+                  type='submit'
+                />
+              </div>
+            )}
+            {showLoading && (
+              <div className='flex items-center justify-cente w-15 h-15 '>
+                <div className='loader'></div>
+              </div>
+            )}
           </form>
         </div>
       </div>
