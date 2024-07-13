@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 import { useForm } from 'react-hook-form';
 import { isUserNew, isUserValidated } from '../redux/reducers/userAuth';
@@ -7,9 +7,17 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../lib/firebase.js';
 import { doc, setDoc } from 'firebase/firestore';
 import { uploadData } from '../lib/upload.js';
+import avatarIcon from '../assets/avatarIcon.png';
+
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [avatar, setAvatar] = useState({
+    file: null,
+    url: '',
+  });
+  const [showImgUpload, setShowImgUpload] = useState(false);
+  const first = useRef(null);
   const {
     register,
     handleSubmit,
@@ -19,32 +27,38 @@ function SignUp() {
   const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
-    try {
-     
+     try {
       data.email = data.callSign + '.' + data.regiment + '@gmail.com';
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password
-      ).catch((error) => {
-        console.log('🚀 ~ onSubmit ~ error:', error);
-      });
+      );
       data.id = userCredential.user.uid;
-      data.radioSilencedUsers=[];
-      console.log("🚀 ~ onSubmit ~ data:", data)
-      debugger
-      setDoc(doc(db, 'users',  data.id), {
+      data.radioSilencedUsers = [];
+
+      if (data?.profilePic && data.profilePic.length) {
+        const imgUrl = await uploadData(data.profilePic[0]);
+        data.imgUrl = imgUrl;
+
+       // deleting profile pic after use
+        delete data.profilePic;
+      } else {
+        console.log('no profile pic uploaded');
+        data.imgUrl = 'none';
+      }
+
+      setDoc(doc(db, 'users', data.id), {
         ...data,
       });
-      setDoc(doc(db, 'chats',  data.id), {
-       chats:[]
+      setDoc(doc(db, 'chats', data.id), {
+        chats: [],
       });
-      const imgUrl= await uploadData( avatarIcon);
-       
+      
       dispatch(isUserValidated(true));
     } catch (error) {
       console.log('🚀 ~ onSubmit ~ error:', error);
-      alert("something went wrong. Please try again");
+      alert('something went wrong. Please try again');
       throw error;
     }
   };
@@ -58,6 +72,82 @@ function SignUp() {
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col justify-center items-center'
           >
+            <div className='flex gap-2 pb-2'>
+              <img
+                className='w-16 h-16 mx-2 rounded-full cursor-pointer object-cover object-top'
+                src={avatar.url || avatarIcon}
+                alt=''
+              />
+              <span
+                onClick={() => {
+                  setAvatar({ file: null, url: '' });
+                  // first.current.style.display = 'none';
+                  setShowImgUpload(false);
+                }}
+                className='self-center p-2 bg-white text-black cursor-pointer rounded-xl '
+              >
+                use default image
+              </span>
+              <span
+                onClick={() => {
+                  // first.current.style.display = 'block';
+                  setShowImgUpload(true);
+                }}
+                className='self-center p-2 bg-white text-black cursor-pointer rounded-xl '
+              >
+                upload image
+              </span>
+            </div>
+
+            {showImgUpload && (
+              <div
+                ref={first}
+                className='mb-5 flex-col justify-center items-center'
+              >
+                <input
+                  type='file'
+                  className='text-opacity-65 w-full p-2 rounded-xl text-center border border-gray-300 '
+                  {...register('profilePic', {
+                    required: false,
+                    validate: {
+                      validFileType: (value) => {
+                        console.log('🚀 ~ SignUp ~ value:', value);
+                        if (value.length) {
+                          if (value[0].size > 1000000) {
+                            return 'File size should be less than 10MB';
+                          }
+                          if (!value[0].type.includes('image/')) {
+                            return 'Only image files are allowed';
+                          }
+
+                          return true;
+                        }
+                      },
+                    },
+                  })}
+                  onChange={(e) => {
+                    console.log('🚀 ~ SignUp ~ e:', e.target.files);
+                    if (e.target.files.length) {
+                      if (
+                        e.target.files[0].size <= 1000000 &&
+                        e.target.files[0].type.includes('image/')
+                      ) {
+                        setAvatar({
+                          file: e.target.files[0],
+                          url: URL.createObjectURL(e.target.files[0]),
+                        });
+                      }
+                    }
+                  }}
+                />
+                <div className='text-red-500 w[548px] flex justify-center items-center'>
+                  {errors.profilePic && (
+                    <span>{errors.profilePic.message}</span>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className='mb-5 flex-col justify-center items-center'>
               <input
                 className='text-black w-[548px] p-1 rounded-xl text-center'
