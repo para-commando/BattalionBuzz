@@ -1,7 +1,11 @@
 import React, { useState, useRef } from 'react';
 
 import { useForm } from 'react-hook-form';
-import { isUserNew, isUserValidated } from '../redux/reducers/userAuth';
+import {
+  isUserNew,
+  isUserValidated,
+  isUserSubmitting,
+} from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../lib/firebase.js';
@@ -20,8 +24,9 @@ function SignUp() {
   const [showDefaultImageUpload, setShowDefaultImageUpload] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [showSubmit, setShowSubmit] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const isSubmitting = useSelector(
+    (state) => state.userAuthReducerExport.valueIsSubmitting
+  );
   const first = useRef(null);
   const {
     register,
@@ -33,9 +38,9 @@ function SignUp() {
 
   const onSubmit = async (data) => {
     try {
-      setIsSubmitting(true);
-      setShowSubmit(false)
-
+      dispatch(isUserSubmitting(true));
+      setShowSubmit(false);
+      setShowLoading(true);
       data.email = data.callSign + '.' + data.regiment + '@gmail.com';
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -65,18 +70,18 @@ function SignUp() {
       });
       dispatch(isUserValidated(true));
     } catch (error) {
-      let errorMessage ="Something went wrong, please try again"
-      if(error.code="auth/email-already-in-use"){
-       errorMessage = "Either Call-Sign or regiment name already taken, please change either or both";
+      let errorMessage = 'Something went wrong, please try again';
+      if ((error.code = 'auth/email-already-in-use')) {
+        errorMessage =
+          'Either Call-Sign or regiment name already taken, please change either or both';
       }
       console.log('🚀 ~ onSubmit ~ error:', JSON.stringify(error));
       alert(errorMessage);
       throw error;
-    }
-    finally{
-      setShowSubmit(true)
+    } finally {
+      setShowSubmit(true);
       setShowLoading(false);
-      setIsSubmitting(false);
+      dispatch(isUserSubmitting(false));
     }
   };
   return (
@@ -287,12 +292,7 @@ function SignUp() {
               </div>
             </div>
             {showSubmit && (
-              <div
-                className='flex justify-center'
-                onClick={(e) => {
-                  setShowLoading(true);
-                }}
-              >
+              <div className='flex justify-center'>
                 <input
                   className='bg-green-800 px-9 py-2 rounded-3xl cursor-pointer hover:bg-green-900'
                   type='submit'

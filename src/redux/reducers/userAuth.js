@@ -66,8 +66,18 @@ export const loginUser = createAsyncThunk(
           profileImg:
             'https://e0.pxfuel.com/wallpapers/314/341/desktop-wallpaper-royal-marine-indian-army-special-forces-royal-marine-commando-marine-commandos.jpg',
         },
-        { name: 'Major Vijay', hasSentMessage: false, profileImg: 'https://www.iadb.in/wp-content/uploads/2021/05/Indian-Special-Forces-scaled.jpeg' },
-        { name: 'Major Rajesh', hasSentMessage: false, profileImg: 'https://www.mathrubhumi.com/image/contentid/policy:1.4871015:1644554133/image.jpg?$p=0f6e831&&q=0.8' },
+        {
+          name: 'Major Vijay',
+          hasSentMessage: false,
+          profileImg:
+            'https://www.iadb.in/wp-content/uploads/2021/05/Indian-Special-Forces-scaled.jpeg',
+        },
+        {
+          name: 'Major Rajesh',
+          hasSentMessage: false,
+          profileImg:
+            'https://www.mathrubhumi.com/image/contentid/policy:1.4871015:1644554133/image.jpg?$p=0f6e831&&q=0.8',
+        },
       ],
     };
   }
@@ -81,6 +91,7 @@ export const userAuthReducers = createSlice({
       data: {},
       chats: [],
     },
+    valueIsSubmitting: false,
   },
   reducers: {
     isUserNew: (state, action) => {
@@ -89,6 +100,9 @@ export const userAuthReducers = createSlice({
     isUserValidated: (state, action) => {
       state.valueIsUserValidated = action.payload;
     },
+    isUserSubmitting: (state, action) => {
+      state.valueIsSubmitting = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -96,20 +110,24 @@ export const userAuthReducers = createSlice({
         state.status = 'loading';
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log("🚀 ~ .addCase ~ action:", action.payload)
-        console.log("🚀 ~ .addCase ~ state.valueUserData:", state.valueUserData)
+        console.log('🚀 ~ .addCase ~ action:', action.payload);
+        console.log(
+          '🚀 ~ .addCase ~ state.valueUserData:',
+          state.valueUserData
+        );
         if (action.payload.data) {
           state.valueUserData = action.payload;
         } else {
           alert('Invalid Credentials. Please try again');
         }
       })
-     
+
       .addCase(loginUser.rejected, (state, action) => {
         alert('something went wrong. Please try again');
       });
   },
 });
 
-export const { isUserNew, isUserValidated } = userAuthReducers.actions;
+export const { isUserNew, isUserValidated, isUserSubmitting } =
+  userAuthReducers.actions;
 export default userAuthReducers.reducer;
