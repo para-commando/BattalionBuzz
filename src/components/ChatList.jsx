@@ -1,23 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import searchIcon from '../assets/search.png';
 import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
-import avatarIcon from '../assets/avatarIcon.png';
 import AddUser from './AddUser';
 import {
   isDetailsVisible,
   isChatsVisible,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
-   
-  const users =  useSelector((state) => {
+   const [chats, setChats] = useState([])
+  const userChat =  useSelector((state) => {
     return state.userAuthReducerExport.valueUserData.chats;
-  });;
+  });
+  const user = useSelector((state) => state.userAuthReducerExport.valueUserData);
   const isUserChatsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
+  useEffect(() => {
+    const latestChats = onSnapshot(doc(db,"chats",user.id), async(res)=>{
+      const items = res.data().chats;
+      const promises = items.map(async (item) => {
+        console.log("🚀 ~ promises ~ item:", item)
+         const userDocRef= doc(db,"users",item);
+        	const userDocSnap = await getDoc(userDocRef);
+          const user = userDocSnap.data();
+          return {...items,user};
+      	})
+        const chatData = await Promise.all(promises);
+        console.log("🚀 ~ latestChats ~ chatData:", chatData)
+        setChats(chatData.sort((a,b)=>b.updatedAt-a.updatedAt));
+      })
+     
+    return () => {
+      latestChats();
+    }
+
+    },[])
   const dispatch = useDispatch();
   return (
     <>
@@ -43,7 +65,7 @@ function ChatList() {
           />
         </div>
         <div className='overflow-y-auto max-h-[85%] pb-5'>
-          {users.map((currUser) => {
+          {chats && chats.map((currUser) => {
             return (
               <div
                 className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
@@ -53,11 +75,11 @@ function ChatList() {
                 }}
               >
                 <img
-                  src={currUser.profileImg}
+                  src={currUser.user.imgUrl}
                   className='w-10 h-10 mx-2 rounded-full cursor-pointer object-cover object-top'
                   alt=''
                 />
-                <span className='text-lg ml-4'>{currUser.name}</span>
+                <span className='text-lg ml-4'>{currUser.user.callSign}</span>
                 {currUser.hasSentMessage ? (
                   <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
                 ) : (

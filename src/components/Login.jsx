@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import {
   isUserNew,
   isUserValidated,
-  loginUser,
   isUserSubmitting,
 } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
@@ -40,7 +39,6 @@ function Login() {
         data.password
       );
       console.log('🚀 ~ onSubmit ~ aa:', aa);
-      dispatch(loginUser({ data: data }));
       console.log(data);
       dispatch(isUserValidated(true));
      } catch (error) {
