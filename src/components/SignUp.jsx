@@ -11,7 +11,6 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../lib/firebase.js';
 import { doc, setDoc } from 'firebase/firestore';
 import { uploadData } from '../lib/upload.js';
-import avatarIcon from '../assets/avatarIcon.png';
 
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);

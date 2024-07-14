@@ -1,4 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 export const loginUser = createAsyncThunk(
   'userAuth/loginUser',
   async (data) => {
@@ -82,16 +84,39 @@ export const loginUser = createAsyncThunk(
     };
   }
 );
+export const fetchUserDetails = createAsyncThunk(
+  'userAuth/fetchUserDetails',
+  async (data) => {
+    return new Promise(async (resolve, reject) => {
+      if (!data || !data.uid) {
+        resolve({
+          data: { id: '' },
+        });
+      }
+      const docRef = doc(db, 'users', data.uid);
+      const docSnap = await getDoc(docRef);
+      console.log('🚀 ~ returnnewPromise ~ docSnap:', docSnap);
+      if (docSnap.exists()) {
+        resolve({
+          data: docSnap.data(),
+        });
+      } else {
+        reject({
+          msg: 'no data found',
+        });
+      }
+    });
+  }
+);
 export const userAuthReducers = createSlice({
   name: 'userAuth',
   initialState: {
     valueIsUserNew: false,
     valueIsUserValidated: false,
-    valueUserData: {
-      data: {},
-      chats: [],
-    },
+    valueUserData: {},
     valueIsSubmitting: false,
+    valueCurrentUser: {},
+    valueScreenLoading: true,
   },
   reducers: {
     isUserNew: (state, action) => {
@@ -103,31 +128,49 @@ export const userAuthReducers = createSlice({
     isUserSubmitting: (state, action) => {
       state.valueIsSubmitting = action.payload;
     },
+    currentLoggedInUser: (state, action) => {
+      state.valueCurrentUser = action.payload;
+    },
+    setScreenLoading: (state, action) => {
+      state.valueScreenLoading = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginUser.pending, (state) => {
-        state.status = 'loading';
+      .addCase(fetchUserDetails.pending, (state) => {
+        console.log('🚀 ~ .addCase ~ state1:', state);
+        // state.valueIsSubmitting = true;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        console.log('🚀 ~ .addCase ~ action:', action.payload);
-        console.log(
-          '🚀 ~ .addCase ~ state.valueUserData:',
-          state.valueUserData
-        );
-        if (action.payload.data) {
-          state.valueUserData = action.payload;
-        } else {
-          alert('Invalid Credentials. Please try again');
+      .addCase(fetchUserDetails.fulfilled, (state, action) => {
+        if (action.payload.data.id) {
+          state.valueUserData = action.payload.data;
+          state.valueIsUserValidated = true;
         }
+        else{
+          state.valueIsUserValidated = false;
+        }
+        state.valueIsSubmitting = false;
+        state.valueScreenLoading = false;
+        console.log('🚀 ~ .addCase ~ action.payload:', action.payload);
+        // Set valueIsUserValidated to true based on fetchUserDetails success
       })
-
-      .addCase(loginUser.rejected, (state, action) => {
-        alert('something went wrong. Please try again');
+      .addCase(fetchUserDetails.rejected, (state) => {
+        debugger;
+        console.log('promise rejected in fetchUserDetails');
+        console.log('🚀 ~ .addCase ~ state2:', state);
+        state.valueIsUserValidated = false;
+        state.valueIsSubmitting = false;
+        state.valueScreenLoading = false;
+        alert('Something went wrong, please try again');
+        //  state.valueIsSubmitting = false;
       });
   },
 });
 
-export const { isUserNew, isUserValidated, isUserSubmitting } =
-  userAuthReducers.actions;
+export const {
+  isUserNew,
+  isUserValidated,
+  isUserSubmitting,
+  currentLoggedInUser,
+} = userAuthReducers.actions;
 export default userAuthReducers.reducer;

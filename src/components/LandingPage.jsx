@@ -12,7 +12,10 @@ function LandingPage() {
     formState: { errors },
   } = useForm();
   const onSubmit = (data) => console.log(data);
- 
+  const isUserValidated = useSelector((state) => {
+   
+    return state.userAuthReducerExport.valueIsUserValidated;
+  });
   const isNewuser = useSelector((state) => state.userAuthReducerExport.valueIsUserNew);
   const isSubmitting = useSelector((state) => state.userAuthReducerExport.valueIsSubmitting);
   const dispatch = useDispatch();

@@ -43,7 +43,7 @@ function ChatList() {
           />
         </div>
         <div className='overflow-y-auto max-h-[85%] pb-5'>
-          {users.map((currUser) => {
+          {users && users.map((currUser) => {
             return (
               <div
                 className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
