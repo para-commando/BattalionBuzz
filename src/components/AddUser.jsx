@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import avatarIcon from '../assets/avatarIcon.png';
-import { collection, endAt, getDocs, orderBy, query, serverTimestamp, setDoc, startAt, where } from 'firebase/firestore';
+import { collection, doc, endAt, getDocs, orderBy, query, serverTimestamp, setDoc, startAt, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useSelector } from 'react-redux';
 
 function AddUser() {
 
   const [user, setUser] = useState([]);
- 
+  const userData = useSelector((state) => state.userAuthReducerExport.valueUserData);
   const addUser = async( ) => {
   try {
       
-      const chatMessages = collection(db, 'chatMessages');
+      const chatMessages = collection(db, 'chatMessages');``
       const chats = collection(db, 'chats');
+      console.log("🚀 ~ addUser ~ chats:", chats)
       const newChatRef = doc(chats);
-      console.log("🚀 ~ addUser ~ newChatRef:", newChatRef.id)
       await setDoc(newChatRef,{
         createdAt: serverTimestamp(),
         messages: []
       })
-
+   
+      await updateDoc(doc(chatMessages,userData.id),{
+        chats:arrayUnion({chatId:newChatRef.id})
+      });
   } catch (error) {
+    console.log("🚀 ~ addUser ~ error:", error)
     
   }
   }
