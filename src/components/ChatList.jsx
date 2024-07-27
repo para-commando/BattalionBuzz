@@ -22,6 +22,7 @@ function ChatList() {
   });
   useEffect(() => {
     const latestChats = onSnapshot(doc(db,"chats",user.id), async(res)=>{
+      // obtained the chat data
       const items = res.data().chats;
       const promises = items.map(async (item) => {
         console.log("🚀 ~ promises ~ item:", item)
@@ -39,7 +40,7 @@ function ChatList() {
       latestChats();
     }
 
-    },[])
+    },[user.id])
   const dispatch = useDispatch();
   return (
     <>
