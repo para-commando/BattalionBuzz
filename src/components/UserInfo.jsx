@@ -8,19 +8,32 @@ import { useSelector, useDispatch } from 'react-redux';
 import { auth } from '../lib/firebase';
 
 function UserInfo() {
-  const user = useSelector((state) => state.userAuthReducerExport.valueUserData);
-  console.log("🚀 ~ UserInfo ~ user:", user)
+  const user = useSelector(
+    (state) => state.userAuthReducerExport.valueUserData
+  );
+  console.log('🚀 ~ UserInfo ~ user:', user);
   const dispatch = useDispatch();
-
+  const isUserChatsVisible = useSelector((state) => {
+    return state.toggleViewReducersExport.valueIsChatsVisible;
+  });
   return (
-    <div className='flex items-center gap-1 mb-7 w-full'>
+    <div
+      className={
+        isUserChatsVisible
+          ? 'flex flex-col items-start gap-1 mb-7 w-full'
+          : 'flex items-center gap-1 mb-7 w-full'
+      }
+    >
       <div className='user flex items-center w-full'>
         <img
           src={user.imgUrl}
           className='w-14 h-14 mx-2  rounded-full cursor-pointer object-cover object-top'
           alt=''
         />
-        <h2 className='font-bold text-xl tracking-wider'>{user.callSign+'.'+user.regiment}</h2>
+        <div className=''>
+          <h2 className='font-bold text-xl tracking-wider'>{user.callSign}</h2>
+          <p className='tracking-wider'>{user.regiment}</p>
+        </div>
       </div>
       <div
         className='logoutButton bg-blue-700 text-white px-4 py-1 rounded-3xl cursor-pointer'

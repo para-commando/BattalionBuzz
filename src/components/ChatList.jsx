@@ -45,11 +45,11 @@ function ChatList() {
     return () => {
       latestChats();
     };
-  }, [userChat]);
+  }, [userChat,user]);
   const dispatch = useDispatch();
   return (
     <>
-      <div className='chatList h-[625px]  w-full px-2 overflow-y-auto'>
+      <div className='chatList h-[588px]  w-full px-2 overflow-y-auto'>
         <div className='search flex items-center mb-5 gap-2 w-full'>
           <div className='searchBar flex relative w-full'>
             <img

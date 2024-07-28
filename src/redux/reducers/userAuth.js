@@ -151,7 +151,7 @@ export const userAuthReducers = createSlice({
         }
         state.valueIsSubmitting = false;
         state.valueScreenLoading = false;
-        console.log('🚀 ~ .addCase ~ action.payload:', action.payload);
+        console.log('🚀 ~ .addCase ~ action.payload333333333333333:', action.payload);
         // Set valueIsUserValidated to true based on fetchUserDetails success
       })
       .addCase(fetchUserDetails.rejected, (state) => {

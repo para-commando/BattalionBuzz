@@ -105,7 +105,7 @@ function Details() {
             </div>
           </div>
           <div className='border-b-2 p-2 mx-2'></div>
-          <div className='options pt-3 mx-1 overflow-y-auto h-[370px] w-full'>
+          <div className='options pt-3 mx-1 overflow-y-auto h-[470px] w-full'>
             <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
               <div className='title flex justify-between items-center'>
                 <span className='text-lg'>Chat settings</span>
@@ -166,13 +166,13 @@ function Details() {
               </div>
             </div>
           </div>
-          <div
+          {/* <div
             ref={radioSilenceRef}
             className='radioSilence bg-red-800 rounded-xl px-[9px] py-[11px] text-center absolute bottom-3 w-full mx-3'
             onClick={() => radioSilenceChat()}
           >
             Radio Silence
-          </div>
+          </div> */}
         </div>
       )}
     </>
