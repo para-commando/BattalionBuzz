@@ -73,6 +73,7 @@ function ChatList() {
         <div className='overflow-y-auto max-h-[85%] pb-5'>
           {chats &&
             chats.map((currUser) => {
+              console.log("🚀 ~ ChatList ~ currUser:", currUser)
               return (
                 <div
                   className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
