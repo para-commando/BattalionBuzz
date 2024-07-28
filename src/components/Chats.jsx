@@ -17,12 +17,50 @@ import {
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../lib/firebase';
-import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
+import {
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+} from 'firebase/firestore';
+function formatChatTime(date) {
+  const currentDate = new Date();
+  const options = { hour: 'numeric', minute: 'numeric', hour12: true };
+
+  // Check if the date is today
+  const isToday = date.toDateString() === currentDate.toDateString();
+
+  // Check if the date is yesterday
+  const yesterday = new Date(currentDate);
+  yesterday.setDate(currentDate.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  // Format the time
+  const formattedTime = date.toLocaleString('en-US', options);
+
+  if (isToday) {
+    return formattedTime;
+  } else if (isYesterday) {
+    return `${formattedTime}, yesterday`;
+  } else {
+    // If the date is not today or yesterday, include the full date
+    const formattedDate = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    return `${formattedTime}, ${formattedDate}`;
+  }
+}
 function Chats() {
   const [showOptions, setShowOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [userInputText, setUserInputText] = useState('');
   const [messages, setMessages] = useState([]);
+  const [openedChatId, setOpenedChatId] = useState('second');
   const emojiPickerRef = useRef(null);
   const showLatestMessage = useRef(null);
   const dispatch = useDispatch();
@@ -39,11 +77,14 @@ function Chats() {
     showLatestMessage?.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
   useEffect(() => {
+    showLatestMessage?.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+  useEffect(() => {
     const fetchData = async () => {
       let userChatId = { chatId: '' };
 
       if (currentOpenedUser.id) {
-        console.log("🚀 ~ fetchData ~ currentOpenedUser:", currentOpenedUser)
+        console.log('🚀 ~ fetchData ~ currentOpenedUser:', currentOpenedUser);
         const chatMessages = collection(db, 'chatMessages');
         const docRef = doc(chatMessages, userData.id);
         const docSnap = await getDoc(docRef);
@@ -55,6 +96,7 @@ function Chats() {
 
         if (matchedChat) {
           userChatId = matchedChat;
+          setOpenedChatId(userChatId.chatId);
         }
       }
 
@@ -110,6 +152,27 @@ function Chats() {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
 
+  const handleSendMessage = async () => {
+    if (!userInputText) {
+      return;
+    }
+    try {
+      console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
+      await updateDoc(doc(db, 'chats', openedChatId), {
+        messages: arrayUnion({
+          senderId: currentOpenedUser.id,
+          image: '',
+          isUserMessage: true,
+          username: currentOpenedUser.callSign,
+          message: userInputText,
+          time: formatChatTime(new Date()),
+        }),
+      });
+      setUserInputText('')
+    } catch (error) {
+      debugger;
+    }
+  };
   return (
     <>
       {isUserChatsVisible && (
@@ -128,7 +191,9 @@ function Chats() {
                 alt=''
               />
               <div className='name flex flex-col justify-start items-start'>
-                <h2 className='font-bold text-xl'>{currentOpenedUser.callSign}</h2>
+                <h2 className='font-bold text-xl'>
+                  {currentOpenedUser.callSign}
+                </h2>
                 <p>{currentOpenedUser.regiment}</p>
               </div>
             </div>
@@ -276,7 +341,11 @@ function Chats() {
                 alt='Camera'
               />
             </div>
-            <div title='Send' className='SendButton'>
+            <div
+              title='Send'
+              className='SendButton'
+              onClick={handleSendMessage}
+            >
               <img
                 src={sendIntelIcon}
                 className='w-9 h-9 mx-2 cursor-pointer'

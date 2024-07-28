@@ -45,11 +45,11 @@ function ChatList() {
     return () => {
       latestChats();
     };
-  }, [userChat]);
+  }, [userChat,user]);
   const dispatch = useDispatch();
   return (
     <>
-      <div className='chatList h-[625px]  w-full px-2 overflow-y-auto'>
+      <div className='chatList h-[588px]  w-full px-2 overflow-y-auto'>
         <div className='search flex items-center mb-5 gap-2 w-full'>
           <div className='searchBar flex relative w-full'>
             <img
@@ -73,6 +73,7 @@ function ChatList() {
         <div className='overflow-y-auto max-h-[85%] pb-5'>
           {chats &&
             chats.map((currUser) => {
+              console.log("🚀 ~ ChatList ~ currUser:", currUser)
               return (
                 <div
                   className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
