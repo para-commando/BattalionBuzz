@@ -6,41 +6,46 @@ import AddUser from './AddUser';
 import {
   isDetailsVisible,
   isChatsVisible,
+  currentOpenedUser,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
-   const [chats, setChats] = useState([])
-  const userChat =  useSelector((state) => {
+  const [chats, setChats] = useState([]);
+  const userChat = useSelector((state) => {
     return state.userAuthReducerExport.valueUserData.chats;
   });
-  const user = useSelector((state) => state.userAuthReducerExport.valueUserData);
+  const user = useSelector(
+    (state) => state.userAuthReducerExport.valueUserData
+  );
   const isUserChatsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
   useEffect(() => {
-    const latestChats = onSnapshot(doc(db,"chats",user.id), async(res)=>{
-      // obtained the chat data
-      const items = res.data().chats;
-      const promises = items.map(async (item) => {
-        console.log("🚀 ~ promises ~ item:", item)
-         const userDocRef= doc(db,"users",item);
-        	const userDocSnap = await getDoc(userDocRef);
+    const latestChats = onSnapshot(
+      doc(db, 'chatMessages', user.id),
+      async (res) => {
+        // obtained the chat data
+        const items = res.data().chats;
+        const promises = items.map(async (item) => {
+          console.log('🚀 ~ promises ~ item:', item);
+          const userDocRef = doc(db, 'users', item.receiverId);
+          const userDocSnap = await getDoc(userDocRef);
           const user = userDocSnap.data();
-          return {...items,user};
-      	})
+          return { ...items, user };
+        });
         const chatData = await Promise.all(promises);
-        console.log("🚀 ~ latestChats ~ chatData:", chatData)
-        setChats(chatData.sort((a,b)=>b.updatedAt-a.updatedAt));
-      })
-     
+        console.log('🚀 ~ latestChats ~ chatData:', chatData);
+        setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+      }
+    );
+
     return () => {
       latestChats();
-    }
-
-    },[user.id])
+    };
+  }, [userChat]);
   const dispatch = useDispatch();
   return (
     <>
@@ -66,29 +71,31 @@ function ChatList() {
           />
         </div>
         <div className='overflow-y-auto max-h-[85%] pb-5'>
-          {chats && chats.map((currUser) => {
-            return (
-              <div
-                className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
-                onClick={() => {
-                  dispatch(isChatsVisible(!isUserChatsVisible));
-                  dispatch(isDetailsVisible(false));
-                }}
-              >
-                <img
-                  src={currUser.user.imgUrl}
-                  className='w-10 h-10 mx-2 rounded-full cursor-pointer object-cover object-top'
-                  alt=''
-                />
-                <span className='text-lg ml-4'>{currUser.user.callSign}</span>
-                {currUser.hasSentMessage ? (
-                  <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
-                ) : (
-                  ''
-                )}
-              </div>
-            );
-          })}
+          {chats &&
+            chats.map((currUser) => {
+              return (
+                <div
+                  className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
+                  onClick={() => {
+                    dispatch(isChatsVisible(!isUserChatsVisible));
+                    dispatch(isDetailsVisible(false));
+                    dispatch(currentOpenedUser(currUser.user));
+                  }}
+                >
+                  <img
+                    src={currUser.user.imgUrl}
+                    className='w-10 h-10 mx-2 rounded-full cursor-pointer object-cover object-top'
+                    alt=''
+                  />
+                  <span className='text-lg ml-4'>{currUser.user.callSign}</span>
+                  {currUser.hasSentMessage ? (
+                    <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
+                  ) : (
+                    ''
+                  )}
+                </div>
+              );
+            })}
         </div>
         {addUsersButtonDisplay && <AddUser />}
       </div>

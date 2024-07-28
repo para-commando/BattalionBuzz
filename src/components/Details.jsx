@@ -9,7 +9,9 @@ function Details() {
   const [toggleImgListDetailsSection, setToggleImgListDetailsSection] =
     useState(false);
   const [isNotRadioSilenced, setIsNotRadioSilenced] = useState(true);
-
+  const currentOpenedUser = useSelector((state) => {
+    return state.toggleViewReducersExport.currentOpenedUser;
+  });
   const sharedMediaListDetails = useRef(null);
   const radioSilenceRef = useRef(null);
   const sharedMediaList = [
@@ -91,16 +93,14 @@ function Details() {
         <div className=' min-w-[20%] max-w-[20%] relative'>
           <div className='flex flex-col items-center gap-3  mx-2 border-b-2 justify-center  '>
             <img
-              src={avatarIcon}
-              className='w-24 h-24 mx-2 rounded-full cursor-pointer'
+              src={currentOpenedUser.imgUrl}
+              className='w-24 h-24 mx-2 rounded-full cursor-pointer object-cover object-top'
               alt=''
             />
             <div className='flex flex-col gap-1 justify-center items-center w-full mb-3'>
-              <h2 className='font-bold text-xl'>Major Videep</h2>
+              <h2 className='font-bold text-xl'>{currentOpenedUser.callSign}</h2>
               <p className='text-[12px] text-center'>
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Praesentium itaque velit asperiores similique placeat et, eos
-                amet voluptas maiores!
+                {currentOpenedUser.regiment}
               </p>
             </div>
           </div>
