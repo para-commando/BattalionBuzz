@@ -11,67 +11,74 @@ import CameraIcon from '../assets/camera.png';
 import mediaIcon from '../assets/media.png';
 import microphoneIcon from '../assets/microphone.png';
 import EmojiPicker from 'emoji-picker-react';
-import { isDetailsVisible, isChatsVisible } from '../redux/reducers/toggleViewReducers';
+import {
+  isDetailsVisible,
+  isChatsVisible,
+} from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
+import { db } from '../lib/firebase';
+import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
 function Chats() {
   const [showOptions, setShowOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [userInputText, setUserInputText] = useState('');
+  const [messages, setMessages] = useState([]);
   const emojiPickerRef = useRef(null);
   const showLatestMessage = useRef(null);
   const dispatch = useDispatch();
   const isUserDetailsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsDetailsVisible;
   });
+  const currentOpenedUser = useSelector((state) => {
+    return state.toggleViewReducersExport.currentOpenedUser;
+  });
+  const userData = useSelector(
+    (state) => state.userAuthReducerExport.valueUserData
+  );
   useEffect(() => {
     showLatestMessage?.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      let userChatId = { chatId: '' };
 
-  const messages = [
-    {
-      message: 'Commander, report your status.',
-      isUserMessage: false,
-      userName: 'Major Videep',
-      time: '10:30 PM, yesterday',
-    },
-    {
-      message:
-        'Sir, we are holding our position and awaiting further instructions.',
-      isUserMessage: true,
-      userName: 'Major Vihaan',
-      time: '10:31 PM, yesterday',
-      image:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/IAF_Tejas_full_size_%2832941198511%29.jpg/330px-IAF_Tejas_full_size_%2832941198511%29.jpg',
-    },
-    {
-      message: 'Keep the perimeter secure. Reinforcements are on the way.',
-      isUserMessage: false,
-      userName: 'Major Videep',
-      time: '10:32 PM, yesterday',
-      image:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/RB005_-_Dassault_Rafale_-_Indian_Air_Force_-_50976863128.jpg/330px-RB005_-_Dassault_Rafale_-_Indian_Air_Force_-_50976863128.jpg',
-    },
-    {
-      message: 'Roger that, Sir. We have eyes on the target.',
-      isUserMessage: true,
-      userName: 'Major Vihaan',
-      time: '10:33 PM, yesterday',
-    },
-    {
-      message: 'Maintain stealth and proceed with caution. Over and out.',
-      isUserMessage: false,
-      userName: 'Major Videep',
-      time: '10:34 PM, yesterday',
-    },
-    {
-      message: 'Understood, Sir. Awaiting your signal.',
-      isUserMessage: true,
-      userName: 'Major Vihaan',
-      time: '10:35 PM, yesterday',
-      image:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/IAF_LCH_in_flight.jpg/330px-IAF_LCH_in_flight.jpg',
-    },
-  ];
+      if (currentOpenedUser.id) {
+        console.log("🚀 ~ fetchData ~ currentOpenedUser:", currentOpenedUser)
+        const chatMessages = collection(db, 'chatMessages');
+        const docRef = doc(chatMessages, userData.id);
+        const docSnap = await getDoc(docRef);
+
+        const chatsArray = docSnap.data() ? docSnap.data().chats : [];
+        const matchedChat = chatsArray.find(
+          (chat) => chat.receiverId === currentOpenedUser.id
+        );
+
+        if (matchedChat) {
+          userChatId = matchedChat;
+        }
+      }
+
+      const unsubscribe = onSnapshot(
+        doc(db, 'chats', userChatId.chatId),
+        (res) => {
+          const items = res.data().messages;
+          setMessages(items);
+        }
+      );
+
+      return unsubscribe; // Returning the unsubscribe function for cleanup
+    };
+
+    const unsubscribePromise = fetchData();
+
+    return () => {
+      // Clean up the subscription
+      // to make the firebase listen to the real time chats even after opening the chat window, add the chat id in the dependency list of this useEffect hook
+      unsubscribePromise.then((unsubscribe) => {
+        if (unsubscribe) unsubscribe();
+      });
+    };
+  }, [currentOpenedUser, userData.id]);
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
@@ -92,29 +99,37 @@ function Chats() {
 
   const handleClickOutside = (event) => {
     console.log('🚀 ~ handleClickOutside ~ event:', event);
-    if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+    if (
+      emojiPickerRef.current &&
+      !emojiPickerRef.current.contains(event.target)
+    ) {
       setShowEmojiPicker(false);
     }
   };
   const isUserChatsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
- 
+
   return (
     <>
-      {
-        isUserChatsVisible &&
-        <div className={isUserDetailsVisible ? 'border-r-2 border-l-2 min-w-[50%] max-w-[60%] px-2 relative flex flex-col items-center':'border-r-2 border-l-2 min-w-[70%] max-w-[70%] px-2 relative flex flex-col items-center'}>
+      {isUserChatsVisible && (
+        <div
+          className={
+            isUserDetailsVisible
+              ? 'border-r-2 border-l-2 min-w-[50%] max-w-[60%] px-2 relative flex flex-col items-center'
+              : 'border-r-2 border-l-2 min-w-[70%] max-w-[70%] px-2 relative flex flex-col items-center'
+          }
+        >
           <div className='flex w-full justify-between border-b-2 pb-4 relative'>
             <div className='UserInfoInChatsWindow flex items-center gap-3'>
               <img
-                src={avatarIcon}
-                className='w-14 h-14 mx-2  rounded-full cursor-pointer'
+                src={currentOpenedUser.imgUrl}
+                className='w-14 h-14 mx-2  rounded-full cursor-pointer object-cover object-top'
                 alt=''
               />
               <div className='name flex flex-col justify-start items-start'>
-                <h2 className='font-bold text-xl'>Major Videep</h2>
-                <p>Jai Hind</p>
+                <h2 className='font-bold text-xl'>{currentOpenedUser.callSign}</h2>
+                <p>{currentOpenedUser.regiment}</p>
               </div>
             </div>
 
@@ -129,7 +144,7 @@ function Chats() {
                 className='w-7 h-7 mx-2 cursor-pointer '
                 alt=''
                 onClick={() => {
-                  dispatch(isDetailsVisible(!isUserDetailsVisible))
+                  dispatch(isDetailsVisible(!isUserDetailsVisible));
                   setShowOptions(!showOptions);
                 }}
               />
@@ -270,7 +285,7 @@ function Chats() {
             </div>
           </div>
         </div>
-      }
+      )}
     </>
   );
 }
