@@ -74,6 +74,7 @@ function ChatList() {
           {chats &&
             chats.map((currUser) => {
               console.log("🚀 ~ ChatList ~ currUser:", currUser)
+              console.log("🚀 ~ ChatList ~ currUser.hasSentMessage:", currUser.hasSentMessage)
               return (
                 <div
                   className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
@@ -96,6 +97,7 @@ function ChatList() {
                   )}
                 </div>
               );
+                
             })}
         </div>
         {addUsersButtonDisplay && <AddUser />}

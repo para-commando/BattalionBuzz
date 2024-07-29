@@ -175,6 +175,9 @@ function formatChatTime(date) {
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, currentOpenedUser.id);
       console.log("🚀 ~ handleSendMessage ~ currentOpenedUser.id:", currentOpenedUser.id)
+      updateDoc(docRef, {
+        hasSentMessage: true,
+      });
       const docSnap = await getDoc(docRef);
 
       const chatsArray = docSnap.data() ? docSnap.data().chats : [];
