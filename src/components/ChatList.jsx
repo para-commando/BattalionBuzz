@@ -29,12 +29,14 @@ function ChatList() {
       async (res) => {
         // obtained the chat data
         const items = res.data().chats;
+        console.log("🚀 ~ items:", items)
         const promises = items.map(async (item) => {
           console.log('🚀 ~ promises ~ item:', item);
           const userDocRef = doc(db, 'users', item.receiverId);
           const userDocSnap = await getDoc(userDocRef);
           const user = userDocSnap.data();
-          return { ...items, user };
+          user.hasSentMessage= item.hasSentMessage;
+          return { ...items,user };
         });
         const chatData = await Promise.all(promises);
         console.log('🚀 ~ latestChats ~ chatData:', chatData);
@@ -90,7 +92,7 @@ function ChatList() {
                     alt=''
                   />
                   <span className='text-lg ml-4'>{currUser.user.callSign}</span>
-                  {currUser.hasSentMessage ? (
+                  {currUser.user.hasSentMessage ? (
                     <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
                   ) : (
                     ''

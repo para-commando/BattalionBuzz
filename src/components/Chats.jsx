@@ -107,7 +107,12 @@ function formatChatTime(date) {
           setMessages(items);
         }
       );
-
+      // const chatMessages = collection(db, 'chatMessages');
+      // const docRef = doc(chatMessages, currentOpenedUser.id);
+      // console.log("🚀 ~ handleSendMessage ~ currentOpenedUser.id:", currentOpenedUser.id)
+      // updateDoc(docRef, {
+      //   hasSentMessage: false,
+      // });
       return unsubscribe; // Returning the unsubscribe function for cleanup
     };
 
@@ -183,9 +188,16 @@ function formatChatTime(date) {
       const chatsArray = docSnap.data() ? docSnap.data().chats : [];
       console.log("🚀 ~ handleSendMessage ~ chatsArray:", chatsArray)
       console.log("🚀 ~ handleSendMessage ~ docSnap.data() :", docSnap.data() )
-      const matchedChat = chatsArray.find(
+      const matchedChat = await chatsArray.find(
         (chat) => chat.receiverId === userData.id
       );
+      if(matchedChat){
+       console.log("🚀 ~ handleSendMessage ~ matchedChat:", matchedChat)
+       updateDoc(docRef, {
+        chats: {
+          
+        },
+      });
        updateDoc(doc(db, 'chats', matchedChat.chatId), {
         messages: arrayUnion({
           senderId: userData.id,
@@ -200,8 +212,13 @@ function formatChatTime(date) {
           isSeen: false,
         }),
       });
+
       console.log("🚀 ~ handleSendMessage ~ matchedChat:", matchedChat)
       setUserInputText('');
+    }
+    else{
+      console.log("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+    }
     } catch (error) {
       debugger;
     }
