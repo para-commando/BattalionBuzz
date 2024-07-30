@@ -17,6 +17,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../lib/firebase';
 import {
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
@@ -55,7 +56,7 @@ function formatChatTime(date) {
     return `${formattedTime}, ${formattedDate}`;
   }
 }
- function Chats() {
+function Chats() {
   const [showOptions, setShowOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [userInputText, setUserInputText] = useState('');
@@ -93,7 +94,13 @@ function formatChatTime(date) {
         const matchedChat = chatsArray.find(
           (chat) => chat.receiverId === currentOpenedUser.id
         );
-
+        await updateDoc(docRef, {
+          chats: arrayRemove(matchedChat),
+        });
+        matchedChat.hasSentMessage = false;
+        updateDoc(docRef, {
+          chats: arrayUnion(matchedChat),
+        });
         if (matchedChat) {
           userChatId = matchedChat;
           setOpenedChatId(userChatId.chatId);
@@ -107,12 +114,7 @@ function formatChatTime(date) {
           setMessages(items);
         }
       );
-      // const chatMessages = collection(db, 'chatMessages');
-      // const docRef = doc(chatMessages, currentOpenedUser.id);
-      // console.log("🚀 ~ handleSendMessage ~ currentOpenedUser.id:", currentOpenedUser.id)
-      // updateDoc(docRef, {
-      //   hasSentMessage: false,
-      // });
+
       return unsubscribe; // Returning the unsubscribe function for cleanup
     };
 
@@ -179,46 +181,52 @@ function formatChatTime(date) {
       });
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, currentOpenedUser.id);
-      console.log("🚀 ~ handleSendMessage ~ currentOpenedUser.id:", currentOpenedUser.id)
+      console.log(
+        '🚀 ~ handleSendMessage ~ currentOpenedUser.id:',
+        currentOpenedUser.id
+      );
       updateDoc(docRef, {
         hasSentMessage: true,
       });
       const docSnap = await getDoc(docRef);
 
       const chatsArray = docSnap.data() ? docSnap.data().chats : [];
-      console.log("🚀 ~ handleSendMessage ~ chatsArray:", chatsArray)
-      console.log("🚀 ~ handleSendMessage ~ docSnap.data() :", docSnap.data() )
+      console.log('🚀 ~ handleSendMessage ~ chatsArray:', chatsArray);
+      console.log('🚀 ~ handleSendMessage ~ docSnap.data() :', docSnap.data());
       const matchedChat = await chatsArray.find(
         (chat) => chat.receiverId === userData.id
       );
-      if(matchedChat){
-       console.log("🚀 ~ handleSendMessage ~ matchedChat:", matchedChat)
-       updateDoc(docRef, {
-        chats: {
-          
-        },
-      });
-       updateDoc(doc(db, 'chats', matchedChat.chatId), {
-        messages: arrayUnion({
-          senderId: userData.id,
-          receiverId: currentOpenedUser.id,
-          image: '',
-          isUserMessage: false,
-          username: currentOpenedUser.callSign,
-          message: userInputText,
-          time: formatChatTime(new Date()),
-          updatedAt: Date.now(),
-          hasSentMessage: true,
-          isSeen: false,
-        }),
-      });
+      if (matchedChat) {
+        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
+        await updateDoc(docRef, {
+          chats: arrayRemove(matchedChat),
+        });
+        matchedChat.hasSentMessage = true;
+        updateDoc(docRef, {
+          chats: arrayUnion(matchedChat),
+        });
+        updateDoc(doc(db, 'chats', matchedChat.chatId), {
+          messages: arrayUnion({
+            senderId: userData.id,
+            receiverId: currentOpenedUser.id,
+            image: '',
+            isUserMessage: false,
+            username: currentOpenedUser.callSign,
+            message: userInputText,
+            time: formatChatTime(new Date()),
+            updatedAt: Date.now(),
+            hasSentMessage: true,
+            isSeen: false,
+          }),
+        });
 
-      console.log("🚀 ~ handleSendMessage ~ matchedChat:", matchedChat)
-      setUserInputText('');
-    }
-    else{
-      console.log("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
-    }
+        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
+        setUserInputText('');
+      } else {
+        console.log(
+          'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'
+        );
+      }
     } catch (error) {
       debugger;
     }
