@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import informationIcon from '../assets/information.png';
 import videoCameraIcon from '../assets/videoCamera.png';
-import avatarIcon from '../assets/avatarIcon.png';
 import phoneCallIcon from '../assets/phoneCall.png';
 import sendIntelIcon from '../assets/fighterJet.png';
 import emojisIcon from '../assets/fires.png';
@@ -18,6 +17,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../lib/firebase';
 import {
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
@@ -28,7 +28,8 @@ import {
 } from 'firebase/firestore';
 function formatChatTime(date) {
   const currentDate = new Date();
-  const options = { hour: 'numeric', minute: 'numeric', hour12: true };
+  const options = { hour: '2-digit', minute: '2-digit', hour12: false };
+  // const options = { hour: 'numeric', minute: 'numeric', hour12: true };
 
   // Check if the date is today
   const isToday = date.toDateString() === currentDate.toDateString();
@@ -93,7 +94,13 @@ function Chats() {
         const matchedChat = chatsArray.find(
           (chat) => chat.receiverId === currentOpenedUser.id
         );
-
+        await updateDoc(docRef, {
+          chats: arrayRemove(matchedChat),
+        });
+        matchedChat.hasSentMessage = false;
+        updateDoc(docRef, {
+          chats: arrayUnion(matchedChat),
+        });
         if (matchedChat) {
           userChatId = matchedChat;
           setOpenedChatId(userChatId.chatId);
@@ -160,15 +167,66 @@ function Chats() {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
       await updateDoc(doc(db, 'chats', openedChatId), {
         messages: arrayUnion({
-          senderId: currentOpenedUser.id,
+          senderId: userData.id,
+          receiverId: currentOpenedUser.id,
           image: '',
           isUserMessage: true,
           username: currentOpenedUser.callSign,
           message: userInputText,
           time: formatChatTime(new Date()),
+          updatedAt: Date.now(),
+          hasSentMessage: true,
+          isSeen: false,
         }),
       });
-      setUserInputText('')
+      const chatMessages = collection(db, 'chatMessages');
+      const docRef = doc(chatMessages, currentOpenedUser.id);
+      console.log(
+        '🚀 ~ handleSendMessage ~ currentOpenedUser.id:',
+        currentOpenedUser.id
+      );
+      updateDoc(docRef, {
+        hasSentMessage: true,
+      });
+      const docSnap = await getDoc(docRef);
+
+      const chatsArray = docSnap.data() ? docSnap.data().chats : [];
+      console.log('🚀 ~ handleSendMessage ~ chatsArray:', chatsArray);
+      console.log('🚀 ~ handleSendMessage ~ docSnap.data() :', docSnap.data());
+      const matchedChat = await chatsArray.find(
+        (chat) => chat.receiverId === userData.id
+      );
+      if (matchedChat) {
+        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
+        await updateDoc(docRef, {
+          chats: arrayRemove(matchedChat),
+        });
+        matchedChat.hasSentMessage = true;
+        updateDoc(docRef, {
+          chats: arrayUnion(matchedChat),
+        });
+        updateDoc(doc(db, 'chats', matchedChat.chatId), {
+          messages: arrayUnion({
+            senderId: userData.id,
+            receiverId: currentOpenedUser.id,
+            image: '',
+            isUserMessage: false,
+            username: currentOpenedUser.callSign,
+            message: userInputText,
+            time: formatChatTime(new Date()),
+            updatedAt: Date.now(),
+            hasSentMessage: true,
+            isSeen: false,
+          }),
+        });
+
+        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
+        setUserInputText('');
+      } else {
+        console.log(
+          'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'
+        );
+      }
     } catch (error) {
       debugger;
     }
@@ -232,11 +290,11 @@ function Chats() {
                 >
                   <img
                     title='user profile'
-                    src={avatarIcon}
+                    src={currentOpenedUser.imgUrl}
                     className={
                       message.isUserMessage
                         ? 'hidden'
-                        : 'w-7 h-7 mx-2 cursor-pointer'
+                        : 'w-7 h-7 mx-2 cursor-pointer rounded-full object-cover object-top'
                     }
                     alt='user profile'
                   />
