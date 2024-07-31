@@ -9,10 +9,13 @@ import documentsIcon from '../assets/docs.png';
 import CameraIcon from '../assets/camera.png';
 import mediaIcon from '../assets/media.png';
 import microphoneIcon from '../assets/microphone.png';
+import backButton from '../assets/back-button.png';
+
 import EmojiPicker from 'emoji-picker-react';
 import {
   isDetailsVisible,
   isChatsVisible,
+  isLandingPageVisible,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../lib/firebase';
@@ -165,6 +168,7 @@ function Chats() {
     }
     try {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
+      // adding chat in the current user's chat list
       await updateDoc(doc(db, 'chats', openedChatId), {
         messages: arrayUnion({
           senderId: userData.id,
@@ -185,9 +189,7 @@ function Chats() {
         '🚀 ~ handleSendMessage ~ currentOpenedUser.id:',
         currentOpenedUser.id
       );
-      updateDoc(docRef, {
-        hasSentMessage: true,
-      });
+
       const docSnap = await getDoc(docRef);
 
       const chatsArray = docSnap.data() ? docSnap.data().chats : [];
@@ -202,9 +204,11 @@ function Chats() {
           chats: arrayRemove(matchedChat),
         });
         matchedChat.hasSentMessage = true;
+        matchedChat.updatedAt = Date.now();
         updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
         });
+        // adding chat in the receiver's chat list
         updateDoc(doc(db, 'chats', matchedChat.chatId), {
           messages: arrayUnion({
             senderId: userData.id,
@@ -231,18 +235,33 @@ function Chats() {
       debugger;
     }
   };
+
   return (
     <>
       {isUserChatsVisible && (
         <div
           className={
             isUserDetailsVisible
-              ? 'border-r-2 border-l-2 min-w-[50%] max-w-[60%] px-2 relative flex flex-col items-center'
-              : 'border-r-2 border-l-2 min-w-[70%] max-w-[70%] px-2 relative flex flex-col items-center'
+              ? 'border-r-2 border-l-2 min-w-[78%] max-w-[60%] px-2 relative flex flex-col items-center'
+              : 'border-r-2 border-l-2 min-w-[95%] max-w-[70%] px-2 relative flex flex-col items-center'
           }
         >
           <div className='flex w-full justify-between border-b-2 pb-4 relative'>
             <div className='UserInfoInChatsWindow flex items-center gap-3'>
+              <div
+                className='name flex flex-col justify-start items-start'
+                onClick={() => {
+                  dispatch(isChatsVisible(false));
+                  dispatch(isDetailsVisible(false));
+                  dispatch(isLandingPageVisible(true));
+                }}
+              >
+                <img
+                  src={backButton}
+                  className='w-12 h-12 mx-2  rounded-full cursor-pointer object-cover object-top invert'
+                  alt=''
+                />
+              </div>
               <img
                 src={currentOpenedUser.imgUrl}
                 className='w-14 h-14 mx-2  rounded-full cursor-pointer object-cover object-top'
@@ -279,13 +298,14 @@ function Chats() {
             </div>
           </div>
           <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[525px] mt-2'>
-            {messages.map((message) => {
+            {messages.map((message, index) => {
               return (
                 <div
+                  key={index}
                   className={
                     message.isUserMessage
-                      ? 'flex flex-col self-end p-2 w-[70%] '
-                      : 'flex flex-col self-start p-2  w-[70%]'
+                      ? 'flex flex-col self-end p-2 max-w-[70%]'
+                      : 'flex flex-col self-start p-2 max-w-[70%]'
                   }
                 >
                   <img
@@ -303,9 +323,10 @@ function Chats() {
                       <p
                         className={
                           message.isUserMessage
-                            ? 'bg-green-950 text-white rounded-3xl p-2'
-                            : 'bg-green-800 text-whitle rounded-3xl p-2'
+                            ? 'bg-green-950 text-white rounded-3xl p-2 break-words'
+                            : 'bg-green-800 text-white rounded-3xl p-2 break-words'
                         }
+                       
                       >
                         {message.message}
                       </p>
@@ -314,9 +335,7 @@ function Chats() {
                       <img
                         title='Image in chats'
                         src={message.image}
-                        className={
-                          'w-17 h-17 mx-2 cursor-pointer rounded-lg mt-1'
-                        }
+                        className='w-20 h-20 mx-2 cursor-pointer rounded-lg mt-1 object-cover'
                         alt='image in chats'
                       />
                     )}
@@ -327,6 +346,7 @@ function Chats() {
                 </div>
               );
             })}
+
             <div ref={showLatestMessage}></div>
           </div>
           <div className='UserInputInChatsWindow flex items-center bg-green-950 rounded-full px-2 h-14  box-border w-[98%] absolute bottom-2  '>

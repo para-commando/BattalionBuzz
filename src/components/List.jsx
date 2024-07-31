@@ -12,16 +12,24 @@ function List() {
   const isUserChatsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
+  const isLandingPageVisible = useSelector((state) => {
+    return state.toggleViewReducersExport.valueIsLandingPageVisible;
+  });
+  
   return (
-    <div
-      ref={stylesOfList}
-      className={
-        isUserChatsVisible ? 'min-w-[25%] pr-3 ' : 'min-w-[70%] pr-3 '
-      }
-    >
-      <UserInfo />
-      <ChatList />
-    </div>
+    <>
+      {isLandingPageVisible && (
+        <div
+          ref={stylesOfList}
+          className={
+            isUserChatsVisible ? 'min-w-[25%] pr-3 ' : 'min-w-[70%] pr-3 '
+          }
+        >
+          <UserInfo />
+          <ChatList />
+        </div>
+      )}
+    </>
   );
 }
 

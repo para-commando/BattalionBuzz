@@ -7,6 +7,7 @@ import {
   isDetailsVisible,
   isChatsVisible,
   currentOpenedUser,
+  isLandingPageVisible
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
@@ -48,6 +49,7 @@ function ChatList() {
       latestChats();
     };
   }, [userChat,user]);
+
   const dispatch = useDispatch();
   return (
     <>
@@ -81,8 +83,8 @@ function ChatList() {
                 <div
                   className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
                   onClick={() => {
-                    dispatch(isChatsVisible(!isUserChatsVisible));
-                    dispatch(isDetailsVisible(false));
+                    dispatch(isChatsVisible(true));
+                    dispatch(isLandingPageVisible(false))
                     dispatch(currentOpenedUser(currUser.user));
                   }}
                 >
