@@ -139,7 +139,7 @@ function SignUp() {
                       validFileType: (value) => {
                         console.log('🚀 ~ SignUp ~ value:', value);
                         if (value.length) {
-                          if (value[0].size > 1000000) {
+                          if (value[0].size > 10000000) {
                             return 'File size should be less than 10MB';
                           }
                           if (!value[0].type.includes('image/')) {

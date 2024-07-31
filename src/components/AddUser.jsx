@@ -53,7 +53,6 @@ function AddUser() {
       }
 
       if (docSnap.exists()) {
-
         await updateDoc(docRef, {
           chats: arrayUnion({
             chatId: newChatRef.id,
@@ -63,7 +62,6 @@ function AddUser() {
           }),
         });
       } else {
-
         await setDoc(docRef, {
           chats: [
             {
@@ -101,7 +99,10 @@ function AddUser() {
 
       querySnapshot.forEach((doc) => {
         const docData = doc.data();
-        uniqueUsers.add(JSON.stringify(docData)); // Add new user data to the Set as string
+       // not showing the current user in the add user list
+        if (docData.id !== userData.id) {
+          uniqueUsers.add(JSON.stringify(docData)); // Add new user data to the Set as string
+        }
       });
 
       // Convert Set back to array of objects

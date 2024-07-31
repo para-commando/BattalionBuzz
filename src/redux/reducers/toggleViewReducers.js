@@ -5,6 +5,7 @@ export const userAuthReducers = createSlice({
   initialState: {
     valueIsDetailsVisible: false,
     valueIsChatsVisible: false,
+    valueIsLandingPageVisible: true,
     currentOpenedUser: '',
   },
   reducers: {
@@ -14,6 +15,9 @@ export const userAuthReducers = createSlice({
     isChatsVisible: (state, action) => {
       state.valueIsChatsVisible = action.payload;
     },
+    isLandingPageVisible: (state, action) => {
+      state.valueIsLandingPageVisible = action.payload;
+    },
     currentOpenedUser: (state, action) => {
       state.currentOpenedUser = action.payload;
       console.log('🚀 ~ action.payload:', action.payload);
@@ -21,6 +25,6 @@ export const userAuthReducers = createSlice({
   },
 });
 
-export const { isDetailsVisible, isChatsVisible, currentOpenedUser } =
+export const { isDetailsVisible, isChatsVisible, currentOpenedUser,isLandingPageVisible } =
   userAuthReducers.actions;
 export default userAuthReducers.reducer;
