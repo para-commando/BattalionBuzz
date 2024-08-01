@@ -23,9 +23,7 @@ function ChatList() {
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
-  const isUserChatsVisible = useSelector((state) => {
-    return state.toggleViewReducersExport.valueIsChatsVisible;
-  });
+
   useEffect(() => {
     const latestChats = onSnapshot(
       doc(db, 'chatMessages', user.id),
