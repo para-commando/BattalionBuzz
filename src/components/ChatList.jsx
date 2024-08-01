@@ -7,7 +7,7 @@ import {
   isDetailsVisible,
   isChatsVisible,
   currentOpenedUser,
-  isLandingPageVisible
+  isLandingPageVisible,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
@@ -15,6 +15,8 @@ import { db } from '../lib/firebase';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
   const [chats, setChats] = useState([]);
+  const [filteredUserChats, setFilteredUserChats] = useState([]);
+
   const userChat = useSelector((state) => {
     return state.userAuthReducerExport.valueUserData.chats;
   });
@@ -30,27 +32,43 @@ function ChatList() {
       async (res) => {
         // obtained the chat data
         const items = res.data().chats;
-        console.log("🚀 ~ items:", items)
+        console.log('🚀 ~ items:', items);
         const promises = items.map(async (item) => {
           console.log('🚀 ~ promises ~ item:', item);
           const userDocRef = doc(db, 'users', item.receiverId);
           const userDocSnap = await getDoc(userDocRef);
           const user = userDocSnap.data();
-          user.hasSentMessage= item.hasSentMessage;
-          return { ...items,user };
+          user.hasSentMessage = item.hasSentMessage;
+          return { ...items, user };
         });
-        const chatData = await Promise.all(promises);
+        let chatData = await Promise.all(promises);
         console.log('🚀 ~ latestChats ~ chatData:', chatData);
-        setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+        chatData = chatData.sort((a, b) => b.updatedAt - a.updatedAt);
+        setChats(chatData);
+        setFilteredUserChats(chatData);
       }
     );
 
     return () => {
       latestChats();
     };
-  }, [userChat,user]);
+  }, [userChat, user]);
 
   const dispatch = useDispatch();
+  const handleSearch = async (e) => {
+    console.log('🚀 ~ handleSearch ~ e:', e.target.value);
+    try {
+      console.log(chats);
+      const filteredChats = chats.filter((chat) => {
+        return chat.user.callSign
+          .toLowerCase()
+          .includes(e.target.value.toLowerCase());
+      });
+      setFilteredUserChats(filteredChats);
+    } catch (error) {
+      console.log('🚀 ~ handleSearch ~ error:', error);
+    }
+  };
   return (
     <>
       <div className='chatList h-[588px]  w-full px-2 overflow-y-auto'>
@@ -65,6 +83,7 @@ function ChatList() {
               type='text'
               placeholder='Search...'
               className='w-[100%] h-8 rounded-full pl-10 text-black'
+              onChange={(e) => handleSearch(e)}
             />
           </div>
           <img
@@ -75,16 +94,19 @@ function ChatList() {
           />
         </div>
         <div className='overflow-y-auto max-h-[85%] pb-5'>
-          {chats &&
-            chats.map((currUser) => {
-              console.log("🚀 ~ ChatList ~ currUser:", currUser)
-              console.log("🚀 ~ ChatList ~ currUser.hasSentMessage:", currUser.hasSentMessage)
+          {filteredUserChats &&
+            filteredUserChats.map((currUser) => {
+              console.log('🚀 ~ ChatList ~ currUser:', currUser);
+              console.log(
+                '🚀 ~ ChatList ~ currUser.hasSentMessage:',
+                currUser.hasSentMessage
+              );
               return (
                 <div
                   className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
                   onClick={() => {
                     dispatch(isChatsVisible(true));
-                    dispatch(isLandingPageVisible(false))
+                    dispatch(isLandingPageVisible(false));
                     dispatch(currentOpenedUser(currUser.user));
                   }}
                 >
@@ -101,7 +123,6 @@ function ChatList() {
                   )}
                 </div>
               );
-                
             })}
         </div>
         {addUsersButtonDisplay && <AddUser />}
