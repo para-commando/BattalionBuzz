@@ -96,10 +96,17 @@ function Chats() {
     file: '',
     url: '',
   });
+  const [videoToSend, setVideoToSend] = useState({
+    file: '',
+    url: '',
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
+ 
   const [isSendImageModalOpen, setIsSendImageModalOpen] = useState(false);
+  const [isSendVideoModalOpen, setIsSendVideoModalOpen] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState('');
+  const [selectedVideo, setSelectedVideo] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isInvert, setIsInvert] = useState(false);
   const emojiPickerRef = useRef(null);
@@ -206,33 +213,53 @@ function Chats() {
 
       return;
     }
-    const imgFileType = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    const imgFileType = [
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'image/gif',
+      'video/mp4',
+    ];
     if (!imgFileType.includes(e.target.files['0'].type)) {
-      alert('File type should be one among: jpeg, png, jpg, gif');
+      alert('File type should be one among: jpeg, png, jpg, gif, mp4');
       return;
     }
-    setImgToSend({
-      file: e.target.files['0'],
-      url: URL.createObjectURL(e.target.files['0']),
-    });
-    handleSendImageModal(URL.createObjectURL(e.target.files['0']));
+    if (e.target.files['0'].type.includes('image')) {
+      setImgToSend({
+        file: e.target.files['0'],
+        url: URL.createObjectURL(e.target.files['0']),
+      });
+      handleSendImageModal(URL.createObjectURL(e.target.files['0']));
+    }
+    if (e.target.files['0'].type.includes('video')) {
+      setVideoToSend({
+        file: e.target.files['0'],
+        url: URL.createObjectURL(e.target.files['0']),
+      });
+      handleSendVideoModal(URL.createObjectURL(e.target.files['0']));
+    }
   };
   const handleSendMessage = async () => {
-    if (!userInputText && !imgToSend.file) {
+    if (!userInputText && !imgToSend.file && !videoToSend.file) {
       alert('Please enter a message or select an image to send');
       return;
     }
     setIsSendImageModalOpen(false);
+    setIsSendVideoModalOpen(false);
     setIsSending(true);
     const interval = setInterval(() => {
       setIsInvert((prev) => !prev);
     }, 250);
     let imgUrl = '';
+    let videoUrl = '';
     if (imgToSend.file) {
       imgUrl = await uploadData(imgToSend.file);
       console.log('🚀 ~ handleSendMessage ~ imgUrl:', imgUrl);
     }
-
+    if (videoToSend.file) {
+      videoUrl = await uploadData(videoToSend.file);
+      console.log('🚀 ~ handleSendMessage ~ videoUrl:', videoUrl);
+    }
     try {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
       // adding chat in the current user's chat list
@@ -241,6 +268,7 @@ function Chats() {
           senderId: userData.id,
           receiverId: currentOpenedUser.id,
           image: imgUrl,
+          video: videoUrl,
           isUserMessage: true,
           username: currentOpenedUser.callSign,
           message: userInputText,
@@ -281,6 +309,7 @@ function Chats() {
             senderId: userData.id,
             receiverId: currentOpenedUser.id,
             image: imgUrl,
+            video: videoUrl,
             isUserMessage: false,
             username: currentOpenedUser.callSign,
             message: userInputText,
@@ -306,7 +335,12 @@ function Chats() {
       setIsSending(false);
       setIsInvert(false);
       imgUrl = '';
+      videoUrl = '';
       setImgToSend({
+        file: '',
+        url: '',
+      });
+      setVideoToSend({
         file: '',
         url: '',
       });
@@ -317,11 +351,12 @@ function Chats() {
     setSelectedImage(url);
     setIsModalOpen(true);
   };
-
+ 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedImage('');
   };
+ 
   const handleCancelImageSending = () => {
     setIsSendImageModalOpen(false);
     setSelectedImage('');
@@ -331,10 +366,21 @@ function Chats() {
       url: '',
     });
   };
-
+  const handleCancelVideoSending = () => {
+    setIsSendVideoModalOpen(false);
+    setSelectedVideo('');
+    setVideoToSend({
+      file: '',
+      url: '',
+    });
+  };
   const handleSendImageModal = (url) => {
     setSelectedImage(url);
     setIsSendImageModalOpen(true);
+  };
+  const handleSendVideoModal = (url) => {
+    setSelectedVideo(url);
+    setIsSendVideoModalOpen(true);
   };
   return (
     <>
@@ -397,6 +443,46 @@ function Chats() {
               </div>
             </div>
           </Modal>
+          <Modal
+            isOpen={isSendVideoModalOpen}
+            onRequestClose={handleCancelVideoSending}
+            style={customStyles}
+            contentLabel='Send Video Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCancelVideoSending}
+              />
+              <div className='relative'>
+                <video width='600' controls>
+                  <source src={selectedVideo} type='video/mp4' />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div
+                title='Send'
+                className='SendButton flex justify-between border-4 border-black h-12'
+              >
+                <span
+                  className='bg-red-500 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleCancelVideoSending}
+                >
+                  Cancel
+                </span>
+                <span
+                  className='bg-green-400 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </span>
+              </div>
+            </div>
+          </Modal>
+          
           <div
             className={
               isUserDetailsVisible
@@ -489,6 +575,15 @@ function Chats() {
                         >
                           {message.message}
                         </p>
+                      )}
+                      {message?.video && (
+                        <video width='600' controls>
+                          <source
+                            src={message.video}
+                            type='video/mp4'
+                          />
+                          Your browser does not support the video tag.
+                        </video>
                       )}
                       {message?.image && (
                         <img
