@@ -12,6 +12,7 @@ import mediaIcon from '../assets/media.png';
 import microphoneIcon from '../assets/microphone.png';
 import backButton from '../assets/back-button.png';
 import closeButton from '../assets/close.png';
+import downloadIcon from '../assets/download.png';
 import EmojiPicker from 'emoji-picker-react';
 import {
   isDetailsVisible,
@@ -102,7 +103,7 @@ function Chats() {
   });
   const [pdfFileToSend, setPdfFileToSend] = useState({
     file: '',
-    fileName: 'untitiled.pdf',
+    fileName: '',
     url: '',
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -110,6 +111,7 @@ function Chats() {
 
   const [isSendImageModalOpen, setIsSendImageModalOpen] = useState(false);
   const [isSendVideoModalOpen, setIsSendVideoModalOpen] = useState(false);
+  const [isSendPdfModalOpen, setIsSendPdfModalOpen] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState('');
   const [selectedVideo, setSelectedVideo] = useState('');
@@ -215,6 +217,7 @@ function Chats() {
   });
 
   const handleSendImage = async (e) => {
+    
     console.log('🚀 ~ handleSendImage ~ e:32rknfkefneor', e.target.files['0']);
     if (e.target.files['0'].size > 10000000) {
       alert('File size should be less than 10MB');
@@ -265,7 +268,8 @@ function Chats() {
       fileName: e.target.files['0'].name,
       url: URL.createObjectURL(e.target.files['0']),
     });
-    // handleSendVideoModal(URL.createObjectURL(e.target.files['0']));
+
+    handleSendPdfModal(URL.createObjectURL(e.target.files['0']));
   };
   const handleSendMessage = async () => {
     if (
@@ -279,6 +283,7 @@ function Chats() {
     }
     setIsSendImageModalOpen(false);
     setIsSendVideoModalOpen(false);
+    setIsSendPdfModalOpen(false);
     setIsSending(true);
     const interval = setInterval(() => {
       setIsInvert((prev) => !prev);
@@ -432,6 +437,16 @@ function Chats() {
       url: '',
     });
   };
+  const handleCancelPdfSending = () => {
+    setIsSendPdfModalOpen(false);
+    setSelectedPdfFile('');
+
+    setPdfFileToSend({
+      file: '',
+      fileName: '',
+      url: '',
+    });
+  };
   const handleSendImageModal = (url) => {
     setSelectedImage(url);
     setIsSendImageModalOpen(true);
@@ -439,6 +454,11 @@ function Chats() {
   const handleSendVideoModal = (url) => {
     setSelectedVideo(url);
     setIsSendVideoModalOpen(true);
+  };
+
+  const handleSendPdfModal = (url) => {
+    setSelectedPdfFile(url);
+    setIsSendPdfModalOpen(true);
   };
   return (
     <>
@@ -554,15 +574,54 @@ function Chats() {
                 className='w-12 h-12 p-2 cursor-pointer'
                 onClick={handlePdfCloseModal}
               />
-             
-                <div className='relative h-[900px] w-[900px]'>
-                  <iframe
-                    src={selectedPdfFile}
-                    className='border-0 h-full w-full bg-white'
-                    title='PDF Viewer'
-                  ></iframe>
-                </div>
-               
+
+              <div className='relative h-[900px] w-[900px]'>
+                <iframe
+                  src={selectedPdfFile}
+                  className='border-0 h-full w-full bg-white'
+                  title='PDF Viewer'
+                ></iframe>
+              </div>
+            </div>
+          </Modal>
+          <Modal
+            isOpen={isSendPdfModalOpen}
+            onRequestClose={handleCancelPdfSending}
+            style={customStyles}
+            contentLabel='Send PDF Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001] h-[900px] w-[900px]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCancelPdfSending}
+              />
+              <div className='relative h-[570px] w-[900px] overflow-auto'>
+                <iframe
+                  src={selectedPdfFile}
+                  className='border-0 h-full w-full bg-white'
+                  title='PDF Viewer'
+                ></iframe>
+              </div>
+              <div
+                title='Send'
+                className='relative SendButton flex justify-between border-4 border-black h-12'
+              >
+                <span
+                  className='bg-red-500 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleCancelPdfSending}
+                >
+                  Cancel
+                </span>
+                <span
+                  className='bg-green-400 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </span>
+              </div>
             </div>
           </Modal>
           <div
@@ -669,32 +728,68 @@ function Chats() {
                         </video>
                       )}
                       {message?.image && (
-                        <img
-                          title='Image in chats'
-                          src={message.image}
-                          className='max-w-80 max-h-80 mx-2 cursor-pointer rounded-lg mt-1 object-contain bg-gray-300'
-                          onClick={() => handleViewImage(message.image)}
-                          alt='image in chats'
-                        />
-                      )}
-                      {message?.pdf && (
-                        <div className='pdf-preview-container p-4 border rounded-lg shadow-md bg-white max-w-3xl mx-auto my-4 cursor-pointer'>
-                          <div className='pdf-preview-header mb-4'>
-                            <h2 className='text-lg font-semibold text-gray-800'>
-                              {message.fileName}
-                            </h2>
-                          </div>
-                          <div className='pdf-preview-body flex items-center justify-center bg-gray-100 border rounded-lg p-4'>
-                            <span
-                              className='text-gray-500 text-center'
-                              onClick={() => handleViewPdf(message.pdf)}
+                        <div className='flex flex-col gap-[2px]'>
+                         
+                          <img
+                            title='Image in chats'
+                            src={message.image}
+                            className='max-w-80 max-h-80 mx-2 cursor-pointer rounded-lg mt-1 object-contain bg-gray-300'
+                            onClick={() => handleViewImage(message.image)}
+                            alt='image in chats'
+                          />
+                           <div className='self-center'>
+                            <a
+                              href={message?.image}
+                              download={message?.image}
+                              className='text-blue-500 hover:underline'
+                              target='_blank'
                             >
-                              📄 Click to open
-                            </span>
+                              <img
+                                src={downloadIcon}
+                                alt=''
+                                className='w-5 h-5'
+                              />
+                            </a>
                           </div>
                         </div>
                       )}
-                      <span className='text-white text-[12px] ml-3'>
+                      {message?.pdf && (
+                        <div className='flex flex-col gap-[2px]'>
+                         
+                          <div className='pdf-preview-container p-4 border rounded-lg shadow-md bg-white max-w-3xl mx-auto my-4 cursor-pointer'>
+                            <div className='pdf-preview-header mb-4'>
+                              <h2 className='text-lg font-semibold text-gray-800'>
+                                {message.fileName}
+                              </h2>
+                            </div>
+                            <div className='pdf-preview-body flex items-center justify-center bg-gray-100 border rounded-lg p-4'>
+                              <span
+                                className='text-gray-500 text-center'
+                                onClick={() => handleViewPdf(message.pdf)}
+                              >
+                                📄 Click to open
+                              </span>
+                            </div>
+                          </div>
+                          <div className='self-center'>
+                            <a
+                              href={message?.pdf}
+                              download={message?.fileName}
+                              target='_blank'
+
+                              className='text-blue-500 hover:underline'
+                            >
+                              <img
+                                src={downloadIcon}
+                                alt=''
+                                className='w-5 h-5'
+                              />
+                            </a> 
+                          </div>
+                        </div>
+                        
+                      )}
+                     <span className='text-white text-[12px] ml-3'>
                         {message.time}
                       </span>
                     </div>
@@ -777,7 +872,7 @@ function Chats() {
                 </div>
               </div>
               <div title='Media' className='Media invert'>
-                <label htmlFor='file'>
+                <label htmlFor='mediaFile'>
                   <img
                     src={mediaIcon}
                     className='w-7 h-7 mx-2 cursor-pointer'
@@ -786,7 +881,7 @@ function Chats() {
                 </label>
                 <input
                   type='file'
-                  id='file'
+                  id='mediaFile'
                   className='hidden'
                   onChange={handleSendImage}
                 />
