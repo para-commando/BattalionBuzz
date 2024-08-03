@@ -100,13 +100,21 @@ function Chats() {
     file: '',
     url: '',
   });
+  const [pdfFileToSend, setPdfFileToSend] = useState({
+    file: '',
+    fileName: 'untitiled.pdf',
+    url: '',
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
- 
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+
   const [isSendImageModalOpen, setIsSendImageModalOpen] = useState(false);
   const [isSendVideoModalOpen, setIsSendVideoModalOpen] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState('');
   const [selectedVideo, setSelectedVideo] = useState('');
+  const [selectedPdfFile, setSelectedPdfFile] = useState('');
+
   const [isSending, setIsSending] = useState(false);
   const [isInvert, setIsInvert] = useState(false);
   const emojiPickerRef = useRef(null);
@@ -239,8 +247,33 @@ function Chats() {
       handleSendVideoModal(URL.createObjectURL(e.target.files['0']));
     }
   };
+  const handleSendPdfFiles = async (e) => {
+    console.log('🚀 ~ handleSendImage ~ e:34543543543534', e.target.files['0']);
+    if (e.target.files['0'].size > 10000000) {
+      alert('File size should be less than 10MB');
+
+      return;
+    }
+    const fileTypes = ['application/pdf', 'text/plain'];
+    if (!fileTypes.includes(e.target.files['0'].type)) {
+      alert('File type should be pdf only');
+      return;
+    }
+
+    setPdfFileToSend({
+      file: e.target.files['0'],
+      fileName: e.target.files['0'].name,
+      url: URL.createObjectURL(e.target.files['0']),
+    });
+    // handleSendVideoModal(URL.createObjectURL(e.target.files['0']));
+  };
   const handleSendMessage = async () => {
-    if (!userInputText && !imgToSend.file && !videoToSend.file) {
+    if (
+      !userInputText &&
+      !imgToSend.file &&
+      !videoToSend.file &&
+      !pdfFileToSend.file
+    ) {
       alert('Please enter a message or select an image to send');
       return;
     }
@@ -252,6 +285,8 @@ function Chats() {
     }, 250);
     let imgUrl = '';
     let videoUrl = '';
+    let pdfUrl = '';
+
     if (imgToSend.file) {
       imgUrl = await uploadData(imgToSend.file);
       console.log('🚀 ~ handleSendMessage ~ imgUrl:', imgUrl);
@@ -259,6 +294,10 @@ function Chats() {
     if (videoToSend.file) {
       videoUrl = await uploadData(videoToSend.file);
       console.log('🚀 ~ handleSendMessage ~ videoUrl:', videoUrl);
+    }
+    if (pdfFileToSend.file) {
+      pdfUrl = await uploadData(pdfFileToSend.file);
+      console.log('🚀 ~ handleSendMessage ~ pdfUrl:', pdfUrl);
     }
     try {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
@@ -269,6 +308,8 @@ function Chats() {
           receiverId: currentOpenedUser.id,
           image: imgUrl,
           video: videoUrl,
+          pdf: pdfUrl,
+          fileName: pdfFileToSend?.fileName,
           isUserMessage: true,
           username: currentOpenedUser.callSign,
           message: userInputText,
@@ -310,6 +351,8 @@ function Chats() {
             receiverId: currentOpenedUser.id,
             image: imgUrl,
             video: videoUrl,
+            pdf: pdfUrl,
+            fileName: pdfFileToSend?.fileName,
             isUserMessage: false,
             username: currentOpenedUser.callSign,
             message: userInputText,
@@ -336,6 +379,8 @@ function Chats() {
       setIsInvert(false);
       imgUrl = '';
       videoUrl = '';
+      pdfUrl = '';
+
       setImgToSend({
         file: '',
         url: '',
@@ -344,6 +389,11 @@ function Chats() {
         file: '',
         url: '',
       });
+      setPdfFileToSend({
+        file: '',
+        url: '',
+        fileName: '',
+      });
     }
   };
 
@@ -351,12 +401,20 @@ function Chats() {
     setSelectedImage(url);
     setIsModalOpen(true);
   };
- 
+
+  const handleViewPdf = (url) => {
+    setSelectedPdfFile(url);
+    setIsPdfModalOpen(true);
+  };
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedImage('');
   };
- 
+
+  const handlePdfCloseModal = () => {
+    setIsPdfModalOpen(false);
+    selectedPdfFile('');
+  };
   const handleCancelImageSending = () => {
     setIsSendImageModalOpen(false);
     setSelectedImage('');
@@ -482,7 +540,31 @@ function Chats() {
               </div>
             </div>
           </Modal>
-          
+          <Modal
+            isOpen={isPdfModalOpen}
+            onRequestClose={handlePdfCloseModal}
+            style={customStyles}
+            contentLabel='Image View Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handlePdfCloseModal}
+              />
+             
+                <div className='relative h-[900px] w-[900px]'>
+                  <iframe
+                    src={selectedPdfFile}
+                    className='border-0 h-full w-full bg-white'
+                    title='PDF Viewer'
+                  ></iframe>
+                </div>
+               
+            </div>
+          </Modal>
           <div
             className={
               isUserDetailsVisible
@@ -545,6 +627,10 @@ function Chats() {
 
             <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[525px] mt-2'>
               {messages.map((message, index) => {
+                console.log(
+                  '🚀 ~ {messages.map ~ messagepppppppppppppppddddddffff:',
+                  message?.pdf
+                );
                 return (
                   <div
                     key={index}
@@ -578,10 +664,7 @@ function Chats() {
                       )}
                       {message?.video && (
                         <video width='600' controls>
-                          <source
-                            src={message.video}
-                            type='video/mp4'
-                          />
+                          <source src={message.video} type='video/mp4' />
                           Your browser does not support the video tag.
                         </video>
                       )}
@@ -593,6 +676,23 @@ function Chats() {
                           onClick={() => handleViewImage(message.image)}
                           alt='image in chats'
                         />
+                      )}
+                      {message?.pdf && (
+                        <div className='pdf-preview-container p-4 border rounded-lg shadow-md bg-white max-w-3xl mx-auto my-4 cursor-pointer'>
+                          <div className='pdf-preview-header mb-4'>
+                            <h2 className='text-lg font-semibold text-gray-800'>
+                              {message.fileName}
+                            </h2>
+                          </div>
+                          <div className='pdf-preview-body flex items-center justify-center bg-gray-100 border rounded-lg p-4'>
+                            <span
+                              className='text-gray-500 text-center'
+                              onClick={() => handleViewPdf(message.pdf)}
+                            >
+                              📄 Click to open
+                            </span>
+                          </div>
+                        </div>
                       )}
                       <span className='text-white text-[12px] ml-3'>
                         {message.time}
@@ -631,10 +731,18 @@ function Chats() {
                     />
                   </div>
                   <div title='Documents' className='DocumentOption invert'>
-                    <img
-                      src={documentsIcon}
-                      className='w-7 h-7 mx-1 cursor-pointer'
-                      alt='Documents'
+                    <label htmlFor='file'>
+                      <img
+                        src={documentsIcon}
+                        className='w-7 h-7 mx-1 cursor-pointer'
+                        alt='Documents'
+                      />
+                    </label>
+                    <input
+                      type='file'
+                      id='file'
+                      className='hidden'
+                      onChange={handleSendPdfFiles}
                     />
                   </div>
 
