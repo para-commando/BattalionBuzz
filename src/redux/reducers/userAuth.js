@@ -4,15 +4,7 @@ import { db } from '../../lib/firebase';
 export const loginUser = createAsyncThunk(
   'userAuth/loginUser',
   async (data) => {
-    // const response = await fetch('http://127.0.0.1:8080/login', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.kBZIPlziE8JB1qhEwtl6KGvG8Xu9whXzcE1lvpeUTSM`,
-    //   },
-    //   body: JSON.stringify(data),
-    // }); // replace with your API endpoint
-    // const resp = await response.json();
+ 
 
     return {
       data: {
@@ -147,17 +139,17 @@ export const userAuthReducers = createSlice({
           state.valueIsUserValidated = true;
         }
         else{
+          state.valueUserData = {};
           state.valueIsUserValidated = false;
         }
         state.valueIsSubmitting = false;
         state.valueScreenLoading = false;
-        console.log('🚀 ~ .addCase ~ action.payload333333333333333:', action.payload);
-        // Set valueIsUserValidated to true based on fetchUserDetails success
-      })
+            })
       .addCase(fetchUserDetails.rejected, (state) => {
         debugger;
         console.log('promise rejected in fetchUserDetails');
         console.log('🚀 ~ .addCase ~ state2:', state);
+        state.valueUserData = {};
         state.valueIsUserValidated = false;
         state.valueIsSubmitting = false;
         state.valueScreenLoading = false;

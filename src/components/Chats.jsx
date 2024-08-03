@@ -12,6 +12,7 @@ import mediaIcon from '../assets/media.png';
 import microphoneIcon from '../assets/microphone.png';
 import backButton from '../assets/back-button.png';
 import closeButton from '../assets/close.png';
+import downloadIcon from '../assets/download.png';
 import EmojiPicker from 'emoji-picker-react';
 import {
   isDetailsVisible,
@@ -96,8 +97,26 @@ function Chats() {
     file: '',
     url: '',
   });
+  const [videoToSend, setVideoToSend] = useState({
+    file: '',
+    url: '',
+  });
+  const [pdfFileToSend, setPdfFileToSend] = useState({
+    file: '',
+    fileName: '',
+    url: '',
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+
+  const [isSendImageModalOpen, setIsSendImageModalOpen] = useState(false);
+  const [isSendVideoModalOpen, setIsSendVideoModalOpen] = useState(false);
+  const [isSendPdfModalOpen, setIsSendPdfModalOpen] = useState(false);
+
   const [selectedImage, setSelectedImage] = useState('');
+  const [selectedVideo, setSelectedVideo] = useState('');
+  const [selectedPdfFile, setSelectedPdfFile] = useState('');
+
   const [isSending, setIsSending] = useState(false);
   const [isInvert, setIsInvert] = useState(false);
   const emojiPickerRef = useRef(null);
@@ -198,34 +217,93 @@ function Chats() {
   });
 
   const handleSendImage = async (e) => {
-    console.log(
-      '🚀 ~ handleSendImage ~ e:32rknfkefneor',
-      e.target.files['0'].size
-    );
+    
+    console.log('🚀 ~ handleSendImage ~ e:32rknfkefneor', e.target.files['0']);
     if (e.target.files['0'].size > 10000000) {
       alert('File size should be less than 10MB');
+
       return;
     }
-    setImgToSend({
+    const imgFileType = [
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'image/gif',
+      'video/mp4',
+    ];
+    if (!imgFileType.includes(e.target.files['0'].type)) {
+      alert('File type should be one among: jpeg, png, jpg, gif, mp4');
+      return;
+    }
+    if (e.target.files['0'].type.includes('image')) {
+      setImgToSend({
+        file: e.target.files['0'],
+        url: URL.createObjectURL(e.target.files['0']),
+      });
+      handleSendImageModal(URL.createObjectURL(e.target.files['0']));
+    }
+    if (e.target.files['0'].type.includes('video')) {
+      setVideoToSend({
+        file: e.target.files['0'],
+        url: URL.createObjectURL(e.target.files['0']),
+      });
+      handleSendVideoModal(URL.createObjectURL(e.target.files['0']));
+    }
+  };
+  const handleSendPdfFiles = async (e) => {
+    console.log('🚀 ~ handleSendImage ~ e:34543543543534', e.target.files['0']);
+    if (e.target.files['0'].size > 10000000) {
+      alert('File size should be less than 10MB');
+
+      return;
+    }
+    const fileTypes = ['application/pdf', 'text/plain'];
+    if (!fileTypes.includes(e.target.files['0'].type)) {
+      alert('File type should be pdf only');
+      return;
+    }
+
+    setPdfFileToSend({
       file: e.target.files['0'],
+      fileName: e.target.files['0'].name,
       url: URL.createObjectURL(e.target.files['0']),
     });
+
+    handleSendPdfModal(URL.createObjectURL(e.target.files['0']));
   };
   const handleSendMessage = async () => {
-    if (!userInputText && !imgToSend.file) {
+    if (
+      !userInputText &&
+      !imgToSend.file &&
+      !videoToSend.file &&
+      !pdfFileToSend.file
+    ) {
       alert('Please enter a message or select an image to send');
       return;
     }
+    setIsSendImageModalOpen(false);
+    setIsSendVideoModalOpen(false);
+    setIsSendPdfModalOpen(false);
     setIsSending(true);
     const interval = setInterval(() => {
       setIsInvert((prev) => !prev);
     }, 250);
     let imgUrl = '';
+    let videoUrl = '';
+    let pdfUrl = '';
+
     if (imgToSend.file) {
       imgUrl = await uploadData(imgToSend.file);
       console.log('🚀 ~ handleSendMessage ~ imgUrl:', imgUrl);
     }
-
+    if (videoToSend.file) {
+      videoUrl = await uploadData(videoToSend.file);
+      console.log('🚀 ~ handleSendMessage ~ videoUrl:', videoUrl);
+    }
+    if (pdfFileToSend.file) {
+      pdfUrl = await uploadData(pdfFileToSend.file);
+      console.log('🚀 ~ handleSendMessage ~ pdfUrl:', pdfUrl);
+    }
     try {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
       // adding chat in the current user's chat list
@@ -234,6 +312,9 @@ function Chats() {
           senderId: userData.id,
           receiverId: currentOpenedUser.id,
           image: imgUrl,
+          video: videoUrl,
+          pdf: pdfUrl,
+          fileName: pdfFileToSend?.fileName,
           isUserMessage: true,
           username: currentOpenedUser.callSign,
           message: userInputText,
@@ -260,12 +341,12 @@ function Chats() {
       );
       if (matchedChat) {
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
-        await updateDoc(docRef, {
+        const aa = await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
         matchedChat.hasSentMessage = true;
         matchedChat.updatedAt = Date.now();
-        updateDoc(docRef, {
+        const op = await updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
         });
         // adding chat in the receiver's chat list
@@ -274,6 +355,9 @@ function Chats() {
             senderId: userData.id,
             receiverId: currentOpenedUser.id,
             image: imgUrl,
+            video: videoUrl,
+            pdf: pdfUrl,
+            fileName: pdfFileToSend?.fileName,
             isUserMessage: false,
             username: currentOpenedUser.callSign,
             message: userInputText,
@@ -299,6 +383,22 @@ function Chats() {
       setIsSending(false);
       setIsInvert(false);
       imgUrl = '';
+      videoUrl = '';
+      pdfUrl = '';
+
+      setImgToSend({
+        file: '',
+        url: '',
+      });
+      setVideoToSend({
+        file: '',
+        url: '',
+      });
+      setPdfFileToSend({
+        file: '',
+        url: '',
+        fileName: '',
+      });
     }
   };
 
@@ -307,11 +407,59 @@ function Chats() {
     setIsModalOpen(true);
   };
 
+  const handleViewPdf = (url) => {
+    setSelectedPdfFile(url);
+    setIsPdfModalOpen(true);
+  };
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedImage('');
   };
 
+  const handlePdfCloseModal = () => {
+    setIsPdfModalOpen(false);
+    selectedPdfFile('');
+  };
+  const handleCancelImageSending = () => {
+    setIsSendImageModalOpen(false);
+    setSelectedImage('');
+    console.log('wefffffffffffffffffrwerwerweeeeeeeeeeeeeeeeeeeeeeee');
+    setImgToSend({
+      file: '',
+      url: '',
+    });
+  };
+  const handleCancelVideoSending = () => {
+    setIsSendVideoModalOpen(false);
+    setSelectedVideo('');
+    setVideoToSend({
+      file: '',
+      url: '',
+    });
+  };
+  const handleCancelPdfSending = () => {
+    setIsSendPdfModalOpen(false);
+    setSelectedPdfFile('');
+
+    setPdfFileToSend({
+      file: '',
+      fileName: '',
+      url: '',
+    });
+  };
+  const handleSendImageModal = (url) => {
+    setSelectedImage(url);
+    setIsSendImageModalOpen(true);
+  };
+  const handleSendVideoModal = (url) => {
+    setSelectedVideo(url);
+    setIsSendVideoModalOpen(true);
+  };
+
+  const handleSendPdfModal = (url) => {
+    setSelectedPdfFile(url);
+    setIsSendPdfModalOpen(true);
+  };
   return (
     <>
       {isUserChatsVisible && (
@@ -335,6 +483,145 @@ function Chats() {
                   <img src={selectedImage} alt='Full View' className='' />
                 </div>
               </Zoom>
+            </div>
+          </Modal>
+          <Modal
+            isOpen={isSendImageModalOpen}
+            onRequestClose={handleCancelImageSending}
+            style={customStyles}
+            contentLabel='Send Image Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCancelImageSending}
+              />
+              <div className='relative'>
+                <img src={selectedImage} alt='Full View' className='' />
+              </div>
+              <div
+                title='Send'
+                className='SendButton flex justify-between border-4 border-black h-12'
+              >
+                <span
+                  className='bg-red-500 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleCancelImageSending}
+                >
+                  Cancel
+                </span>
+                <span
+                  className='bg-green-400 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </span>
+              </div>
+            </div>
+          </Modal>
+          <Modal
+            isOpen={isSendVideoModalOpen}
+            onRequestClose={handleCancelVideoSending}
+            style={customStyles}
+            contentLabel='Send Video Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCancelVideoSending}
+              />
+              <div className='relative'>
+                <video width='600' controls>
+                  <source src={selectedVideo} type='video/mp4' />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div
+                title='Send'
+                className='SendButton flex justify-between border-4 border-black h-12'
+              >
+                <span
+                  className='bg-red-500 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleCancelVideoSending}
+                >
+                  Cancel
+                </span>
+                <span
+                  className='bg-green-400 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </span>
+              </div>
+            </div>
+          </Modal>
+          <Modal
+            isOpen={isPdfModalOpen}
+            onRequestClose={handlePdfCloseModal}
+            style={customStyles}
+            contentLabel='Image View Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handlePdfCloseModal}
+              />
+
+              <div className='relative h-[900px] w-[900px]'>
+                <iframe
+                  src={selectedPdfFile}
+                  className='border-0 h-full w-full bg-white'
+                  title='PDF Viewer'
+                ></iframe>
+              </div>
+            </div>
+          </Modal>
+          <Modal
+            isOpen={isSendPdfModalOpen}
+            onRequestClose={handleCancelPdfSending}
+            style={customStyles}
+            contentLabel='Send PDF Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001] h-[900px] w-[900px]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCancelPdfSending}
+              />
+              <div className='relative h-[570px] w-[900px] overflow-auto'>
+                <iframe
+                  src={selectedPdfFile}
+                  className='border-0 h-full w-full bg-white'
+                  title='PDF Viewer'
+                ></iframe>
+              </div>
+              <div
+                title='Send'
+                className='relative SendButton flex justify-between border-4 border-black h-12'
+              >
+                <span
+                  className='bg-red-500 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleCancelPdfSending}
+                >
+                  Cancel
+                </span>
+                <span
+                  className='bg-green-400 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </span>
+              </div>
             </div>
           </Modal>
           <div
@@ -399,6 +686,10 @@ function Chats() {
 
             <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[525px] mt-2'>
               {messages.map((message, index) => {
+                console.log(
+                  '🚀 ~ {messages.map ~ messagepppppppppppppppddddddffff:',
+                  message?.pdf
+                );
                 return (
                   <div
                     key={index}
@@ -430,16 +721,75 @@ function Chats() {
                           {message.message}
                         </p>
                       )}
-                      {message?.image && (
-                        <img
-                          title='Image in chats'
-                          src={message.image}
-                          className='max-w-80 max-h-80 mx-2 cursor-pointer rounded-lg mt-1 object-contain bg-gray-300'
-                          onClick={() => handleViewImage(message.image)}
-                          alt='image in chats'
-                        />
+                      {message?.video && (
+                        <video width='600' controls>
+                          <source src={message.video} type='video/mp4' />
+                          Your browser does not support the video tag.
+                        </video>
                       )}
-                      <span className='text-white text-[12px] ml-3'>
+                      {message?.image && (
+                        <div className='flex flex-col gap-[2px]'>
+                         
+                          <img
+                            title='Image in chats'
+                            src={message.image}
+                            className='max-w-80 max-h-80 mx-2 cursor-pointer rounded-lg mt-1 object-contain bg-gray-300'
+                            onClick={() => handleViewImage(message.image)}
+                            alt='image in chats'
+                          />
+                           <div className='self-center'>
+                            <a
+                              href={message?.image}
+                              download={message?.image}
+                              className='text-blue-500 hover:underline'
+                              target='_blank'
+                            >
+                              <img
+                                src={downloadIcon}
+                                alt=''
+                                className='w-5 h-5'
+                              />
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      {message?.pdf && (
+                        <div className='flex flex-col gap-[2px]'>
+                         
+                          <div className='pdf-preview-container p-4 border rounded-lg shadow-md bg-white max-w-3xl mx-auto my-4 cursor-pointer'>
+                            <div className='pdf-preview-header mb-4'>
+                              <h2 className='text-lg font-semibold text-gray-800'>
+                                {message.fileName}
+                              </h2>
+                            </div>
+                            <div className='pdf-preview-body flex items-center justify-center bg-gray-100 border rounded-lg p-4'>
+                              <span
+                                className='text-gray-500 text-center'
+                                onClick={() => handleViewPdf(message.pdf)}
+                              >
+                                📄 Click to open
+                              </span>
+                            </div>
+                          </div>
+                          <div className='self-center'>
+                            <a
+                              href={message?.pdf}
+                              download={message?.fileName}
+                              target='_blank'
+
+                              className='text-blue-500 hover:underline'
+                            >
+                              <img
+                                src={downloadIcon}
+                                alt=''
+                                className='w-5 h-5'
+                              />
+                            </a> 
+                          </div>
+                        </div>
+                        
+                      )}
+                     <span className='text-white text-[12px] ml-3'>
                         {message.time}
                       </span>
                     </div>
@@ -476,17 +826,26 @@ function Chats() {
                     />
                   </div>
                   <div title='Documents' className='DocumentOption invert'>
-                    <img
-                      src={documentsIcon}
-                      className='w-7 h-7 mx-1 cursor-pointer'
-                      alt='Documents'
+                    <label htmlFor='file'>
+                      <img
+                        src={documentsIcon}
+                        className='w-7 h-7 mx-1 cursor-pointer'
+                        alt='Documents'
+                      />
+                    </label>
+                    <input
+                      type='file'
+                      id='file'
+                      className='hidden'
+                      onChange={handleSendPdfFiles}
                     />
                   </div>
-                  <div title='Media' className='Media invert'>
+
+                  <div title='Camera' className='Camera invert'>
                     <img
-                      src={mediaIcon}
+                      src={CameraIcon}
                       className='w-7 h-7 mx-2 cursor-pointer'
-                      alt='Media'
+                      alt='Camera'
                     />
                   </div>
                 </div>
@@ -512,18 +871,17 @@ function Chats() {
                   )}
                 </div>
               </div>
-
-              <div title='Camera' className='Camera invert'>
-                <label htmlFor='file'>
+              <div title='Media' className='Media invert'>
+                <label htmlFor='mediaFile'>
                   <img
-                    src={CameraIcon}
+                    src={mediaIcon}
                     className='w-7 h-7 mx-2 cursor-pointer'
-                    alt='Camera'
+                    alt='Media'
                   />
                 </label>
                 <input
                   type='file'
-                  id='file'
+                  id='mediaFile'
                   className='hidden'
                   onChange={handleSendImage}
                 />

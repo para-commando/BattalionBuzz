@@ -4,10 +4,9 @@ import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
 import AddUser from './AddUser';
 import {
-  isDetailsVisible,
   isChatsVisible,
   currentOpenedUser,
-  isLandingPageVisible
+  isLandingPageVisible,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
@@ -15,42 +14,63 @@ import { db } from '../lib/firebase';
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
   const [chats, setChats] = useState([]);
-  const userChat = useSelector((state) => {
-    return state.userAuthReducerExport.valueUserData.chats;
-  });
+  const [filteredUserChats, setFilteredUserChats] = useState([]);
+
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
-  const isUserChatsVisible = useSelector((state) => {
-    return state.toggleViewReducersExport.valueIsChatsVisible;
-  });
+
   useEffect(() => {
+    // listener for any changes on the specified document in the given collection
     const latestChats = onSnapshot(
       doc(db, 'chatMessages', user.id),
       async (res) => {
         // obtained the chat data
         const items = res.data().chats;
-        console.log("🚀 ~ items:", items)
+        console.log('🚀 ~ items:', items);
         const promises = items.map(async (item) => {
           console.log('🚀 ~ promises ~ item:', item);
           const userDocRef = doc(db, 'users', item.receiverId);
           const userDocSnap = await getDoc(userDocRef);
           const user = userDocSnap.data();
-          user.hasSentMessage= item.hasSentMessage;
-          return { ...items,user };
+          user.hasSentMessage = item.hasSentMessage;
+          user.updatedAt = item.updatedAt;
+          return user;
         });
-        const chatData = await Promise.all(promises);
+        let chatData = await Promise.all(promises);
         console.log('🚀 ~ latestChats ~ chatData:', chatData);
-        setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+        chatData = chatData.sort((a, b) => {
+          if (a.hasSentMessage === b.hasSentMessage) {
+            return b.updatedAt - a.updatedAt; // Sort by updatedAt if hasSentMessage is the same
+          }
+          return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
+        });
+        console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
+        setChats(chatData);
+        setFilteredUserChats(chatData);
       }
     );
 
     return () => {
       latestChats();
     };
-  }, [userChat,user]);
+  }, []);
 
   const dispatch = useDispatch();
+  const handleSearch = async (e) => {
+    console.log('🚀 ~ handleSearch ~ e:', e.target.value);
+    try {
+      console.log(chats);
+      const filteredChats = chats.filter((chat) => {
+        return chat.user.callSign
+          .toLowerCase()
+          .includes(e.target.value.toLowerCase());
+      });
+      setFilteredUserChats(filteredChats);
+    } catch (error) {
+      console.log('🚀 ~ handleSearch ~ error:', error);
+    }
+  };
   return (
     <>
       <div className='chatList h-[588px]  w-full px-2 overflow-y-auto'>
@@ -65,6 +85,7 @@ function ChatList() {
               type='text'
               placeholder='Search...'
               className='w-[100%] h-8 rounded-full pl-10 text-black'
+              onChange={(e) => handleSearch(e)}
             />
           </div>
           <img
@@ -75,33 +96,36 @@ function ChatList() {
           />
         </div>
         <div className='overflow-y-auto max-h-[85%] pb-5'>
-          {chats &&
-            chats.map((currUser) => {
-              console.log("🚀 ~ ChatList ~ currUser:", currUser)
-              console.log("🚀 ~ ChatList ~ currUser.hasSentMessage:", currUser.hasSentMessage)
+          {filteredUserChats &&
+            filteredUserChats.map((currUser) => {
+              console.log('🚀 ~ ChatList ~ currUser:', currUser);
+              console.log(
+                '🚀 ~ ChatList ~ currUser.hasSentMessage:',
+                currUser.hasSentMessage
+              );
               return (
                 <div
                   className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'
                   onClick={() => {
                     dispatch(isChatsVisible(true));
-                    dispatch(isLandingPageVisible(false))
-                    dispatch(currentOpenedUser(currUser.user));
+                    dispatch(isLandingPageVisible(false));
+                    // setting the value of the reducer to the current opened user
+                    dispatch(currentOpenedUser(currUser));
                   }}
                 >
                   <img
-                    src={currUser.user.imgUrl}
+                    src={currUser.imgUrl}
                     className='w-10 h-10 mx-2 rounded-full cursor-pointer object-cover object-top'
                     alt=''
                   />
-                  <span className='text-lg ml-4'>{currUser.user.callSign}</span>
-                  {currUser.user.hasSentMessage ? (
+                  <span className='text-lg ml-4'>{currUser.callSign}</span>
+                  {currUser.hasSentMessage ? (
                     <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
                   ) : (
                     ''
                   )}
                 </div>
               );
-                
             })}
         </div>
         {addUsersButtonDisplay && <AddUser />}

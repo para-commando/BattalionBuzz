@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
-  isUserNew,
   isUserValidated,
   isUserSubmitting,
 } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth, db } from '../lib/firebase.js';
-import { doc, setDoc } from 'firebase/firestore';
+import { auth } from '../lib/firebase.js';
+
 function Login() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
@@ -115,7 +112,7 @@ function Login() {
                 </div>
               )}
               {showLoading && (
-                <div className='flex items-center justify-cente w-15 h-15 '>
+                <div className='flex items-center  w-15 h-15 '>
                   <div className='loader'></div>
                 </div>
               )}

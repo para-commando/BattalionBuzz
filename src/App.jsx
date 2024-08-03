@@ -16,7 +16,6 @@ import {
 import turbine from './assets/turbine.gif';
 import combatChopper from './assets/combatChopper.png';
 
-
 function App() {
   const isUserValidated = useSelector((state) => {
     return state.userAuthReducerExport.valueIsUserValidated;
@@ -29,12 +28,20 @@ function App() {
   useEffect(() => {
     const userAuthState = auth.onAuthStateChanged((user) => {
       console.log('🚀 ~ userAuthState ~ user:useeffffectttt', user);
-      dispatch(fetchUserDetails(user));
+      if (user) {
+        // User is signed in, fetch and dispatch user details
+        console.log('User signed in:', user);
+        dispatch(fetchUserDetails(user));
+      } else {
+        // User is signed out, dispatch an action to handle this state
+        console.log('User signed out or session expired');
+        dispatch(fetchUserDetails(null)); // This action should handle the null case appropriately
+      }
     });
     return () => {
       userAuthState();
     };
-  }, [auth, dispatch,fetchUserDetails]);
+  }, []);
 
   return (
     <>
@@ -44,9 +51,9 @@ function App() {
         <div className='content flex justify-center'>
           {isLoading ? (
             <>
-              <div className='loading text-white text-8xl mt-60 relative flex flex-col items-center'> 
-                <img src={turbine} className='absolute bottom-[268px]' alt="" />
-                <img src={combatChopper} className='w-44 h-44' alt="" />
+              <div className='loading text-white text-8xl mt-60 relative flex flex-col items-center'>
+                <img src={turbine} className='absolute bottom-[268px]' alt='' />
+                <img src={combatChopper} className='w-44 h-44' alt='' />
                 <p>Loading...</p>
               </div>
             </>

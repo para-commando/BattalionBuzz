@@ -1,8 +1,4 @@
 import React from 'react';
-import editIcon from '../assets/edit.png';
-import menuIcon from '../assets/menu.png';
-import videoCameraIcon from '../assets/videoCamera.png';
-import avatarIcon from '../assets/avatarIcon.png';
 import { isUserNew, isUserValidated } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import { auth } from '../lib/firebase';
@@ -13,17 +9,9 @@ function UserInfo() {
   );
   console.log('🚀 ~ UserInfo ~ user:', user);
   const dispatch = useDispatch();
-  const isUserChatsVisible = useSelector((state) => {
-    return state.toggleViewReducersExport.valueIsChatsVisible;
-  });
+
   return (
-    <div
-      className={
-        isUserChatsVisible
-          ? 'flex flex-col items-start gap-1 mb-7 w-full'
-          : 'flex items-center gap-1 mb-7 w-full'
-      }
-    >
+    <div className='flex items-center gap-1 mb-7 w-full'>
       <div className='user flex items-center w-full'>
         <img
           src={user.imgUrl}
