@@ -97,6 +97,8 @@ function Chats() {
     url: '',
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSendImageModalOpen, setIsSendImageModalOpen] = useState(false);
+
   const [selectedImage, setSelectedImage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isInvert, setIsInvert] = useState(false);
@@ -198,24 +200,29 @@ function Chats() {
   });
 
   const handleSendImage = async (e) => {
-    console.log(
-      '🚀 ~ handleSendImage ~ e:32rknfkefneor',
-      e.target.files['0'].size
-    );
+    console.log('🚀 ~ handleSendImage ~ e:32rknfkefneor', e.target.files['0']);
     if (e.target.files['0'].size > 10000000) {
       alert('File size should be less than 10MB');
+
+      return;
+    }
+    const imgFileType = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    if (!imgFileType.includes(e.target.files['0'].type)) {
+      alert('File type should be one among: jpeg, png, jpg, gif');
       return;
     }
     setImgToSend({
       file: e.target.files['0'],
       url: URL.createObjectURL(e.target.files['0']),
     });
+    handleSendImageModal(URL.createObjectURL(e.target.files['0']));
   };
   const handleSendMessage = async () => {
     if (!userInputText && !imgToSend.file) {
       alert('Please enter a message or select an image to send');
       return;
     }
+    setIsSendImageModalOpen(false);
     setIsSending(true);
     const interval = setInterval(() => {
       setIsInvert((prev) => !prev);
@@ -260,13 +267,12 @@ function Chats() {
       );
       if (matchedChat) {
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
-        debugger
-       const aa = await updateDoc(docRef, {
+        const aa = await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
         matchedChat.hasSentMessage = true;
         matchedChat.updatedAt = Date.now();
-      const op= await updateDoc(docRef, {
+        const op = await updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
         });
         // adding chat in the receiver's chat list
@@ -300,6 +306,10 @@ function Chats() {
       setIsSending(false);
       setIsInvert(false);
       imgUrl = '';
+      setImgToSend({
+        file: '',
+        url: '',
+      });
     }
   };
 
@@ -312,7 +322,20 @@ function Chats() {
     setIsModalOpen(false);
     setSelectedImage('');
   };
+  const handleCancelImageSending = () => {
+    setIsSendImageModalOpen(false);
+    setSelectedImage('');
+    console.log('wefffffffffffffffffrwerwerweeeeeeeeeeeeeeeeeeeeeeee');
+    setImgToSend({
+      file: '',
+      url: '',
+    });
+  };
 
+  const handleSendImageModal = (url) => {
+    setSelectedImage(url);
+    setIsSendImageModalOpen(true);
+  };
   return (
     <>
       {isUserChatsVisible && (
@@ -336,6 +359,42 @@ function Chats() {
                   <img src={selectedImage} alt='Full View' className='' />
                 </div>
               </Zoom>
+            </div>
+          </Modal>
+          <Modal
+            isOpen={isSendImageModalOpen}
+            onRequestClose={handleCancelImageSending}
+            style={customStyles}
+            contentLabel='Send Image Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001]'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCancelImageSending}
+              />
+              <div className='relative'>
+                <img src={selectedImage} alt='Full View' className='' />
+              </div>
+              <div
+                title='Send'
+                className='SendButton flex justify-between border-4 border-black h-12'
+              >
+                <span
+                  className='bg-red-500 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleCancelImageSending}
+                >
+                  Cancel
+                </span>
+                <span
+                  className='bg-green-400 px-10 pt-2 text-center w-1/2 cursor-pointer'
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </span>
+              </div>
             </div>
           </Modal>
           <div
@@ -483,11 +542,12 @@ function Chats() {
                       alt='Documents'
                     />
                   </div>
-                  <div title='Media' className='Media invert'>
+
+                  <div title='Camera' className='Camera invert'>
                     <img
-                      src={mediaIcon}
+                      src={CameraIcon}
                       className='w-7 h-7 mx-2 cursor-pointer'
-                      alt='Media'
+                      alt='Camera'
                     />
                   </div>
                 </div>
@@ -513,13 +573,12 @@ function Chats() {
                   )}
                 </div>
               </div>
-
-              <div title='Camera' className='Camera invert'>
+              <div title='Media' className='Media invert'>
                 <label htmlFor='file'>
                   <img
-                    src={CameraIcon}
+                    src={mediaIcon}
                     className='w-7 h-7 mx-2 cursor-pointer'
-                    alt='Camera'
+                    alt='Media'
                   />
                 </label>
                 <input
