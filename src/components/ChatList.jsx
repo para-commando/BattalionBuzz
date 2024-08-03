@@ -4,7 +4,6 @@ import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
 import AddUser from './AddUser';
 import {
-  isDetailsVisible,
   isChatsVisible,
   currentOpenedUser,
   isLandingPageVisible,
@@ -17,14 +16,12 @@ function ChatList() {
   const [chats, setChats] = useState([]);
   const [filteredUserChats, setFilteredUserChats] = useState([]);
 
-  const userChat = useSelector((state) => {
-    return state.userAuthReducerExport.valueUserData.chats;
-  });
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
 
   useEffect(() => {
+    // listener for any changes on the specified document in the given collection
     const latestChats = onSnapshot(
       doc(db, 'chatMessages', user.id),
       async (res) => {
@@ -37,11 +34,18 @@ function ChatList() {
           const userDocSnap = await getDoc(userDocRef);
           const user = userDocSnap.data();
           user.hasSentMessage = item.hasSentMessage;
-          return { ...items, user };
+          user.updatedAt = item.updatedAt;
+          return user;
         });
         let chatData = await Promise.all(promises);
         console.log('🚀 ~ latestChats ~ chatData:', chatData);
-        chatData = chatData.sort((a, b) => b.updatedAt - a.updatedAt);
+        chatData = chatData.sort((a, b) => {
+          if (a.hasSentMessage === b.hasSentMessage) {
+            return b.updatedAt - a.updatedAt; // Sort by updatedAt if hasSentMessage is the same
+          }
+          return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
+        });
+        console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
         setChats(chatData);
         setFilteredUserChats(chatData);
       }
@@ -50,7 +54,7 @@ function ChatList() {
     return () => {
       latestChats();
     };
-  }, [userChat, user]);
+  }, []);
 
   const dispatch = useDispatch();
   const handleSearch = async (e) => {
@@ -105,16 +109,17 @@ function ChatList() {
                   onClick={() => {
                     dispatch(isChatsVisible(true));
                     dispatch(isLandingPageVisible(false));
-                    dispatch(currentOpenedUser(currUser.user));
+                    // setting the value of the reducer to the current opened user
+                    dispatch(currentOpenedUser(currUser));
                   }}
                 >
                   <img
-                    src={currUser.user.imgUrl}
+                    src={currUser.imgUrl}
                     className='w-10 h-10 mx-2 rounded-full cursor-pointer object-cover object-top'
                     alt=''
                   />
-                  <span className='text-lg ml-4'>{currUser.user.callSign}</span>
-                  {currUser.user.hasSentMessage ? (
+                  <span className='text-lg ml-4'>{currUser.callSign}</span>
+                  {currUser.hasSentMessage ? (
                     <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
                   ) : (
                     ''

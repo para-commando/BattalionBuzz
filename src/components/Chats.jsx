@@ -260,12 +260,13 @@ function Chats() {
       );
       if (matchedChat) {
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
-        await updateDoc(docRef, {
+        debugger
+       const aa = await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
         matchedChat.hasSentMessage = true;
         matchedChat.updatedAt = Date.now();
-        updateDoc(docRef, {
+      const op= await updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
         });
         // adding chat in the receiver's chat list
