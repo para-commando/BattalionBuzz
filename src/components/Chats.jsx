@@ -112,6 +112,7 @@ function Chats() {
   const [isSendImageModalOpen, setIsSendImageModalOpen] = useState(false);
   const [isSendVideoModalOpen, setIsSendVideoModalOpen] = useState(false);
   const [isSendPdfModalOpen, setIsSendPdfModalOpen] = useState(false);
+  const [isSendVoiceModalOpen, setIsSendVoiceModalOpen] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState('');
   const [selectedVideo, setSelectedVideo] = useState('');
@@ -186,10 +187,6 @@ function Chats() {
     };
   }, [currentOpenedUser, userData.id]);
 
-  const toggleOptions = () => {
-    setShowOptions(!showOptions);
-  };
-
   const handleEmojiClick = (params) => {
     console.log('🚀 ~ handleEmojiClick ~ params:', params);
     setUserInputText(userInputText + params.emoji);
@@ -217,7 +214,6 @@ function Chats() {
   });
 
   const handleSendImage = async (e) => {
-    
     console.log('🚀 ~ handleSendImage ~ e:32rknfkefneor', e.target.files['0']);
     if (e.target.files['0'].size > 10000000) {
       alert('File size should be less than 10MB');
@@ -252,6 +248,7 @@ function Chats() {
   };
   const handleSendPdfFiles = async (e) => {
     console.log('🚀 ~ handleSendImage ~ e:34543543543534', e.target.files['0']);
+
     if (e.target.files['0'].size > 10000000) {
       alert('File size should be less than 10MB');
 
@@ -272,18 +269,23 @@ function Chats() {
     handleSendPdfModal(URL.createObjectURL(e.target.files['0']));
   };
   const handleSendMessage = async () => {
+    debugger;
+    console.log('audioblock', audioBlob);
+    console.log('videoblock', audioURL);
     if (
       !userInputText &&
       !imgToSend.file &&
       !videoToSend.file &&
-      !pdfFileToSend.file
+      !pdfFileToSend.file &&
+      !audioURL
     ) {
-      alert('Please enter a message or select an image to send');
+      alert('Please enter a valid item to send');
       return;
     }
     setIsSendImageModalOpen(false);
     setIsSendVideoModalOpen(false);
     setIsSendPdfModalOpen(false);
+    setIsSendVoiceModalOpen(false);
     setIsSending(true);
     const interval = setInterval(() => {
       setIsInvert((prev) => !prev);
@@ -291,7 +293,7 @@ function Chats() {
     let imgUrl = '';
     let videoUrl = '';
     let pdfUrl = '';
-
+    let audioUploadUrl = '';
     if (imgToSend.file) {
       imgUrl = await uploadData(imgToSend.file);
       console.log('🚀 ~ handleSendMessage ~ imgUrl:', imgUrl);
@@ -304,6 +306,10 @@ function Chats() {
       pdfUrl = await uploadData(pdfFileToSend.file);
       console.log('🚀 ~ handleSendMessage ~ pdfUrl:', pdfUrl);
     }
+    if (audioURL) {
+      audioUploadUrl = await uploadData(audioBlob.audioBlob);
+      console.log('🚀 ~ handleSendMessage ~ audioUploadUrl:', audioUploadUrl);
+    }
     try {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
       // adding chat in the current user's chat list
@@ -313,6 +319,8 @@ function Chats() {
           receiverId: currentOpenedUser.id,
           image: imgUrl,
           video: videoUrl,
+          audioURL: audioUploadUrl,
+          audioFileName: audioBlob.audioFileName,
           pdf: pdfUrl,
           fileName: pdfFileToSend?.fileName,
           isUserMessage: true,
@@ -356,6 +364,8 @@ function Chats() {
             receiverId: currentOpenedUser.id,
             image: imgUrl,
             video: videoUrl,
+            audioURL: audioUploadUrl,
+            audioFileName: audioBlob.audioFileName,
             pdf: pdfUrl,
             fileName: pdfFileToSend?.fileName,
             isUserMessage: false,
@@ -385,7 +395,7 @@ function Chats() {
       imgUrl = '';
       videoUrl = '';
       pdfUrl = '';
-
+      audioUploadUrl = '';
       setImgToSend({
         file: '',
         url: '',
@@ -398,6 +408,11 @@ function Chats() {
         file: '',
         url: '',
         fileName: '',
+      });
+      setAudioURL('');
+      setAudioBlob({
+        audioBlob: null,
+        audioFileName: '',
       });
     }
   };
@@ -447,6 +462,13 @@ function Chats() {
       url: '',
     });
   };
+
+  const handleCancelAudioRecording = () => {
+    mediaRecorder.current.stop();
+    setIsRecording(false);
+    setIsSendVoiceModalOpen(false);
+  };
+
   const handleSendImageModal = (url) => {
     setSelectedImage(url);
     setIsSendImageModalOpen(true);
@@ -459,6 +481,43 @@ function Chats() {
   const handleSendPdfModal = (url) => {
     setSelectedPdfFile(url);
     setIsSendPdfModalOpen(true);
+  };
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState('');
+  const [audioBlob, setAudioBlob] = useState({
+    audioBlob: null,
+    audioFileName: '',
+  });
+  const mediaRecorder = useRef(null);
+  const audioChunks = useRef([]);
+  const handleMicrophoneClick = () => {
+    setIsSendVoiceModalOpen(true);
+  };
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder.current = new MediaRecorder(stream);
+
+    mediaRecorder.current.ondataavailable = (event) => {
+      audioChunks.current.push(event.data);
+    };
+    mediaRecorder.current.onstop = () => {
+      const blob = new Blob(audioChunks.current, { type: 'audio/wav' });
+      setAudioBlob({
+        audioBlob: blob,
+        audioFileName: new Date().toISOString(),
+      });
+      setAudioURL(URL.createObjectURL(blob));
+      audioChunks.current = [];
+    };
+    mediaRecorder.current.start();
+    setIsRecording(true);
+  };
+
+  const stopRecording = () => {
+    mediaRecorder.current.stop();
+    setIsRecording(false);
   };
   return (
     <>
@@ -624,6 +683,53 @@ function Chats() {
               </div>
             </div>
           </Modal>
+          <Modal
+            isOpen={isSendVoiceModalOpen}
+            onRequestClose={handleCancelAudioRecording}
+            contentLabel='Record Voice Message'
+            ariaHideApp={false}
+            style={customStyles}
+          >
+            <h2 className='text-lg font-semibold mb-4 relative p-3'>
+              Record Voice Message
+            </h2>
+            <div className='flex flex-col items-center relative p-3'>
+              {isRecording ? (
+                <button
+                  className='bg-red-500 text-white px-4 py-2 rounded-2xl cursor-pointer relative'
+                  onClick={stopRecording}
+                >
+                  Stop Recording
+                </button>
+              ) : (
+                <button
+                  className='bg-green-500 text-white px-4 py-2 cursor-pointer relative rounded-2xl'
+                  onClick={startRecording}
+                >
+                  Start Recording
+                </button>
+              )}
+              {audioURL && (
+                <div className='mt-4 flex flex-col items-center'>
+                  <span className='text-sm font-semibold mb-2'>
+                    Recorded Audio:
+                  </span>
+                  <div className='w-full max-w-sm p-4 border rounded-lg shadow-md bg-gray-50'>
+                    <audio controls src={audioURL} className='w-full mb-2' />
+                    <span className='text-xs text-gray-600'>
+                      file name: {audioBlob.audioFileName}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div
+                className='bg-emerald-950 text-white px-6 py-1 text-center rounded-2xl cursor-pointer mt-2'
+                onClick={handleSendMessage}
+              >
+                Send
+              </div>
+            </div>
+          </Modal>
           <div
             className={
               isUserDetailsVisible
@@ -721,6 +827,20 @@ function Chats() {
                           {message.message}
                         </p>
                       )}
+                      {message?.audioURL && (
+                        <div className='mt-4 flex flex-col items-center w-96'>
+                          <div className='w-full max-w-sm p-4 border rounded-lg shadow-md bg-gray-50'>
+                            <audio
+                              controls
+                              src={message.audioURL}
+                              className='w-full mb-2'
+                            />
+                            <span className='text-xs text-gray-600'>
+                              file name: {message.audioFileName}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       {message?.video && (
                         <video width='600' controls>
                           <source src={message.video} type='video/mp4' />
@@ -729,7 +849,6 @@ function Chats() {
                       )}
                       {message?.image && (
                         <div className='flex flex-col gap-[2px]'>
-                         
                           <img
                             title='Image in chats'
                             src={message.image}
@@ -737,7 +856,7 @@ function Chats() {
                             onClick={() => handleViewImage(message.image)}
                             alt='image in chats'
                           />
-                           <div className='self-center'>
+                          <div className='self-center'>
                             <a
                               href={message?.image}
                               download={message?.image}
@@ -755,7 +874,6 @@ function Chats() {
                       )}
                       {message?.pdf && (
                         <div className='flex flex-col gap-[2px]'>
-                         
                           <div className='pdf-preview-container p-4 border rounded-lg shadow-md bg-white max-w-3xl mx-auto my-4 cursor-pointer'>
                             <div className='pdf-preview-header mb-4'>
                               <h2 className='text-lg font-semibold text-gray-800'>
@@ -776,7 +894,6 @@ function Chats() {
                               href={message?.pdf}
                               download={message?.fileName}
                               target='_blank'
-
                               className='text-blue-500 hover:underline'
                             >
                               <img
@@ -784,12 +901,11 @@ function Chats() {
                                 alt=''
                                 className='w-5 h-5'
                               />
-                            </a> 
+                            </a>
                           </div>
                         </div>
-                        
                       )}
-                     <span className='text-white text-[12px] ml-3'>
+                      <span className='text-white text-[12px] ml-3'>
                         {message.time}
                       </span>
                     </div>
@@ -800,7 +916,7 @@ function Chats() {
               <div ref={showLatestMessage}></div>
             </div>
 
-            <div className='UserInputInChatsWindow flex items-center bg-green-950 rounded-full px-2 h-14  box-border w-[98%] absolute bottom-2  '>
+            <div className='UserInputInChatsWindow flex items-center bg-green-950 rounded-full px-2 h-14  box-border w-[95%] absolute bottom-2  '>
               <input
                 type='text'
                 value={userInputText}
@@ -808,48 +924,38 @@ function Chats() {
                 className='w-[70%] rounded-full pl-4 text-black h-9 text-lg'
                 placeholder='Your Intel goes here...'
               />
-              <div title='More' className='MoreButton invert'>
+
+              <div title='microphone' className='Microphone invert'>
                 <img
-                  src={menuIcon}
-                  className='w-9 h-9 mx-2 cursor-pointer'
-                  alt='More'
-                  onClick={toggleOptions}
+                  src={microphoneIcon}
+                  className='w-7 h-7 mx-2 cursor-pointer'
+                  alt='microphone'
+                  onClick={handleMicrophoneClick}
                 />
               </div>
-              {showOptions && (
-                <div className='options flex items-center'>
-                  <div title='microphone' className='Microphone invert'>
-                    <img
-                      src={microphoneIcon}
-                      className='w-7 h-7 mx-2 cursor-pointer'
-                      alt='microphone'
-                    />
-                  </div>
-                  <div title='Documents' className='DocumentOption invert'>
-                    <label htmlFor='file'>
-                      <img
-                        src={documentsIcon}
-                        className='w-7 h-7 mx-1 cursor-pointer'
-                        alt='Documents'
-                      />
-                    </label>
-                    <input
-                      type='file'
-                      id='file'
-                      className='hidden'
-                      onChange={handleSendPdfFiles}
-                    />
-                  </div>
+              <div title='Documents' className='DocumentOption invert'>
+                <label htmlFor='file'>
+                  <img
+                    src={documentsIcon}
+                    className='w-7 h-7 mx-1 cursor-pointer'
+                    alt='Documents'
+                  />
+                </label>
+                <input
+                  type='file'
+                  id='file'
+                  className='hidden'
+                  onChange={handleSendPdfFiles}
+                />
+              </div>
 
-                  <div title='Camera' className='Camera invert'>
-                    <img
-                      src={CameraIcon}
-                      className='w-7 h-7 mx-2 cursor-pointer'
-                      alt='Camera'
-                    />
-                  </div>
-                </div>
-              )}
+              <div title='Camera' className='Camera invert hidden'>
+                <img
+                  src={CameraIcon}
+                  className='w-7 h-7 mx-2 cursor-pointer'
+                  alt='Camera'
+                />
+              </div>
               <div ref={emojiPickerRef} title='emojis' className='emojisOption'>
                 <img
                   src={emojisIcon}
