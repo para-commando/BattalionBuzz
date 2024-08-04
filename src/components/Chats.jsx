@@ -269,9 +269,7 @@ function Chats() {
     handleSendPdfModal(URL.createObjectURL(e.target.files['0']));
   };
   const handleSendMessage = async () => {
-    debugger;
-    console.log('audioblock', audioBlob);
-    console.log('videoblock', audioURL);
+    
     if (
       !userInputText &&
       !imgToSend.file &&
@@ -916,7 +914,7 @@ function Chats() {
               <div ref={showLatestMessage}></div>
             </div>
 
-            <div className='UserInputInChatsWindow flex items-center bg-green-950 rounded-full px-2 h-14  box-border w-[95%] absolute bottom-2  '>
+            <div className='UserInputInChatsWindow flex justify-between items-center bg-green-950 rounded-full px-2 h-14  box-border w-[95%] absolute bottom-2  '>
               <input
                 type='text'
                 value={userInputText}
@@ -924,86 +922,83 @@ function Chats() {
                 className='w-[70%] rounded-full pl-4 text-black h-9 text-lg'
                 placeholder='Your Intel goes here...'
               />
-
-              <div title='microphone' className='Microphone invert'>
-                <img
-                  src={microphoneIcon}
-                  className='w-7 h-7 mx-2 cursor-pointer'
-                  alt='microphone'
-                  onClick={handleMicrophoneClick}
-                />
-              </div>
-              <div title='Documents' className='DocumentOption invert'>
-                <label htmlFor='file'>
+              <div className='flex items-center gap-5 mr-2'>
+                <div title='microphone' className='Microphone invert'>
                   <img
-                    src={documentsIcon}
-                    className='w-7 h-7 mx-1 cursor-pointer'
-                    alt='Documents'
-                  />
-                </label>
-                <input
-                  type='file'
-                  id='file'
-                  className='hidden'
-                  onChange={handleSendPdfFiles}
-                />
-              </div>
-
-              <div title='Camera' className='Camera invert hidden'>
-                <img
-                  src={CameraIcon}
-                  className='w-7 h-7 mx-2 cursor-pointer'
-                  alt='Camera'
-                />
-              </div>
-              <div ref={emojiPickerRef} title='emojis' className='emojisOption'>
-                <img
-                  src={emojisIcon}
-                  className='w-9 h-9 mx-1 cursor-pointer'
-                  alt='emojis'
-                  onClick={() => {
-                    setShowEmojiPicker(!showEmojiPicker);
-                  }}
-                />
-
-                <div className=' absolute bottom-16 right-0'>
-                  {showEmojiPicker && (
-                    <EmojiPicker
-                      height={400}
-                      width={400}
-                      onEmojiClick={handleEmojiClick}
-                      // onEmojiSelect={handleEmojiClick}
-                    />
-                  )}
-                </div>
-              </div>
-              <div title='Media' className='Media invert'>
-                <label htmlFor='mediaFile'>
-                  <img
-                    src={mediaIcon}
+                    src={microphoneIcon}
                     className='w-7 h-7 mx-2 cursor-pointer'
-                    alt='Media'
+                    alt='microphone'
+                    onClick={handleMicrophoneClick}
                   />
-                </label>
-                <input
-                  type='file'
-                  id='mediaFile'
-                  className='hidden'
-                  onChange={handleSendImage}
-                />
-              </div>
-              <div
-                title='Send'
-                className='SendButton'
-                onClick={handleSendMessage}
-              >
-                <img
-                  src={sendIntelIcon}
-                  className={`w-9 h-9 mx-2 cursor-pointer ${
-                    isInvert ? 'invert' : ''
-                  }`}
-                  alt='Send'
-                />
+                </div>
+                <div title='Documents' className='DocumentOption invert'>
+                  <label htmlFor='file'>
+                    <img
+                      src={documentsIcon}
+                      className='w-7 h-7 mx-1 cursor-pointer'
+                      alt='Documents'
+                    />
+                  </label>
+                  <input
+                    type='file'
+                    id='file'
+                    className='hidden'
+                    onChange={handleSendPdfFiles}
+                  />
+                </div>
+                <div
+                  ref={emojiPickerRef}
+                  title='emojis'
+                  className='emojisOption'
+                >
+                  <img
+                    src={emojisIcon}
+                    className='w-9 h-9 mx-1 cursor-pointer'
+                    alt='emojis'
+                    onClick={() => {
+                      setShowEmojiPicker(!showEmojiPicker);
+                    }}
+                  />
+
+                  <div className=' absolute bottom-16 right-0'>
+                    {showEmojiPicker && (
+                      <EmojiPicker
+                        height={400}
+                        width={400}
+                        onEmojiClick={handleEmojiClick}
+                        // onEmojiSelect={handleEmojiClick}
+                      />
+                    )}
+                  </div>
+                </div>
+                <div title='Media' className='Media invert'>
+                  <label htmlFor='mediaFile'>
+                    <img
+                      src={mediaIcon}
+                      className='w-7 h-7 mx-2 cursor-pointer'
+                      alt='Media'
+                    />
+                  </label>
+                  <input
+                    type='file'
+                    id='mediaFile'
+                    className='hidden'
+                    onChange={handleSendImage}
+                  />
+                </div>
+                <div
+                  title='Send'
+                  className='SendButton'
+                  onClick={!isSending ? handleSendMessage : undefined}
+                >
+                  <img
+                    src={sendIntelIcon}
+                    className={`w-9 h-9 mx-2 cursor-pointer ${
+                      isInvert ? 'invert' : ''
+                    }`}
+                    alt='Send'
+                  />
+                </div>
               </div>
             </div>
           </div>
