@@ -34,6 +34,9 @@ import {
 import { uploadData } from '../lib/upload.js';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
+import {
+  setSharedChatData,
+} from '../redux/reducers/userAuth.js';
 const customStyles = {
   content: {
     top: '50%',
@@ -132,6 +135,7 @@ function Chats() {
   const userData = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
+
   useEffect(() => {
     showLatestMessage?.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
@@ -269,7 +273,6 @@ function Chats() {
     handleSendPdfModal(URL.createObjectURL(e.target.files['0']));
   };
   const handleSendMessage = async () => {
-    
     if (
       !userInputText &&
       !imgToSend.file &&
@@ -731,8 +734,8 @@ function Chats() {
           <div
             className={
               isUserDetailsVisible
-                ? 'border-r-2 border-l-2 min-w-[78%] max-w-[60%] px-2 relative flex flex-col items-center'
-                : 'border-r-2 border-l-2 min-w-[95%] max-w-[70%] px-2 relative flex flex-col items-center'
+                ? 'border-r-2 border-l-2 min-w-[73%] max-w-[80%] px-2 relative flex flex-col items-center'
+                : 'border-r-2 border-l-2 min-w-[95%] max-w-[100%] px-2 relative flex flex-col items-center'
             }
           >
             <div className='flex w-full justify-between border-b-2 pb-4 relative'>
@@ -794,6 +797,9 @@ function Chats() {
                   '🚀 ~ {messages.map ~ messagepppppppppppppppddddddffff:',
                   message?.pdf
                 );
+
+                dispatch(setSharedChatData(message));
+
                 return (
                   <div
                     key={index}
