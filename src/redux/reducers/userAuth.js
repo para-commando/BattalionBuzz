@@ -4,8 +4,6 @@ import { db } from '../../lib/firebase';
 export const loginUser = createAsyncThunk(
   'userAuth/loginUser',
   async (data) => {
- 
-
     return {
       data: {
         name: 'Major Vihaan',
@@ -109,6 +107,10 @@ export const userAuthReducers = createSlice({
     valueIsSubmitting: false,
     valueCurrentUser: {},
     valueScreenLoading: true,
+    sharedImages: [],
+    sharedVideos: [],
+    sharedAudios: [],
+    sharedDocuments: [],
   },
   reducers: {
     isUserNew: (state, action) => {
@@ -126,7 +128,33 @@ export const userAuthReducers = createSlice({
     setScreenLoading: (state, action) => {
       state.valueScreenLoading = action.payload;
     },
+    setSharedChatData: (state, action) => {
+      
+     
+  if(action.payload.shouldItClear) { 
+    state.sharedVideos=[];
+    state.sharedAudios=[];
+    state.sharedImages=[];
+    state.sharedDocuments=[];
+    return;
+  }
+  action.payload.items.map(({ video=null, audioURL=null, image=null, pdf=null, fileName=null,audioFileName=null }) => {
+    if (video) {
+        state.sharedVideos.push(video);
+      }
+      if (audioURL) {
+        state.sharedAudios.push({ audioURL, audioFileName });
+      }
+      if (image) {
+        state.sharedImages.push(image);
+      }
+      if (pdf) {
+        state.sharedDocuments.push({ pdf, fileName });
+      }
+    })
   },
+},
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchUserDetails.pending, (state) => {
@@ -137,14 +165,13 @@ export const userAuthReducers = createSlice({
         if (action.payload.data.id) {
           state.valueUserData = action.payload.data;
           state.valueIsUserValidated = true;
-        }
-        else{
+        } else {
           state.valueUserData = {};
           state.valueIsUserValidated = false;
         }
         state.valueIsSubmitting = false;
         state.valueScreenLoading = false;
-            })
+      })
       .addCase(fetchUserDetails.rejected, (state) => {
         debugger;
         console.log('promise rejected in fetchUserDetails');
@@ -164,5 +191,6 @@ export const {
   isUserValidated,
   isUserSubmitting,
   currentLoggedInUser,
+  setSharedChatData,
 } = userAuthReducers.actions;
 export default userAuthReducers.reducer;

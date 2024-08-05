@@ -2,18 +2,39 @@ import React, { useState, useRef } from 'react';
 import avatarIcon from '../assets/avatarIcon.png';
 import toggleViewIcon from '../assets/unfold.png';
 import { useSelector, useDispatch } from 'react-redux';
+import documentsIcon from '../assets/docs.png';
+import microphoneIcon from '../assets/microphone.png';
 
 import showImageInChatIcon from '../assets/eye.png';
 
 function Details() {
   const [toggleImgListDetailsSection, setToggleImgListDetailsSection] =
     useState(false);
+  const [toggleVideosListDetailsSection, setToggleVideosListDetailsSection] =
+    useState(false);
+  const [
+    toggleDocumentsListDetailsSection,
+    setToggleDocumentsListDetailsSection,
+  ] = useState(false);
+  const [toggleAudioListDetailsSection, setToggleAudioListDetailsSection] =
+    useState(false);
   const [isNotRadioSilenced, setIsNotRadioSilenced] = useState(true);
   const currentOpenedUser = useSelector((state) => {
     return state.toggleViewReducersExport.currentOpenedUser;
   });
-  const sharedMediaListDetails = useRef(null);
   const radioSilenceRef = useRef(null);
+  const sharedVideosList = useSelector((state) => {
+    return state.userAuthReducerExport.sharedVideos;
+  });
+  const sharedAudiosList = useSelector((state) => {
+    return state.userAuthReducerExport.sharedAudios;
+  });
+  const sharedImagesList = useSelector((state) => {
+    return state.userAuthReducerExport.sharedImages;
+  });
+  const sharedDocumentsList = useSelector((state) => {
+    return state.userAuthReducerExport.sharedDocuments;
+  });
   const sharedMediaList = [
     {
       imgLink:
@@ -90,7 +111,7 @@ function Details() {
   return (
     <>
       {isUserDetailsVisible && (
-        <div className=' min-w-[20%] max-w-[20%] relative'>
+        <div className=' min-w-[27%] max-w-[30%] relative'>
           <div className='flex flex-col items-center gap-3  mx-2 border-b-2 justify-center  '>
             <img
               src={currentOpenedUser.imgUrl}
@@ -98,7 +119,9 @@ function Details() {
               alt=''
             />
             <div className='flex flex-col gap-1 justify-center items-center w-full mb-3'>
-              <h2 className='font-bold text-xl'>{currentOpenedUser.callSign}</h2>
+              <h2 className='font-bold text-xl'>
+                {currentOpenedUser.callSign}
+              </h2>
               <p className='text-[12px] text-center'>
                 {currentOpenedUser.regiment}
               </p>
@@ -108,19 +131,68 @@ function Details() {
           <div className='options pt-3 mx-1 overflow-y-auto h-[470px] w-full'>
             <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
               <div className='title flex justify-between items-center'>
-                <span className='text-lg'>Chat settings</span>
+                <span className='text-lg'>Shared Docs</span>
                 <img
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''
+                  onClick={(e) =>
+                    setToggleDocumentsListDetailsSection(
+                      !toggleDocumentsListDetailsSection
+                    )
+                  }
                 />
               </div>
             </div>
+            {toggleDocumentsListDetailsSection && (
+              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+                {sharedDocumentsList.map((item, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
+                    >
+                      <img src={documentsIcon} className='w-6 h-6  ' alt='' />
+                      <span className='text-[14px]'>{item.fileName}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
               <div className='title flex justify-between items-center'>
-                <span className='text-lg'>Shared Media</span>
+                <span className='text-lg'>Shared Audios</span>
                 <img
-                  ref={sharedMediaListDetails}
+                  src={toggleViewIcon}
+                  className='invert w-6 h-6 mx-2 cursor-pointer'
+                  alt=''
+                  onClick={(e) =>
+                    setToggleAudioListDetailsSection(
+                      !toggleAudioListDetailsSection
+                    )
+                  }
+                />
+              </div>
+            </div>
+            {toggleAudioListDetailsSection && (
+              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+                {sharedAudiosList.map((item, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
+                    >
+                      <img src={microphoneIcon} className='w-6 h-6  ' alt='' />
+                      <span className='text-[14px]'>{item.audioFileName}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
+              <div className='title flex justify-between items-center'>
+                <span className='text-lg'>Shared Images</span>
+                <img
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''
@@ -133,18 +205,18 @@ function Details() {
 
             {toggleImgListDetailsSection && (
               <div className=' ml-4 photos overflow-y-auto h-[200px]'>
-                {sharedMediaList.map((item, index) => {
+                {sharedImagesList.map((item, index) => {
                   return (
                     <div
                       key={index}
                       className='photoItem flex items-center gap-2 mb-2'
                     >
                       <img
-                        src={item.imgLink}
+                        src={item.image}
                         className='w-6 h-6 rounded-full'
                         alt=''
                       />
-                      <span className='text-[14px]'>{item.imgName}</span>
+                      <span className='text-[14px]'>{'item.imgName'}</span>
                       <img
                         src={showImageInChatIcon}
                         className='w-5 h-5 ml-8 cursor-pointer '
@@ -157,14 +229,43 @@ function Details() {
             )}
             <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
               <div className='title flex justify-between items-center'>
-                <span className='text-lg'>Shared Docs</span>
+                <span className='text-lg'>Shared Videos</span>
                 <img
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''
+                  onClick={(e) =>
+                    setToggleVideosListDetailsSection(
+                      !toggleVideosListDetailsSection
+                    )
+                  }
                 />
               </div>
             </div>
+            {toggleVideosListDetailsSection && (
+              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+                {sharedVideosList.map((item, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className='photoItem flex items-center gap-2 mb-2'
+                    >
+                      <img
+                        src={item.video}
+                        className='w-6 h-6 rounded-full'
+                        alt=''
+                      />
+                      <span className='text-[14px]'>{'item.videoName'}</span>
+                      <img
+                        src={showImageInChatIcon}
+                        className='w-5 h-5 ml-8 cursor-pointer '
+                        alt=''
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
           {/* <div
             ref={radioSilenceRef}
