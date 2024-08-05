@@ -173,6 +173,8 @@ function Chats() {
         doc(db, 'chats', userChatId.chatId),
         (res) => {
           const items = res.data().messages;
+          dispatch(setSharedChatData({items:[],shouldItClear:true}));
+          dispatch(setSharedChatData({items,shouldItClear:false}));
           setMessages(items);
         }
       );
@@ -797,8 +799,6 @@ function Chats() {
                   '🚀 ~ {messages.map ~ messagepppppppppppppppddddddffff:',
                   message?.pdf
                 );
-
-                dispatch(setSharedChatData(message));
 
                 return (
                   <div

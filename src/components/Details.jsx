@@ -3,6 +3,7 @@ import avatarIcon from '../assets/avatarIcon.png';
 import toggleViewIcon from '../assets/unfold.png';
 import { useSelector, useDispatch } from 'react-redux';
 import documentsIcon from '../assets/docs.png';
+import microphoneIcon from '../assets/microphone.png';
 
 import showImageInChatIcon from '../assets/eye.png';
 
@@ -21,7 +22,7 @@ function Details() {
   const currentOpenedUser = useSelector((state) => {
     return state.toggleViewReducersExport.currentOpenedUser;
   });
-   const radioSilenceRef = useRef(null);
+  const radioSilenceRef = useRef(null);
   const sharedVideosList = useSelector((state) => {
     return state.userAuthReducerExport.sharedVideos;
   });
@@ -151,13 +152,38 @@ function Details() {
                       key={index}
                       className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
                     >
-                      <img
-                        src={documentsIcon}
-                        className='w-6 h-6  '
-                        alt=''
-                      />
+                      <img src={documentsIcon} className='w-6 h-6  ' alt='' />
                       <span className='text-[14px]'>{item.fileName}</span>
-                   
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
+              <div className='title flex justify-between items-center'>
+                <span className='text-lg'>Shared Audios</span>
+                <img
+                  src={toggleViewIcon}
+                  className='invert w-6 h-6 mx-2 cursor-pointer'
+                  alt=''
+                  onClick={(e) =>
+                    setToggleAudioListDetailsSection(
+                      !toggleAudioListDetailsSection
+                    )
+                  }
+                />
+              </div>
+            </div>
+            {toggleAudioListDetailsSection && (
+              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+                {sharedAudiosList.map((item, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
+                    >
+                      <img src={microphoneIcon} className='w-6 h-6  ' alt='' />
+                      <span className='text-[14px]'>{item.audioFileName}</span>
                     </div>
                   );
                 })}
@@ -167,7 +193,6 @@ function Details() {
               <div className='title flex justify-between items-center'>
                 <span className='text-lg'>Shared Images</span>
                 <img
-                 
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''

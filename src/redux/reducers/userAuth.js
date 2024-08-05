@@ -129,16 +129,17 @@ export const userAuthReducers = createSlice({
       state.valueScreenLoading = action.payload;
     },
     setSharedChatData: (state, action) => {
-      const {
-        video = null,
-        audioURL = null,
-        audioFileName = null,
-        image = null,
-        pdf = null,
-        fileName = null,
-      } = action.payload;
+      
      
-      if (video) {
+  if(action.payload.shouldItClear) { 
+    state.sharedVideos=[];
+    state.sharedAudios=[];
+    state.sharedImages=[];
+    state.sharedDocuments=[];
+    return;
+  }
+  action.payload.items.map(({ video=null, audioURL=null, image=null, pdf=null, fileName=null,audioFileName=null }) => {
+    if (video) {
         state.sharedVideos.push(video);
       }
       if (audioURL) {
@@ -150,9 +151,10 @@ export const userAuthReducers = createSlice({
       if (pdf) {
         state.sharedDocuments.push({ pdf, fileName });
       }
-    },
-    
+    })
   },
+},
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchUserDetails.pending, (state) => {
