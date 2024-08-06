@@ -1,0 +1,5 @@
+replace the eye icon with download icon
+add modals to view them
+add option to delete the sent media, for self as well as for both
+forward option to existing and new users
+group chat

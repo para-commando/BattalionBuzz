@@ -241,6 +241,7 @@ function Chats() {
       setImgToSend({
         file: e.target.files['0'],
         url: URL.createObjectURL(e.target.files['0']),
+        name: e.target.files['0'].name
       });
       handleSendImageModal(URL.createObjectURL(e.target.files['0']));
     }
@@ -248,6 +249,7 @@ function Chats() {
       setVideoToSend({
         file: e.target.files['0'],
         url: URL.createObjectURL(e.target.files['0']),
+        name: e.target.files['0'].name
       });
       handleSendVideoModal(URL.createObjectURL(e.target.files['0']));
     }
@@ -321,7 +323,9 @@ function Chats() {
           senderId: userData.id,
           receiverId: currentOpenedUser.id,
           image: imgUrl,
+          imageName: imgToSend?.name,
           video: videoUrl,
+          videoName: videoToSend?.name,
           audioURL: audioUploadUrl,
           audioFileName: audioBlob.audioFileName,
           pdf: pdfUrl,
@@ -366,7 +370,9 @@ function Chats() {
             senderId: userData.id,
             receiverId: currentOpenedUser.id,
             image: imgUrl,
+            imageName: imgToSend?.name,
             video: videoUrl,
+            videoName: videoToSend?.name,
             audioURL: audioUploadUrl,
             audioFileName: audioBlob.audioFileName,
             pdf: pdfUrl,
@@ -402,10 +408,12 @@ function Chats() {
       setImgToSend({
         file: '',
         url: '',
+        name:''
       });
       setVideoToSend({
         file: '',
         url: '',
+        name:''
       });
       setPdfFileToSend({
         file: '',
@@ -445,6 +453,7 @@ function Chats() {
     setImgToSend({
       file: '',
       url: '',
+      name:''
     });
   };
   const handleCancelVideoSending = () => {
@@ -453,6 +462,7 @@ function Chats() {
     setVideoToSend({
       file: '',
       url: '',
+      name:''
     });
   };
   const handleCancelPdfSending = () => {
