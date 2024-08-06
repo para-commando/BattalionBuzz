@@ -4,8 +4,9 @@ import toggleViewIcon from '../assets/unfold.png';
 import { useSelector, useDispatch } from 'react-redux';
 import documentsIcon from '../assets/docs.png';
 import microphoneIcon from '../assets/microphone.png';
-
+import videoIcon from '../assets/video.png';
 import showImageInChatIcon from '../assets/eye.png';
+import downloadIcon from '../assets/download.png';
 
 function Details() {
   const [toggleImgListDetailsSection, setToggleImgListDetailsSection] =
@@ -35,63 +36,7 @@ function Details() {
   const sharedDocumentsList = useSelector((state) => {
     return state.userAuthReducerExport.sharedDocuments;
   });
-  const sharedMediaList = [
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-    {
-      imgLink:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80',
-      imgName: 'Photo_2024_2.png',
-    },
-  ];
+
   const radioSilenceChat = (params) => {
     if (isNotRadioSilenced) {
       alert('Radio silenced...');
@@ -145,15 +90,15 @@ function Details() {
               </div>
             </div>
             {toggleDocumentsListDetailsSection && (
-              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+              <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedDocumentsList.map((item, index) => {
                   return (
                     <div
                       key={index}
-                      className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
+                      className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72 cursor-pointer'
                     >
                       <img src={documentsIcon} className='w-6 h-6  ' alt='' />
-                      <span className='text-[14px]'>{item.fileName}</span>
+                      <span className='text-[12px]'>{item.fileName}</span>
                     </div>
                   );
                 })}
@@ -175,7 +120,7 @@ function Details() {
               </div>
             </div>
             {toggleAudioListDetailsSection && (
-              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+              <div className=' ml-4 photos overflow-y-auto max-h-[200px] cursor-pointer'>
                 {sharedAudiosList.map((item, index) => {
                   return (
                     <div
@@ -183,7 +128,9 @@ function Details() {
                       className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
                     >
                       <img src={microphoneIcon} className='w-6 h-6  ' alt='' />
-                      <span className='text-[14px]'>{item.audioFileName}</span>
+                      <span className='text-[14px] break-words '>
+                        {item.audioFileName || 'untitled'}
+                      </span>
                     </div>
                   );
                 })}
@@ -204,24 +151,21 @@ function Details() {
             </div>
 
             {toggleImgListDetailsSection && (
-              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+              <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedImagesList.map((item, index) => {
                   return (
                     <div
                       key={index}
-                      className='photoItem flex items-center gap-2 mb-2'
+                      className='photoItem flex items-center gap-8 mb-2 w-72 cursor-pointer'
                     >
                       <img
                         src={item.image}
-                        className='w-6 h-6 rounded-full'
+                        className='w-8 h-8 rounded-full object-cover'
                         alt=''
                       />
-                      <span className='text-[14px]'>{'item.imgName'}</span>
-                      <img
-                        src={showImageInChatIcon}
-                        className='w-5 h-5 ml-8 cursor-pointer '
-                        alt=''
-                      />
+                      <span className='text-[14px]'>
+                        {item?.imageName || 'untitled'}
+                      </span>
                     </div>
                   );
                 })}
@@ -243,24 +187,21 @@ function Details() {
               </div>
             </div>
             {toggleVideosListDetailsSection && (
-              <div className=' ml-4 photos overflow-y-auto h-[200px]'>
+              <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedVideosList.map((item, index) => {
                   return (
                     <div
                       key={index}
-                      className='photoItem flex items-center gap-2 mb-2'
+                      className='photoItem flex items-center gap-2 mb-2 cursor-pointer'
                     >
                       <img
-                        src={item.video}
+                        src={videoIcon}
                         className='w-6 h-6 rounded-full'
                         alt=''
                       />
-                      <span className='text-[14px]'>{'item.videoName'}</span>
-                      <img
-                        src={showImageInChatIcon}
-                        className='w-5 h-5 ml-8 cursor-pointer '
-                        alt=''
-                      />
+                      <span className='text-[14px]'>
+                        {item.videoName || 'untitled'}
+                      </span>
                     </div>
                   );
                 })}

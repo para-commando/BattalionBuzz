@@ -129,31 +129,40 @@ export const userAuthReducers = createSlice({
       state.valueScreenLoading = action.payload;
     },
     setSharedChatData: (state, action) => {
-      
-     
-  if(action.payload.shouldItClear) { 
-    state.sharedVideos=[];
-    state.sharedAudios=[];
-    state.sharedImages=[];
-    state.sharedDocuments=[];
-    return;
-  }
-  action.payload.items.map(({ video=null, audioURL=null, image=null, pdf=null, fileName=null,audioFileName=null }) => {
-    if (video) {
-        state.sharedVideos.push(video);
+      if (action.payload.shouldItClear) {
+        state.sharedVideos = [];
+        state.sharedAudios = [];
+        state.sharedImages = [];
+        state.sharedDocuments = [];
+        return;
       }
-      if (audioURL) {
-        state.sharedAudios.push({ audioURL, audioFileName });
-      }
-      if (image) {
-        state.sharedImages.push(image);
-      }
-      if (pdf) {
-        state.sharedDocuments.push({ pdf, fileName });
-      }
-    })
+      action.payload.items.map(
+        ({
+          video = null,
+          audioURL = null,
+          image = null,
+          pdf = null,
+          fileName = null,
+          audioFileName = null,
+          imageName = null,
+          videoName=null
+        }) => {
+          if (video) {
+            state.sharedVideos.push({video,videoName});
+          }
+          if (audioURL) {
+            state.sharedAudios.push({ audioURL, audioFileName });
+          }
+          if (image) {
+            state.sharedImages.push({image,imageName});
+          }
+          if (pdf) {
+            state.sharedDocuments.push({ pdf, fileName });
+          }
+        }
+      );
+    },
   },
-},
 
   extraReducers: (builder) => {
     builder
