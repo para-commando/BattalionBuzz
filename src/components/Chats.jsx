@@ -13,6 +13,7 @@ import microphoneIcon from '../assets/microphone.png';
 import backButton from '../assets/back-button.png';
 import closeButton from '../assets/close.png';
 import downloadIcon from '../assets/download.png';
+import deleteIcon from '../assets/delete.png';
 import EmojiPicker from 'emoji-picker-react';
 import {
   isDetailsVisible,
@@ -21,6 +22,8 @@ import {
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../lib/firebase';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
   arrayRemove,
   arrayUnion,
@@ -34,9 +37,7 @@ import {
 import { uploadData } from '../lib/upload.js';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
-import {
-  setSharedChatData,
-} from '../redux/reducers/userAuth.js';
+import { setSharedChatData } from '../redux/reducers/userAuth.js';
 const customStyles = {
   content: {
     top: '50%',
@@ -173,8 +174,8 @@ function Chats() {
         doc(db, 'chats', userChatId.chatId),
         (res) => {
           const items = res.data().messages;
-          dispatch(setSharedChatData({items:[],shouldItClear:true}));
-          dispatch(setSharedChatData({items,shouldItClear:false}));
+          dispatch(setSharedChatData({ items: [], shouldItClear: true }));
+          dispatch(setSharedChatData({ items, shouldItClear: false }));
           setMessages(items);
         }
       );
@@ -241,7 +242,7 @@ function Chats() {
       setImgToSend({
         file: e.target.files['0'],
         url: URL.createObjectURL(e.target.files['0']),
-        name: e.target.files['0'].name
+        name: e.target.files['0'].name,
       });
       handleSendImageModal(URL.createObjectURL(e.target.files['0']));
     }
@@ -249,7 +250,7 @@ function Chats() {
       setVideoToSend({
         file: e.target.files['0'],
         url: URL.createObjectURL(e.target.files['0']),
-        name: e.target.files['0'].name
+        name: e.target.files['0'].name,
       });
       handleSendVideoModal(URL.createObjectURL(e.target.files['0']));
     }
@@ -287,6 +288,7 @@ function Chats() {
       alert('Please enter a valid item to send');
       return;
     }
+    const uniqueId = uuidv4();
     setIsSendImageModalOpen(false);
     setIsSendVideoModalOpen(false);
     setIsSendPdfModalOpen(false);
@@ -320,19 +322,22 @@ function Chats() {
       // adding chat in the current user's chat list
       await updateDoc(doc(db, 'chats', openedChatId), {
         messages: arrayUnion({
+          mId: uniqueId,
           senderId: userData.id,
           receiverId: currentOpenedUser.id,
-          image: imgUrl,
-          imageName: imgToSend?.name,
-          video: videoUrl,
-          videoName: videoToSend?.name,
-          audioURL: audioUploadUrl,
-          audioFileName: audioBlob.audioFileName,
-          pdf: pdfUrl,
-          fileName: pdfFileToSend?.fileName,
+          image: imgUrl ? imgUrl : '',
+          imageName: imgToSend?.name ? imgToSend?.name : '',
+          video: videoUrl ? videoUrl : '',
+          videoName: videoToSend?.name ? videoToSend?.name : '',
+          audioURL: audioUploadUrl ? audioUploadUrl : '',
+          audioFileName: audioBlob.audioFileName ? audioBlob.audioFileName : '',
+          pdf: pdfUrl ? pdfUrl : '',
+          fileName: pdfFileToSend?.fileName ? pdfFileToSend?.fileName : '',
           isUserMessage: true,
-          username: currentOpenedUser.callSign,
-          message: userInputText,
+          username: currentOpenedUser.callSign
+            ? currentOpenedUser.callSign
+            : '',
+          message: userInputText ? userInputText : '',
           time: formatChatTime(new Date()),
           updatedAt: Date.now(),
           hasSentMessage: true,
@@ -367,19 +372,24 @@ function Chats() {
         // adding chat in the receiver's chat list
         updateDoc(doc(db, 'chats', matchedChat.chatId), {
           messages: arrayUnion({
+            mId: uniqueId,
             senderId: userData.id,
             receiverId: currentOpenedUser.id,
-            image: imgUrl,
-            imageName: imgToSend?.name,
-            video: videoUrl,
-            videoName: videoToSend?.name,
-            audioURL: audioUploadUrl,
-            audioFileName: audioBlob.audioFileName,
-            pdf: pdfUrl,
-            fileName: pdfFileToSend?.fileName,
+            image: imgUrl ? imgUrl : '',
+            imageName: imgToSend?.name ? imgToSend?.name : '',
+            video: videoUrl ? videoUrl : '',
+            videoName: videoToSend?.name ? videoToSend?.name : '',
+            audioURL: audioUploadUrl ? audioUploadUrl : '',
+            audioFileName: audioBlob.audioFileName
+              ? audioBlob.audioFileName
+              : '',
+            pdf: pdfUrl ? pdfUrl : '',
+            fileName: pdfFileToSend?.fileName ? pdfFileToSend?.fileName : '',
             isUserMessage: false,
-            username: currentOpenedUser.callSign,
-            message: userInputText,
+            username: currentOpenedUser.callSign
+              ? currentOpenedUser.callSign
+              : '',
+            message: userInputText ? userInputText : '',
             time: formatChatTime(new Date()),
             updatedAt: Date.now(),
             hasSentMessage: true,
@@ -408,12 +418,12 @@ function Chats() {
       setImgToSend({
         file: '',
         url: '',
-        name:''
+        name: '',
       });
       setVideoToSend({
         file: '',
         url: '',
-        name:''
+        name: '',
       });
       setPdfFileToSend({
         file: '',
@@ -453,7 +463,7 @@ function Chats() {
     setImgToSend({
       file: '',
       url: '',
-      name:''
+      name: '',
     });
   };
   const handleCancelVideoSending = () => {
@@ -462,7 +472,7 @@ function Chats() {
     setVideoToSend({
       file: '',
       url: '',
-      name:''
+      name: '',
     });
   };
   const handleCancelPdfSending = () => {
@@ -504,6 +514,92 @@ function Chats() {
   });
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
+  const handleDeleteMessage = async (mId) => {
+    debugger;
+    try {
+     // updating in the receiver's chat list for the sender's data
+
+      const chatMessages = collection(db, 'chatMessages');
+      const docRef = doc(chatMessages, currentOpenedUser.id);
+      // gets the chats list for the current opened user with whom we are texting (updating the data in the receiver's chat list of the sender)
+      const openedUsersListOfChats = await getDoc(docRef);
+
+      if (!openedUsersListOfChats.exists()) {
+        console.log(`receiver's chat doesn't exist`);
+        return;
+      }
+
+      const chatsArray = openedUsersListOfChats.data().chats || [];
+      // finding the matched chat for the current logged in user in the list of the receiver's chats list
+      const sendersChat = chatsArray.find(
+        (chat) => chat.receiverId === userData.id
+      );
+
+      if (!sendersChat) {
+        console.log(
+          `Sender's chat was not found in the receiver's chat list`
+        );
+        return;
+      }
+
+      // updating in the sender's chat list for the receiver's data
+      const chatMessages22 = collection(db, 'chats');
+      const docRef22 = doc(chatMessages22, openedChatId);
+      const docSnap22 = await getDoc(docRef22);
+
+      if (!docSnap22.exists()) {
+        console.log(`receiver's chat doesn't exist in the sender's list of chats`);
+        return;
+      }
+
+      const chatsArray22 = docSnap22.data().messages || [];
+
+      const docRef33 = doc(chatMessages22, sendersChat.chatId);
+      const docSnap33 = await getDoc(docRef33);
+
+      if (!docSnap33.exists()) {
+        console.log('No messages found in the receiver chat window for the current sender');
+        return;
+      }
+
+      const chatsArray33 = docSnap33.data().messages || [];
+
+      const matchedSenderMessage = chatsArray22.find(
+        (chat) => chat.mId === mId
+      );
+      const matchedReceiverMessage = chatsArray33.find(
+        (chat) => chat.mId === mId
+      );
+
+      if (!matchedSenderMessage && !matchedReceiverMessage) {
+        console.log('No messages found with the provided message ID');
+        return;
+      }
+
+      if (matchedSenderMessage) {
+        // deleting the specific message sent by sender from the receiver's chat
+        await updateDoc(doc(db, 'chats', openedChatId), {
+          messages: arrayRemove(matchedSenderMessage),
+        });
+        console.log('Sender message deleted successfully');
+      } else {
+        console.log('Sender message not found');
+      }
+
+      if (matchedReceiverMessage) {
+        // deleting the specific message received by receiver from the sender's chat
+        await updateDoc(doc(db, 'chats', sendersChat.chatId), {
+          messages: arrayRemove(matchedReceiverMessage),
+        });
+        console.log('Receiver message deleted successfully');
+      } else {
+        console.log('Receiver message not found');
+      }
+    } catch (error) {
+      console.log('🚀 ~ handleDeleteMessage ~ error:', error);
+      debugger;
+    }
+  };
   const handleMicrophoneClick = () => {
     setIsSendVoiceModalOpen(true);
   };
@@ -807,7 +903,7 @@ function Chats() {
               {messages.map((message, index) => {
                 console.log(
                   '🚀 ~ {messages.map ~ messagepppppppppppppppddddddffff:',
-                  message?.pdf
+                  message
                 );
 
                 return (
@@ -831,15 +927,17 @@ function Chats() {
                     />
                     <div className='texts flex flex-col justify-start'>
                       {message?.message && (
-                        <p
-                          className={
-                            message.isUserMessage
-                              ? 'bg-green-950 text-white rounded-3xl p-2 break-words'
-                              : 'bg-green-800 text-white rounded-3xl p-2 break-words'
-                          }
-                        >
-                          {message.message}
-                        </p>
+                        <div>
+                          <p
+                            className={
+                              message.isUserMessage
+                                ? 'bg-green-950 text-white rounded-3xl p-2 break-words'
+                                : 'bg-green-800 text-white rounded-3xl p-2 break-words'
+                            }
+                          >
+                            {message.message}
+                          </p>
+                        </div>
                       )}
                       {message?.audioURL && (
                         <div className='mt-4 flex flex-col items-center w-96'>
@@ -903,7 +1001,7 @@ function Chats() {
                               </span>
                             </div>
                           </div>
-                          <div className='self-center'>
+                          <div className=' '>
                             <a
                               href={message?.pdf}
                               download={message?.fileName}
@@ -919,9 +1017,17 @@ function Chats() {
                           </div>
                         </div>
                       )}
-                      <span className='text-white text-[12px] ml-3'>
-                        {message.time}
-                      </span>
+                      <div className='flex gap-7'>
+                        <span className='text-white text-[12px] ml-3'>
+                          {message.time}
+                        </span>
+                        <img
+                          src={deleteIcon}
+                          alt=''
+                          className='w-5 h-5 cursor-pointer'
+                          onClick={() => handleDeleteMessage(message.mId)}
+                        />
+                      </div>
                     </div>
                   </div>
                 );

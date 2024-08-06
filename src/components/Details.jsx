@@ -6,6 +6,7 @@ import documentsIcon from '../assets/docs.png';
 import microphoneIcon from '../assets/microphone.png';
 import videoIcon from '../assets/video.png';
 import showImageInChatIcon from '../assets/eye.png';
+import downloadIcon from '../assets/download.png';
 
 function Details() {
   const [toggleImgListDetailsSection, setToggleImgListDetailsSection] =
@@ -127,7 +128,9 @@ function Details() {
                       className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
                     >
                       <img src={microphoneIcon} className='w-6 h-6  ' alt='' />
-                      <span className='text-[14px] break-words '>{item.audioFileName || 'untitled'}</span>
+                      <span className='text-[14px] break-words '>
+                        {item.audioFileName || 'untitled'}
+                      </span>
                     </div>
                   );
                 })}
@@ -163,11 +166,6 @@ function Details() {
                       <span className='text-[14px]'>
                         {item?.imageName || 'untitled'}
                       </span>
-                      <img
-                        src={showImageInChatIcon}
-                        className='w-5 h-5 ml-6 cursor-pointer '
-                        alt=''
-                      />
                     </div>
                   );
                 })}
@@ -201,12 +199,9 @@ function Details() {
                         className='w-6 h-6 rounded-full'
                         alt=''
                       />
-                      <span className='text-[14px]'>{item.videoName || 'untitled'}</span>
-                      <img
-                        src={showImageInChatIcon}
-                        className='w-5 h-5 ml-8 cursor-pointer '
-                        alt=''
-                      />
+                      <span className='text-[14px]'>
+                        {item.videoName || 'untitled'}
+                      </span>
                     </div>
                   );
                 })}
