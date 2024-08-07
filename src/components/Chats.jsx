@@ -117,6 +117,8 @@ function Chats() {
   const [isSendVideoModalOpen, setIsSendVideoModalOpen] = useState(false);
   const [isSendPdfModalOpen, setIsSendPdfModalOpen] = useState(false);
   const [isSendVoiceModalOpen, setIsSendVoiceModalOpen] = useState(false);
+  const [isDeleteMessageModalOpen, setIsDeleteMessageModalOpen] =
+    useState(false);
 
   const [selectedImage, setSelectedImage] = useState('');
   const [selectedVideo, setSelectedVideo] = useState('');
@@ -344,6 +346,8 @@ function Chats() {
           isSeen: false,
         }),
       });
+      setUserInputText('');
+
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, currentOpenedUser.id);
       console.log(
@@ -398,8 +402,6 @@ function Chats() {
         });
 
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
-
-        setUserInputText('');
       } else {
         console.log(
           'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'
@@ -408,6 +410,7 @@ function Chats() {
     } catch (error) {
       debugger;
     } finally {
+      setUserInputText('');
       clearInterval(interval);
       setIsSending(false);
       setIsInvert(false);
@@ -475,6 +478,11 @@ function Chats() {
       name: '',
     });
   };
+  const handleDeleteMessageForSelf = () => {};
+  const handleDeleteMessageForBoth = () => {};
+  const handleCloseDeleteMessageModal = () => {
+    setIsDeleteMessageModalOpen(false);
+  };
   const handleCancelPdfSending = () => {
     setIsSendPdfModalOpen(false);
     setSelectedPdfFile('');
@@ -515,9 +523,8 @@ function Chats() {
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
   const handleDeleteMessage = async (mId) => {
-    debugger;
     try {
-     // updating in the receiver's chat list for the sender's data
+      // updating in the receiver's chat list for the sender's data
 
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, currentOpenedUser.id);
@@ -536,9 +543,7 @@ function Chats() {
       );
 
       if (!sendersChat) {
-        console.log(
-          `Sender's chat was not found in the receiver's chat list`
-        );
+        console.log(`Sender's chat was not found in the receiver's chat list`);
         return;
       }
 
@@ -548,7 +553,9 @@ function Chats() {
       const docSnap22 = await getDoc(docRef22);
 
       if (!docSnap22.exists()) {
-        console.log(`receiver's chat doesn't exist in the sender's list of chats`);
+        console.log(
+          `receiver's chat doesn't exist in the sender's list of chats`
+        );
         return;
       }
 
@@ -558,7 +565,9 @@ function Chats() {
       const docSnap33 = await getDoc(docRef33);
 
       if (!docSnap33.exists()) {
-        console.log('No messages found in the receiver chat window for the current sender');
+        console.log(
+          'No messages found in the receiver chat window for the current sender'
+        );
         return;
       }
 
@@ -627,6 +636,10 @@ function Chats() {
   const stopRecording = () => {
     mediaRecorder.current.stop();
     setIsRecording(false);
+  };
+  const handleDeleteMessageModal = (mId) => {
+    setIsDeleteMessageModalOpen(true);
+    //  handleDeleteMessage(mId);
   };
   return (
     <>
@@ -839,6 +852,40 @@ function Chats() {
               </div>
             </div>
           </Modal>
+          <Modal
+            isOpen={isDeleteMessageModalOpen}
+            onRequestClose={handleCloseDeleteMessageModal}
+            style={customStyles}
+            contentLabel='Delete message Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001] w-72'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCloseDeleteMessageModal}
+              />
+
+              <div
+                title='Send'
+                className='SendButton flex justify-between border-4 border-black h-12'
+              >
+                <span
+                  className='bg-red-500 px-10 pt-2 text-[10px] text-center w-1/2 cursor-pointer'
+                  onClick={handleDeleteMessageForSelf}
+                >
+                  Delete For Self
+                </span>
+                <span
+                  className='bg-green-400 px-10 pt-2 text-[10px] text-center cursor-pointer'
+                  onClick={handleDeleteMessageForBoth}
+                >
+                  Delete for both
+                </span>
+              </div>
+            </div>
+          </Modal>
           <div
             className={
               isUserDetailsVisible
@@ -1025,7 +1072,7 @@ function Chats() {
                           src={deleteIcon}
                           alt=''
                           className='w-5 h-5 cursor-pointer'
-                          onClick={() => handleDeleteMessage(message.mId)}
+                          onClick={() => handleDeleteMessageModal(message.mId)}
                         />
                       </div>
                     </div>
