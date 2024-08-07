@@ -21,40 +21,52 @@ function ChatList() {
   );
 
   useEffect(() => {
+    if (!user || !user.id) {
+      console.log('User ID is not available yet.');
+      return;
+    }
+
     // listener for any changes on the specified document in the given collection
     const latestChats = onSnapshot(
       doc(db, 'chatMessages', user.id),
       async (res) => {
         // obtained the chat data
-        const items = res.data().chats;
-        console.log('🚀 ~ items:', items);
-        const promises = items.map(async (item) => {
-          console.log('🚀 ~ promises ~ item:', item);
-          const userDocRef = doc(db, 'users', item.receiverId);
-          const userDocSnap = await getDoc(userDocRef);
-          const user = userDocSnap.data();
-          user.hasSentMessage = item.hasSentMessage;
-          user.updatedAt = item.updatedAt;
-          return user;
-        });
-        let chatData = await Promise.all(promises);
-        console.log('🚀 ~ latestChats ~ chatData:', chatData);
-        chatData = chatData.sort((a, b) => {
-          if (a.hasSentMessage === b.hasSentMessage) {
-            return b.updatedAt - a.updatedAt; // Sort by updatedAt if hasSentMessage is the same
-          }
-          return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
-        });
-        console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
-        setChats(chatData);
-        setFilteredUserChats(chatData);
+
+        if (res && res.data()) {
+          const items = res.data().chats;
+          console.log('🚀 ~ items:', items);
+          const promises = items.map(async (item) => {
+            console.log('🚀 ~ promises ~ item:', item);
+            if (item.receiverId) {
+              const userDocRef = doc(db, 'users', item.receiverId);
+              const userDocSnap = await getDoc(userDocRef);
+              const user = userDocSnap.data();
+              user.hasSentMessage = item.hasSentMessage;
+              user.updatedAt = item.updatedAt;
+              return user;
+            }
+          });
+          let chatData = await Promise.all(promises);
+          console.log('🚀 ~ latestChats ~ chatData:', chatData);
+          chatData = chatData.sort((a, b) => {
+            if (a.hasSentMessage === b.hasSentMessage) {
+              return b.updatedAt - a.updatedAt; // Sort by updatedAt if hasSentMessage is the same
+            }
+            return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
+          });
+          console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
+          setChats(chatData);
+          setFilteredUserChats(chatData);
+        } else {
+          console.log('user chats are loading, please wait...');
+        }
       }
     );
 
     return () => {
       latestChats();
     };
-  }, []);
+  }, [user?.id]);
 
   const dispatch = useDispatch();
   const handleSearch = async (e) => {

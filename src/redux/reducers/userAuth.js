@@ -78,23 +78,28 @@ export const fetchUserDetails = createAsyncThunk(
   'userAuth/fetchUserDetails',
   async (data) => {
     return new Promise(async (resolve, reject) => {
-      if (!data || !data.uid) {
-        resolve({
-          data: { id: '' },
-        });
-      }
-      const docRef = doc(db, 'users', data.uid);
-      const docSnap = await getDoc(docRef);
-      console.log('🚀 ~ returnnewPromise ~ docSnap:', docSnap);
-      if (docSnap.exists()) {
-        resolve({
-          data: docSnap.data(),
-        });
-      } else {
-        reject({
-          msg: 'no data found',
-        });
-      }
+     try {
+       if (!data || !data?.uid) {
+        return resolve({
+           data: { id: '' },
+         });
+       }
+         
+       const docRef = doc(db, 'users', data.uid);
+       const docSnap = await getDoc(docRef);
+       console.log('🚀 ~ returnnewPromise ~ docSnap:', docSnap);
+       if (docSnap.exists()) {
+       return  resolve({
+           data: docSnap.data(),
+         });
+       } else {
+       return  reject({
+           msg: 'no data found',
+         });
+       }
+     } catch (error) {
+      debugger
+     }
     });
   }
 );
