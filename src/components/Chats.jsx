@@ -100,6 +100,7 @@ function Chats() {
   const [imgToSend, setImgToSend] = useState({
     file: '',
     url: '',
+    name: '',
   });
   const [videoToSend, setVideoToSend] = useState({
     file: '',
@@ -112,6 +113,7 @@ function Chats() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [messageIdToDelete, setMessageIdToDelete] = useState('false');
 
   const [isSendImageModalOpen, setIsSendImageModalOpen] = useState(false);
   const [isSendVideoModalOpen, setIsSendVideoModalOpen] = useState(false);
@@ -478,10 +480,107 @@ function Chats() {
       name: '',
     });
   };
-  const handleDeleteMessageForSelf = () => {};
-  const handleDeleteMessageForBoth = () => {};
+
+  const deleteMessageInReceiversChat = async (mId) => {
+    const chatMessages = collection(db, 'chatMessages');
+    const docRef = doc(chatMessages, currentOpenedUser.id);
+    const openedUsersListOfChats = await getDoc(docRef);
+
+    if (!openedUsersListOfChats.exists()) {
+      console.log(`Receiver's chat doesn't exist`);
+      return;
+    }
+
+    const chatsArray = openedUsersListOfChats.data().chats || [];
+    const sendersChat = chatsArray.find(
+      (chat) => chat.receiverId === userData.id
+    );
+
+    if (!sendersChat) {
+      console.log(`Sender's chat was not found in the receiver's chat list`);
+      return;
+    }
+
+    const docRef33 = doc(db, 'chats', sendersChat.chatId);
+    const docSnap33 = await getDoc(docRef33);
+
+    if (!docSnap33.exists()) {
+      console.log(
+        'No messages found in the receiver chat window for the current sender'
+      );
+      return;
+    }
+
+    const chatsArray33 = docSnap33.data().messages || [];
+    const matchedReceiverMessage = chatsArray33.find(
+      (chat) => chat.mId === mId
+    );
+
+    if (matchedReceiverMessage) {
+      await updateDoc(docRef33, {
+        messages: arrayRemove(matchedReceiverMessage),
+      });
+      console.log(
+        'Receiver message deleted successfully from sender’s chat list'
+      );
+    } else {
+      console.log('Receiver message not found in sender’s chat list');
+    }
+  };
+
+  // Step 2: Delete the message from the receiver's chat list (i.e., the receiver's view of the chat with the current user)
+  const deleteMessageInSendersChat = async (mId) => {
+    const chatMessages22 = collection(db, 'chats');
+    const docRef22 = doc(chatMessages22, openedChatId);
+    const docSnap22 = await getDoc(docRef22);
+
+    if (!docSnap22.exists()) {
+      console.log(
+        `Receiver's chat doesn't exist in the sender's list of chats`
+      );
+      return;
+    }
+
+    const chatsArray22 = docSnap22.data().messages || [];
+    const matchedSenderMessage = chatsArray22.find((chat) => chat.mId === mId);
+
+    if (matchedSenderMessage) {
+      await updateDoc(docRef22, {
+        messages: arrayRemove(matchedSenderMessage),
+      });
+      console.log(
+        'Sender message deleted successfully from receiver’s chat list'
+      );
+    } else {
+      console.log('Sender message not found in receiver’s chat list');
+    }
+    return;
+  };
+  const handleDeleteMessageForSelf = async () => {
+    try {
+      await deleteMessageInSendersChat(messageIdToDelete);
+    } catch (error) {
+      alert('something went wrong, please try again');
+    } finally {
+      setIsDeleteMessageModalOpen(false);
+      setMessageIdToDelete('');
+    }
+  };
+  const handleDeleteMessageForBoth = async () => {
+    try {
+      await deleteMessageInReceiversChat(messageIdToDelete);
+      await deleteMessageInSendersChat(messageIdToDelete);
+    } catch (error) {
+      alert('something went wrong, please try again');
+    } finally {
+      setIsDeleteMessageModalOpen(false);
+      setMessageIdToDelete('');
+    }
+  };
+
   const handleCloseDeleteMessageModal = () => {
     setIsDeleteMessageModalOpen(false);
+    setMessageIdToDelete('');
   };
   const handleCancelPdfSending = () => {
     setIsSendPdfModalOpen(false);
@@ -522,93 +621,7 @@ function Chats() {
   });
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
-  const handleDeleteMessage = async (mId) => {
-    try {
-      // updating in the receiver's chat list for the sender's data
 
-      const chatMessages = collection(db, 'chatMessages');
-      const docRef = doc(chatMessages, currentOpenedUser.id);
-      // gets the chats list for the current opened user with whom we are texting (updating the data in the receiver's chat list of the sender)
-      const openedUsersListOfChats = await getDoc(docRef);
-
-      if (!openedUsersListOfChats.exists()) {
-        console.log(`receiver's chat doesn't exist`);
-        return;
-      }
-
-      const chatsArray = openedUsersListOfChats.data().chats || [];
-      // finding the matched chat for the current logged in user in the list of the receiver's chats list
-      const sendersChat = chatsArray.find(
-        (chat) => chat.receiverId === userData.id
-      );
-
-      if (!sendersChat) {
-        console.log(`Sender's chat was not found in the receiver's chat list`);
-        return;
-      }
-
-      // updating in the sender's chat list for the receiver's data
-      const chatMessages22 = collection(db, 'chats');
-      const docRef22 = doc(chatMessages22, openedChatId);
-      const docSnap22 = await getDoc(docRef22);
-
-      if (!docSnap22.exists()) {
-        console.log(
-          `receiver's chat doesn't exist in the sender's list of chats`
-        );
-        return;
-      }
-
-      const chatsArray22 = docSnap22.data().messages || [];
-
-      const docRef33 = doc(chatMessages22, sendersChat.chatId);
-      const docSnap33 = await getDoc(docRef33);
-
-      if (!docSnap33.exists()) {
-        console.log(
-          'No messages found in the receiver chat window for the current sender'
-        );
-        return;
-      }
-
-      const chatsArray33 = docSnap33.data().messages || [];
-
-      const matchedSenderMessage = chatsArray22.find(
-        (chat) => chat.mId === mId
-      );
-      const matchedReceiverMessage = chatsArray33.find(
-        (chat) => chat.mId === mId
-      );
-
-      if (!matchedSenderMessage && !matchedReceiverMessage) {
-        console.log('No messages found with the provided message ID');
-        return;
-      }
-
-      if (matchedSenderMessage) {
-        // deleting the specific message sent by sender from the receiver's chat
-        await updateDoc(doc(db, 'chats', openedChatId), {
-          messages: arrayRemove(matchedSenderMessage),
-        });
-        console.log('Sender message deleted successfully');
-      } else {
-        console.log('Sender message not found');
-      }
-
-      if (matchedReceiverMessage) {
-        // deleting the specific message received by receiver from the sender's chat
-        await updateDoc(doc(db, 'chats', sendersChat.chatId), {
-          messages: arrayRemove(matchedReceiverMessage),
-        });
-        console.log('Receiver message deleted successfully');
-      } else {
-        console.log('Receiver message not found');
-      }
-    } catch (error) {
-      console.log('🚀 ~ handleDeleteMessage ~ error:', error);
-      debugger;
-    }
-  };
   const handleMicrophoneClick = () => {
     setIsSendVoiceModalOpen(true);
   };
@@ -637,9 +650,9 @@ function Chats() {
     mediaRecorder.current.stop();
     setIsRecording(false);
   };
-  const handleDeleteMessageModal = (mId) => {
+  const handleDeleteMessageModal = async (mId) => {
     setIsDeleteMessageModalOpen(true);
-    //  handleDeleteMessage(mId);
+    setMessageIdToDelete(mId);
   };
   return (
     <>
@@ -1071,7 +1084,11 @@ function Chats() {
                         <img
                           src={deleteIcon}
                           alt=''
-                          className='w-5 h-5 cursor-pointer'
+                          className={
+                            message.isUserMessage
+                              ? 'w-5 h-5 cursor-pointer'
+                              : 'hidden'
+                          }
                           onClick={() => handleDeleteMessageModal(message.mId)}
                         />
                       </div>
