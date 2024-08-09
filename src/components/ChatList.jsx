@@ -9,8 +9,18 @@ import {
   isLandingPageVisible,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import {
+  arrayRemove,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import deleteIcon from '../assets/delete.png';
+
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
   const [chats, setChats] = useState([]);
@@ -83,6 +93,40 @@ function ChatList() {
       console.log('🚀 ~ handleSearch ~ error:', error);
     }
   };
+  const handleDeleteUser = async (userId) => {
+    try {
+      // loading the desired collection
+      const chatMessagesCollection = collection(db, 'chatMessages');
+      // selecting the document or row in the collection
+      const docSelectCondition = doc(chatMessagesCollection, user?.id);
+
+      const docResponse = await getDoc(docSelectCondition);
+
+      if (!docResponse.exists()) {
+        console.log(
+          `User with ID ${userId} does not exist in the chatMessages collection.`
+        );
+        return;
+      }
+
+      const userChatList = docResponse.data().chats || [];
+      const matchedUserChat = userChatList.find(
+        (chat) => chat.receiverId === userId
+      );
+      const matchedUserChatId = matchedUserChat?.chatId;
+      await updateDoc(docSelectCondition, {
+        chats: arrayRemove(matchedUserChat),
+      });
+      dispatch(currentOpenedUser(''));
+      // deleting the chat from the chats collection
+      const chatsCollection = collection(db, 'chats');
+      // selecting the document or row in the collection
+      const chatsDocSelectCondition = doc(chatsCollection, matchedUserChatId);
+        deleteDoc(chatsDocSelectCondition);
+    } catch (error) {
+      debugger;
+    }
+  };
   return (
     <>
       <div className='chatList h-[588px]  w-full px-2 overflow-y-auto'>
@@ -131,6 +175,19 @@ function ChatList() {
                     alt=''
                   />
                   <span className='text-lg ml-4'>{currUser.callSign}</span>
+                  <span className='absolute right-16'>
+                    <img
+                      title='delete user history'
+                      src={deleteIcon}
+                      alt=''
+                      className={'w-6 h-6 cursor-pointer ml-14'}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                       return handleDeleteUser(currUser.id);
+                      }}
+                    />
+                  </span>
+
                   {currUser.hasSentMessage ? (
                     <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
                   ) : (
