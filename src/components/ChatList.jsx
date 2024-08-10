@@ -7,6 +7,7 @@ import {
   isChatsVisible,
   currentOpenedUser,
   isLandingPageVisible,
+  setMessages
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -141,6 +142,8 @@ function ChatList() {
         chats: arrayRemove(matchedUserChat),
       });
       dispatch(currentOpenedUser(''));
+      dispatch(setMessages([]));
+
       // deleting the chat from the chats collection
       const chatsCollection = collection(db, 'chats');
       // selecting the document or row in the collection
