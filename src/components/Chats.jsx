@@ -19,6 +19,7 @@ import {
   isDetailsVisible,
   isChatsVisible,
   isLandingPageVisible,
+  setMessages,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import { db } from '../lib/firebase';
@@ -95,7 +96,9 @@ function Chats() {
   const [showOptions, setShowOptions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [userInputText, setUserInputText] = useState('');
-  const [messages, setMessages] = useState([]);
+  const messages = useSelector((state) => {
+    return state.toggleViewReducersExport.messages;
+  });
   const [openedChatId, setOpenedChatId] = useState('second');
   const [imgToSend, setImgToSend] = useState({
     file: '',
@@ -180,7 +183,7 @@ function Chats() {
           const items = res.data().messages;
           dispatch(setSharedChatData({ items: [], shouldItClear: true }));
           dispatch(setSharedChatData({ items, shouldItClear: false }));
-          setMessages(items);
+          dispatch(setMessages(items));
         }
       );
 
@@ -1107,6 +1110,11 @@ function Chats() {
                 onChange={(e) => setUserInputText(e.target.value)}
                 className='w-[70%] rounded-full pl-4 text-black h-9 text-lg'
                 placeholder='Your Intel goes here...'
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    !isSending && handleSendMessage();
+                  }
+                }}
               />
               <div className='flex items-center gap-5 mr-2'>
                 <div title='microphone' className='Microphone invert'>

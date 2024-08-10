@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import searchIcon from '../assets/search.png';
 import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
@@ -7,10 +7,21 @@ import {
   isChatsVisible,
   currentOpenedUser,
   isLandingPageVisible,
+  setMessages
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import {
+  arrayRemove,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import deleteIcon from '../assets/delete.png';
+
 function ChatList() {
   const [addUsersButtonDisplay, setAddUsersButtonDisplay] = useState(false);
   const [chats, setChats] = useState([]);
@@ -19,7 +30,22 @@ function ChatList() {
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
-
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside2, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside2, true);
+    };
+  }, []);
+  const addUsersRef = useRef(null);
+  const addUserComponentRef = useRef(null);
+  const handleClickOutside2 = (event) => {
+   
+    if (addUserComponentRef.current && !addUserComponentRef.current.contains(event.target)) {
+    
+      
+      setAddUsersButtonDisplay(false);
+    }
+  };
   useEffect(() => {
     if (!user || !user.id) {
       console.log('User ID is not available yet.');
@@ -83,6 +109,50 @@ function ChatList() {
       console.log('🚀 ~ handleSearch ~ error:', error);
     }
   };
+  const handleDeleteUser = async (userId) => {
+    try {
+      const userResponse = confirm(
+        'Are you sure you want to delete this user?'
+      );
+
+      if (!userResponse) {
+        // User clicked "OK" (Yes)
+        return;
+      }
+      // loading the desired collection
+      const chatMessagesCollection = collection(db, 'chatMessages');
+      // selecting the document or row in the collection
+      const docSelectCondition = doc(chatMessagesCollection, user?.id);
+
+      const docResponse = await getDoc(docSelectCondition);
+
+      if (!docResponse.exists()) {
+        console.log(
+          `User with ID ${userId} does not exist in the chatMessages collection.`
+        );
+        return;
+      }
+
+      const userChatList = docResponse.data().chats || [];
+      const matchedUserChat = userChatList.find(
+        (chat) => chat.receiverId === userId
+      );
+      const matchedUserChatId = matchedUserChat?.chatId;
+      await updateDoc(docSelectCondition, {
+        chats: arrayRemove(matchedUserChat),
+      });
+      dispatch(currentOpenedUser(''));
+      dispatch(setMessages([]));
+
+      // deleting the chat from the chats collection
+      const chatsCollection = collection(db, 'chats');
+      // selecting the document or row in the collection
+      const chatsDocSelectCondition = doc(chatsCollection, matchedUserChatId);
+      deleteDoc(chatsDocSelectCondition);
+    } catch (error) {
+      debugger;
+    }
+  };
   return (
     <>
       <div className='chatList h-[588px]  w-full px-2 overflow-y-auto'>
@@ -100,12 +170,31 @@ function ChatList() {
               onChange={(e) => handleSearch(e)}
             />
           </div>
-          <img
-            src={addUsersButtonDisplay ? disableAddUsersIcon : addUsersIcon}
-            className='w-7 h-7 mx-2 cursor-pointer '
-            alt='add users icon'
-            onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
-          />
+          <span>
+            {
+              // since default value will be false hence inversion of it is used
+              !addUsersButtonDisplay && (
+                <img
+                  ref={addUsersRef}
+                  src={addUsersIcon}
+                  className='w-7 h-7 mx-2 cursor-pointer '
+                  alt='add users icon'
+                  onClick={() =>
+                    setAddUsersButtonDisplay(true)
+                  }
+                />
+              )
+            }
+            {addUsersButtonDisplay && (
+              <img
+                ref={addUsersRef}
+                src={disableAddUsersIcon}
+                className='w-7 h-7 mx-2 cursor-pointer '
+                alt='add users icon'
+                onClick={() => setAddUsersButtonDisplay(false)}
+              />
+            )}
+          </span>
         </div>
         <div className='overflow-y-auto max-h-[85%] pb-5'>
           {filteredUserChats &&
@@ -131,6 +220,19 @@ function ChatList() {
                     alt=''
                   />
                   <span className='text-lg ml-4'>{currUser.callSign}</span>
+                  <span className='absolute right-16'>
+                    <img
+                      title='delete user history'
+                      src={deleteIcon}
+                      alt=''
+                      className={'w-6 h-6 cursor-pointer ml-14'}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        return handleDeleteUser(currUser.id);
+                      }}
+                    />
+                  </span>
+
                   {currUser.hasSentMessage ? (
                     <span className='bg-green-500 rounded-full w-4 h-4 ml-10 absolute right-6'></span>
                   ) : (
@@ -140,7 +242,11 @@ function ChatList() {
               );
             })}
         </div>
-        {addUsersButtonDisplay && <AddUser />}
+        {addUsersButtonDisplay && (
+          <div ref={addUserComponentRef}>
+            <AddUser />
+          </div>
+        )}
       </div>
     </>
   );
