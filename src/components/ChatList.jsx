@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import searchIcon from '../assets/search.png';
 import addUsersIcon from '../assets/addUsers.png';
 import disableAddUsersIcon from '../assets/remove.png';
@@ -29,7 +29,21 @@ function ChatList() {
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside2, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside2, true);
+    };
+  }, []);
+  const addUsersRef = useRef(null);
 
+  const handleClickOutside2 = (event) => {
+  
+    if (addUsersRef.current) {
+      setAddUsersButtonDisplay(false);
+    }
+   
+  };
   useEffect(() => {
     if (!user || !user.id) {
       console.log('User ID is not available yet.');
@@ -95,6 +109,14 @@ function ChatList() {
   };
   const handleDeleteUser = async (userId) => {
     try {
+      const userResponse = confirm(
+        'Are you sure you want to delete this user?'
+      );
+
+      if (!userResponse) {
+        // User clicked "OK" (Yes)
+        return;
+      }
       // loading the desired collection
       const chatMessagesCollection = collection(db, 'chatMessages');
       // selecting the document or row in the collection
@@ -122,7 +144,7 @@ function ChatList() {
       const chatsCollection = collection(db, 'chats');
       // selecting the document or row in the collection
       const chatsDocSelectCondition = doc(chatsCollection, matchedUserChatId);
-        deleteDoc(chatsDocSelectCondition);
+      deleteDoc(chatsDocSelectCondition);
     } catch (error) {
       debugger;
     }
@@ -144,12 +166,29 @@ function ChatList() {
               onChange={(e) => handleSearch(e)}
             />
           </div>
-          <img
-            src={addUsersButtonDisplay ? disableAddUsersIcon : addUsersIcon}
-            className='w-7 h-7 mx-2 cursor-pointer '
-            alt='add users icon'
-            onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
-          />
+          <span>
+           
+            {
+            // since default value will be false hence inversion of it is used 
+            !addUsersButtonDisplay && (
+              <img
+                ref={addUsersRef}
+                src={addUsersIcon}
+                className='w-7 h-7 mx-2 cursor-pointer '
+                alt='add users icon'
+                onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
+              />
+            )}
+            {addUsersButtonDisplay && (
+              <img
+                ref={addUsersRef}
+                src={disableAddUsersIcon}
+                className='w-7 h-7 mx-2 cursor-pointer '
+                alt='add users icon'
+                onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
+              />
+            )}
+          </span>
         </div>
         <div className='overflow-y-auto max-h-[85%] pb-5'>
           {filteredUserChats &&
@@ -183,7 +222,7 @@ function ChatList() {
                       className={'w-6 h-6 cursor-pointer ml-14'}
                       onClick={(event) => {
                         event.stopPropagation();
-                       return handleDeleteUser(currUser.id);
+                        return handleDeleteUser(currUser.id);
                       }}
                     />
                   </span>
