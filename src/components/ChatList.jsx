@@ -36,13 +36,14 @@ function ChatList() {
     };
   }, []);
   const addUsersRef = useRef(null);
-
+  const addUserComponentRef = useRef(null);
   const handleClickOutside2 = (event) => {
-  
-    if (addUsersRef.current) {
+   
+    if (addUserComponentRef.current && !addUserComponentRef.current.contains(event.target)) {
+    
+      
       setAddUsersButtonDisplay(false);
     }
-   
   };
   useEffect(() => {
     if (!user || !user.id) {
@@ -167,25 +168,27 @@ function ChatList() {
             />
           </div>
           <span>
-           
             {
-            // since default value will be false hence inversion of it is used 
-            !addUsersButtonDisplay && (
-              <img
-                ref={addUsersRef}
-                src={addUsersIcon}
-                className='w-7 h-7 mx-2 cursor-pointer '
-                alt='add users icon'
-                onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
-              />
-            )}
+              // since default value will be false hence inversion of it is used
+              !addUsersButtonDisplay && (
+                <img
+                  ref={addUsersRef}
+                  src={addUsersIcon}
+                  className='w-7 h-7 mx-2 cursor-pointer '
+                  alt='add users icon'
+                  onClick={() =>
+                    setAddUsersButtonDisplay(true)
+                  }
+                />
+              )
+            }
             {addUsersButtonDisplay && (
               <img
                 ref={addUsersRef}
                 src={disableAddUsersIcon}
                 className='w-7 h-7 mx-2 cursor-pointer '
                 alt='add users icon'
-                onClick={() => setAddUsersButtonDisplay(!addUsersButtonDisplay)}
+                onClick={() => setAddUsersButtonDisplay(false)}
               />
             )}
           </span>
@@ -236,7 +239,11 @@ function ChatList() {
               );
             })}
         </div>
-        {addUsersButtonDisplay && <AddUser />}
+        {addUsersButtonDisplay && (
+          <div ref={addUserComponentRef}>
+            <AddUser />
+          </div>
+        )}
       </div>
     </>
   );
