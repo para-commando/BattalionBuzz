@@ -14,6 +14,8 @@ import backButton from '../assets/back-button.png';
 import closeButton from '../assets/close.png';
 import downloadIcon from '../assets/download.png';
 import deleteIcon from '../assets/delete.png';
+import forwardMessageIcon from '../assets/forward.png';
+
 import EmojiPicker from 'emoji-picker-react';
 import {
   isDetailsVisible,
@@ -99,6 +101,9 @@ function Chats() {
   const messages = useSelector((state) => {
     return state.toggleViewReducersExport.messages;
   });
+  const usersList = useSelector(
+    (state) => state.userAuthReducerExport.allUserIds
+  );
   const [openedChatId, setOpenedChatId] = useState('second');
   const [imgToSend, setImgToSend] = useState({
     file: '',
@@ -124,7 +129,7 @@ function Chats() {
   const [isSendVoiceModalOpen, setIsSendVoiceModalOpen] = useState(false);
   const [isDeleteMessageModalOpen, setIsDeleteMessageModalOpen] =
     useState(false);
-
+  const [isForwardDataModalOpen, setIsForwardDataModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   const [selectedVideo, setSelectedVideo] = useState('');
   const [selectedPdfFile, setSelectedPdfFile] = useState('');
@@ -585,6 +590,11 @@ function Chats() {
     setIsDeleteMessageModalOpen(false);
     setMessageIdToDelete('');
   };
+
+  const handleCloseForwardDataModal = () => {
+    setIsForwardDataModalOpen(false);
+  };
+
   const handleCancelPdfSending = () => {
     setIsSendPdfModalOpen(false);
     setSelectedPdfFile('');
@@ -616,6 +626,9 @@ function Chats() {
     setIsSendPdfModalOpen(true);
   };
 
+  const handleForwardDataModal = (url) => {
+    setIsForwardDataModalOpen(true);
+  };
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState('');
   const [audioBlob, setAudioBlob] = useState({
@@ -902,6 +915,57 @@ function Chats() {
               </div>
             </div>
           </Modal>
+          <Modal
+            isOpen={isForwardDataModalOpen}
+            onRequestClose={handleCloseForwardDataModal}
+            style={customStyles}
+            contentLabel='Forward data Modal'
+            ariaHideApp={false}
+          >
+            <div className='relative z-[1001] w-72 h-auto'>
+              <img
+                src={closeButton}
+                alt='Back'
+                className='w-12 h-12 p-2 cursor-pointer'
+                onClick={handleCloseForwardDataModal}
+              />
+
+              <div
+                title='Send'
+                className='SendButton  justify-between border-4 border-black h-21 overflow-y-auto'
+              >
+                {usersList &&
+                  usersList.map((e) => {
+                    // Truncate the callSign if it exceeds the maximum length
+                    const truncatedCallSign =
+                      e.callSign.length > 15
+                        ? e.callSign.slice(0, 15) + '...'
+                        : e.callSign;
+
+                    return (
+                      <div
+                        key={e.id}
+                        className='user p-2 details flex gap-2 items-center justify-center'
+                        onClick={() =>  {}}
+                      >
+                        <img
+                          src={e.img}
+                          className='w-7 h-7 mx-2 rounded-full cursor-pointer object-cover object-top'
+                          alt=''
+                        />
+                        <span className='w-15'>{truncatedCallSign}</span>
+                        <img
+                          src={forwardMessageIcon}
+                          alt=''
+                          className={'w-5 h-5 cursor-pointer'}
+                          
+                        />
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </Modal>
           <div
             className={
               isUserDetailsVisible
@@ -1080,6 +1144,7 @@ function Chats() {
                           </div>
                         </div>
                       )}
+
                       <div className='flex gap-7'>
                         <span className='text-white text-[12px] ml-3'>
                           {message.time}
@@ -1093,6 +1158,16 @@ function Chats() {
                               : 'hidden'
                           }
                           onClick={() => handleDeleteMessageModal(message.mId)}
+                        />
+                        <img
+                          src={forwardMessageIcon}
+                          alt=''
+                          className={
+                            message.isUserMessage
+                              ? 'w-5 h-5 cursor-pointer'
+                              : 'hidden'
+                          }
+                          onClick={() => handleForwardDataModal(message)}
                         />
                       </div>
                     </div>

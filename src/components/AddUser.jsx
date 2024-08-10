@@ -23,10 +23,13 @@ function AddUser() {
   const userData = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
+  const usersList = useSelector(
+    (state) => state.userAuthReducerExport.allUserIds
+  );
   const addUser = async (currentUserDetails) => {
     try {
       const chatMessages = collection(db, 'chatMessages');
-
+     
       const chats = collection(db, 'chats');
       console.log('🚀 ~ addUser ~ chats:', chats);
       const newChatRef = doc(chats);
@@ -82,26 +85,23 @@ function AddUser() {
     try {
       e.preventDefault();
 
-      const formData = new FormData(e.id);
+      const formData = new FormData(e.target);
+      console.log("🚀 ~ handleSearch ~ formData:", formData)
       const username = formData.get('callSignAddUser');
-      const userRef = collection(db, 'users');
-      const queryMake = query(
-        userRef,
-        orderBy('callSign'),
-        startAt(username),
-        endAt(username + '\uf8ff')
-      );
+      console.log("🚀 ~ handleSearch ~ username:2344444444444444444", username)
+       
 
-      const querySnapshot = await getDocs(queryMake);
+      const querySnapshot = usersList;
 
       // Use a Set to ensure unique users
       const uniqueUsers = new Set(); // Convert existing users to string to use in Set
 
       querySnapshot.forEach((doc) => {
-        const docData = doc.data();
+       console.log("🚀 ~ querySnapshot.forEach ~ docsdddddddddddddddddd:", doc)
+       
        // not showing the current user in the add user list
-        if (docData.id !== userData.id) {
-          uniqueUsers.add(JSON.stringify(docData)); // Add new user data to the Set as string
+        if (doc.id !== userData.id && doc.callSign.includes(username) ) {
+          uniqueUsers.add(JSON.stringify(doc)); // Add new user data to the Set as string
         }
       });
 
@@ -144,8 +144,8 @@ function AddUser() {
                 className='user p-2 details flex gap-1 items-center justify-center'
               >
                 <img
-                  src={e.imgUrl}
-                  className='w-7 h-7 mx-2 rounded-full cursor-pointer'
+                  src={e.img}
+                  className='w-7 h-7 mx-2 rounded-full cursor-pointer object-cover object-top'
                   alt=''
                 />
                 <span className='w-15'>{truncatedCallSign}</span>

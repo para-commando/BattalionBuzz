@@ -9,8 +9,7 @@ import LandingPage from './components/LandingPage';
 import { useSelector, useDispatch } from 'react-redux';
 import { auth } from './lib/firebase';
 import {
-  isUserValidated,
-  currentLoggedInUser,
+  getAllUserIds,
   fetchUserDetails,
 } from './redux/reducers/userAuth';
 import turbine from './assets/turbine.gif';
@@ -32,6 +31,7 @@ function App() {
         // User is signed in, fetch and dispatch user details
         console.log('User signed in:', user);
         dispatch(fetchUserDetails(user));
+        dispatch(getAllUserIds());
       } else {
         // User is signed out, dispatch an action to handle this state
         console.log('User signed out or session expired');

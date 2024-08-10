@@ -7,7 +7,7 @@ import {
   isChatsVisible,
   currentOpenedUser,
   isLandingPageVisible,
-  setMessages
+  setMessages,
 } from '../redux/reducers/toggleViewReducers';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -36,13 +36,15 @@ function ChatList() {
       document.removeEventListener('click', handleClickOutside2, true);
     };
   }, []);
+ 
+  
   const addUsersRef = useRef(null);
   const addUserComponentRef = useRef(null);
   const handleClickOutside2 = (event) => {
-   
-    if (addUserComponentRef.current && !addUserComponentRef.current.contains(event.target)) {
-    
-      
+    if (
+      addUserComponentRef.current &&
+      !addUserComponentRef.current.contains(event.target)
+    ) {
       setAddUsersButtonDisplay(false);
     }
   };
@@ -179,9 +181,7 @@ function ChatList() {
                   src={addUsersIcon}
                   className='w-7 h-7 mx-2 cursor-pointer '
                   alt='add users icon'
-                  onClick={() =>
-                    setAddUsersButtonDisplay(true)
-                  }
+                  onClick={() => setAddUsersButtonDisplay(true)}
                 />
               )
             }
