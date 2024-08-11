@@ -26,10 +26,13 @@ function AddUser() {
   const usersList = useSelector(
     (state) => state.userAuthReducerExport.allUserIds
   );
+  const loggedInUsersChatList = useSelector(
+    (state) => state.userAuthReducerExport.currentUsersChatList
+  );
   const addUser = async (currentUserDetails) => {
     try {
       const chatMessages = collection(db, 'chatMessages');
-     
+
       const chats = collection(db, 'chats');
       console.log('🚀 ~ addUser ~ chats:', chats);
       const newChatRef = doc(chats);
@@ -76,6 +79,10 @@ function AddUser() {
           ],
         });
       }
+   
+      // adding new user in the redux reducer 
+      loggedInUsersChatList[currentUserDetails.id] = newChatRef.id;
+      dispatch(setCurrentUsersChatlist(loggedInUsersChatList));
     } catch (error) {
       debugger;
       console.log('🚀 ~ addUser ~ error:', error);
@@ -86,10 +93,9 @@ function AddUser() {
       e.preventDefault();
 
       const formData = new FormData(e.target);
-      console.log("🚀 ~ handleSearch ~ formData:", formData)
+      console.log('🚀 ~ handleSearch ~ formData:', formData);
       const username = formData.get('callSignAddUser');
-      console.log("🚀 ~ handleSearch ~ username:2344444444444444444", username)
-       
+      console.log('🚀 ~ handleSearch ~ username:2344444444444444444', username);
 
       const querySnapshot = usersList;
 
@@ -97,10 +103,13 @@ function AddUser() {
       const uniqueUsers = new Set(); // Convert existing users to string to use in Set
 
       querySnapshot.forEach((doc) => {
-       console.log("🚀 ~ querySnapshot.forEach ~ docsdddddddddddddddddd:", doc)
-       
-       // not showing the current user in the add user list
-        if (doc.id !== userData.id && doc.callSign.includes(username) ) {
+        console.log(
+          '🚀 ~ querySnapshot.forEach ~ docsdddddddddddddddddd:',
+          doc
+        );
+
+        // not showing the current user in the add user list
+        if (doc.id !== userData.id && doc.callSign.includes(username)) {
           uniqueUsers.add(JSON.stringify(doc)); // Add new user data to the Set as string
         }
       });
@@ -140,6 +149,7 @@ function AddUser() {
 
             return (
               <div
+                title={e.callSign}
                 key={e.id}
                 className='user p-2 details flex gap-1 items-center justify-center'
               >

@@ -7,12 +7,26 @@ export const getAllUserIds = createAsyncThunk(
     const querySnapshot = await getDocs(collection(db, 'users'));
 
     const docIds = querySnapshot.docs.map((doc) => {
-      console.log("🚀 ~ docIds ~ doc:", doc.data())
+      console.log('🚀 ~ docIds ~ doc:', doc.data());
 
-      return { id: doc.data().id, callSign: doc.data().callSign, img: doc.data().imgUrl };
+      return {
+        id: doc.data().id,
+        callSign: doc.data().callSign,
+        img: doc.data().imgUrl,
+      };
     });
     console.log('🚀 ~ returnnewPromise ~ documentIds:', docIds);
     return docIds;
+  }
+);
+export const getCurrentUsersChatList = createAsyncThunk(
+  'userAuth/getCurrentUsersChatList',
+  async (loggedInUserId) => {
+    const chatMessages = collection(db, 'chatMessages');
+    const docRef = doc(chatMessages, loggedInUserId);
+    const docSnap = await getDoc(docRef);
+    const chatsArray = docSnap.data() ? docSnap.data().chats : [];
+    return chatsArray;
   }
 );
 export const fetchUserDetails = createAsyncThunk(
@@ -58,6 +72,7 @@ export const userAuthReducers = createSlice({
     sharedAudios: [],
     sharedDocuments: [],
     allUserIds: [],
+    currentUsersChatList: [],
   },
   reducers: {
     isUserNew: (state, action) => {
@@ -109,6 +124,9 @@ export const userAuthReducers = createSlice({
         }
       );
     },
+    setCurrentUsersChatlist: (state, action) => {
+      state.currentUsersChatList = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
@@ -143,10 +161,26 @@ export const userAuthReducers = createSlice({
         console.log('🚀 ~ .addCase ~ state1:', state);
       })
       .addCase(getAllUserIds.fulfilled, (state, action) => {
-        debugger;
+        
+        // making sure the logged in user is not present in the list
+        action.payload = action.payload.filter((user) => user.id !== state.valueUserData.id);
         state.allUserIds = action.payload;
       })
       .addCase(getAllUserIds.rejected, (state) => {
+        debugger;
+      })
+      .addCase(getCurrentUsersChatList.pending, (state) => {
+        console.log('🚀 ~ .addCase ~ state1:', state);
+      })
+      .addCase(getCurrentUsersChatList.fulfilled, (state, action) => {
+        const obje = action.payload.reduce((accumulator, currentValue) => {
+          accumulator[currentValue.receiverId] = currentValue.chatId;
+          return accumulator;
+        },{});
+        
+        state.currentUsersChatList =obje;
+      })
+      .addCase(getCurrentUsersChatList.rejected, (state) => {
         debugger;
       });
   },
@@ -158,5 +192,6 @@ export const {
   isUserSubmitting,
   currentLoggedInUser,
   setSharedChatData,
+  setCurrentUsersChatlist
 } = userAuthReducers.actions;
 export default userAuthReducers.reducer;

@@ -11,6 +11,7 @@ import { auth } from './lib/firebase';
 import {
   getAllUserIds,
   fetchUserDetails,
+  getCurrentUsersChatList
 } from './redux/reducers/userAuth';
 import turbine from './assets/turbine.gif';
 import combatChopper from './assets/combatChopper.png';
@@ -32,6 +33,7 @@ function App() {
         console.log('User signed in:', user);
         dispatch(fetchUserDetails(user));
         dispatch(getAllUserIds());
+        dispatch(getCurrentUsersChatList(user.uid));
       } else {
         // User is signed out, dispatch an action to handle this state
         console.log('User signed out or session expired');

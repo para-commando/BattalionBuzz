@@ -35,6 +35,7 @@ import {
   getDoc,
   onSnapshot,
   serverTimestamp,
+  setDoc,
   updateDoc,
 } from 'firebase/firestore';
 import { uploadData } from '../lib/upload.js';
@@ -101,6 +102,7 @@ function Chats() {
   const messages = useSelector((state) => {
     return state.toggleViewReducersExport.messages;
   });
+  const [messageToForward, setMessageToForward] = useState({});
   const usersList = useSelector(
     (state) => state.userAuthReducerExport.allUserIds
   );
@@ -413,9 +415,51 @@ function Chats() {
 
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
       } else {
-        console.log(
-          'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'
-        );
+        debugger;
+        const chats = collection(db, 'chats');
+        console.log('🚀 ~ addUser ~ chats:', chats);
+        const newChatRef = doc(chats);
+        await setDoc(newChatRef, {
+          createdAt: Date.now(),
+          messages: [],
+        });
+
+        await setDoc(docRef, {
+          chats: [
+            {
+              chatId: newChatRef.id,
+              lastMessage: '',
+              receiverId: userData.id,
+              updatedAt: Date.now(),
+            },
+          ],
+        });
+        updateDoc(doc(db, 'chats', newChatRef.id), {
+          messages: arrayUnion({
+            mId: uniqueId,
+            senderId: userData.id,
+            receiverId: currentOpenedUser.id,
+            image: imgUrl ? imgUrl : '',
+            imageName: imgToSend?.name ? imgToSend?.name : '',
+            video: videoUrl ? videoUrl : '',
+            videoName: videoToSend?.name ? videoToSend?.name : '',
+            audioURL: audioUploadUrl ? audioUploadUrl : '',
+            audioFileName: audioBlob.audioFileName
+              ? audioBlob.audioFileName
+              : '',
+            pdf: pdfUrl ? pdfUrl : '',
+            fileName: pdfFileToSend?.fileName ? pdfFileToSend?.fileName : '',
+            isUserMessage: false,
+            username: currentOpenedUser.callSign
+              ? currentOpenedUser.callSign
+              : '',
+            message: userInputText ? userInputText : '',
+            time: formatChatTime(new Date()),
+            updatedAt: Date.now(),
+            hasSentMessage: true,
+            isSeen: false,
+          }),
+        });
       }
     } catch (error) {
       debugger;
@@ -627,6 +671,8 @@ function Chats() {
   };
 
   const handleForwardDataModal = (url) => {
+    console.log('🚀 ~ handleForwardDataModal ~ url:', url);
+    setMessageToForward(url);
     setIsForwardDataModalOpen(true);
   };
   const [isRecording, setIsRecording] = useState(false);
@@ -670,6 +716,128 @@ function Chats() {
     setIsDeleteMessageModalOpen(true);
     setMessageIdToDelete(mId);
   };
+  const loggedInUsersChatList = useSelector(
+    (state) => state.userAuthReducerExport.currentUsersChatList
+  );
+  const handleForwardMessage = async (params) => {
+    try {
+      debugger;
+      console.log(
+        '🚀 ~ handleForwardMessage ~ params:6777777777777777777777777',
+        params
+      );
+      const uniqueId = uuidv4();
+      const newMsg = { ...messageToForward };
+      newMsg.mId = uniqueId;
+      setMessageToForward(newMsg);
+      if (loggedInUsersChatList[params.id]) {
+        await updateDoc(doc(db, 'chats', loggedInUsersChatList[params.id]), {
+          messages: arrayUnion(newMsg),
+        });
+      } else {
+        debugger;
+        const chats = collection(db, 'chats');
+        console.log('🚀 ~ addUser ~ chats:', chats);
+        const newChatRef = doc(chats);
+        await setDoc(newChatRef, {
+          createdAt: Date.now(),
+          messages: [],
+        });
+        const chatMessages = collection(db, 'chatMessages');
+        const docRef = doc(chatMessages, userData.id);
+
+        await updateDoc(docRef, {
+          chats: arrayUnion({
+            chatId: newChatRef.id,
+            receiverId: params.id,
+            lastMessage: '',
+            updatedAt: Date.now(),
+          }),
+        });
+        // adding new user in the redux reducer
+        loggedInUsersChatList[params.id] = newChatRef.id;
+        dispatch(setCurrentUsersChatlist(loggedInUsersChatList));
+       
+      }
+
+      // updating the chats in the receiver's list
+      const chatMessages = collection(db, 'chatMessages');
+      const docRef = doc(chatMessages, currentOpenedUser.id);
+      console.log(
+        '🚀 ~ handleSendMessage ~ currentOpenedUser.id:',
+        currentOpenedUser.id
+      );
+
+      const docSnap = await getDoc(docRef);
+
+      const chatsArray = docSnap.data() ? docSnap.data().chats : [];
+
+      const matchedChat = await chatsArray.find(
+        (chat) => chat.receiverId === userData.id
+      );
+      if (matchedChat) {
+        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
+        const aa = await updateDoc(docRef, {
+          chats: arrayRemove(matchedChat),
+        });
+        matchedChat.hasSentMessage = true;
+        matchedChat.updatedAt = Date.now();
+        const op = await updateDoc(docRef, {
+          chats: arrayUnion(matchedChat),
+        });
+        // adding chat in the receiver's chat list
+        updateDoc(doc(db, 'chats', matchedChat.chatId), {
+          messages: arrayUnion(newMsg),
+        });
+
+        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
+      } else {
+        // TODO add logic to create a new user in the receiver's chat list
+        console.log(
+          " // TODO add logic to create a new user in the receiver's chat list"
+        );
+
+        const chats = collection(db, 'chats');
+        console.log('🚀 ~ addUser ~ chats:', chats);
+        const newChatRef = doc(chats);
+        await setDoc(newChatRef, {
+          createdAt: Date.now(),
+          messages: [],
+        });
+
+        // if the receiver has no chats at all then create a new doc else update the existing one
+        if (!chatsArray?.length) {
+          await setDoc(docRef, {
+            chats: [
+              {
+                chatId: newChatRef.id,
+                lastMessage: '',
+                receiverId: userData.id,
+                updatedAt: Date.now(),
+              },
+            ],
+          });
+        }
+        else{
+          await updateDoc(docRef, {
+            chats: arrayUnion({
+              chatId: newChatRef.id,
+              receiverId: userData.id,
+              lastMessage: '',
+              updatedAt: Date.now(),
+            }),
+          });
+        }
+        updateDoc(doc(db, 'chats', newChatRef.id), {
+          messages: arrayUnion(newMsg),
+        });
+      }
+    } catch (error) {
+      console.log('🚀 ~ handleForwardMessage ~ error:', error);
+      debugger;
+    }
+  };
+
   return (
     <>
       {isUserChatsVisible && (
@@ -944,9 +1112,12 @@ function Chats() {
 
                     return (
                       <div
+                        title={e.callSign}
                         key={e.id}
                         className='user p-2 details flex gap-2 items-center justify-center'
-                        onClick={() =>  {}}
+                        onClick={() => {
+                          handleForwardMessage(e);
+                        }}
                       >
                         <img
                           src={e.img}
@@ -955,10 +1126,10 @@ function Chats() {
                         />
                         <span className='w-15'>{truncatedCallSign}</span>
                         <img
+                          title='Forward'
                           src={forwardMessageIcon}
                           alt=''
                           className={'w-5 h-5 cursor-pointer'}
-                          
                         />
                       </div>
                     );
@@ -1162,11 +1333,7 @@ function Chats() {
                         <img
                           src={forwardMessageIcon}
                           alt=''
-                          className={
-                            message.isUserMessage
-                              ? 'w-5 h-5 cursor-pointer'
-                              : 'hidden'
-                          }
+                          className='w-5 h-5 cursor-pointer'
                           onClick={() => handleForwardDataModal(message)}
                         />
                       </div>
