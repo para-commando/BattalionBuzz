@@ -41,7 +41,10 @@ import {
 import { uploadData } from '../lib/upload.js';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
-import { setSharedChatData } from '../redux/reducers/userAuth.js';
+import {
+  setSharedChatData,
+  setCurrentUsersChatlist,
+} from '../redux/reducers/userAuth.js';
 const customStyles = {
   content: {
     top: '50%',
@@ -729,6 +732,7 @@ function Chats() {
       const uniqueId = uuidv4();
       const newMsg = { ...messageToForward };
       newMsg.mId = uniqueId;
+      newMsg.receiverId = params.id;
       setMessageToForward(newMsg);
       if (loggedInUsersChatList[params.id]) {
         await updateDoc(doc(db, 'chats', loggedInUsersChatList[params.id]), {
@@ -750,32 +754,40 @@ function Chats() {
           chats: arrayUnion({
             chatId: newChatRef.id,
             receiverId: params.id,
+            hasSentMessage:false,
             lastMessage: '',
             updatedAt: Date.now(),
           }),
         });
         // adding new user in the redux reducer
-        loggedInUsersChatList[params.id] = newChatRef.id;
-        dispatch(setCurrentUsersChatlist(loggedInUsersChatList));
-       
-      }
 
+        const newList = { ...loggedInUsersChatList };
+
+        // adding new user in the redux reducer
+        newList[params.id] = newChatRef.id;
+        dispatch(setCurrentUsersChatlist(newList));
+      }
+      setIsForwardDataModalOpen(false);
       // updating the chats in the receiver's list
       const chatMessages = collection(db, 'chatMessages');
-      const docRef = doc(chatMessages, currentOpenedUser.id);
-      console.log(
-        '🚀 ~ handleSendMessage ~ currentOpenedUser.id:',
-        currentOpenedUser.id
-      );
+      const docRef = doc(chatMessages, params.id);
 
       const docSnap = await getDoc(docRef);
-
-      const chatsArray = docSnap.data() ? docSnap.data().chats : [];
-
-      const matchedChat = await chatsArray.find(
-        (chat) => chat.receiverId === userData.id
+      // getting the receiver's chat list from chatMessages collection
+      const chatsArray =
+        docSnap.data() && docSnap.data().chats
+          ? docSnap.data().chats
+          : null;
+      console.log(
+        '🚀 ~ handleForwardMessage ~ docSnap.data():',
+        docSnap.data()
       );
+
+      const matchedChat = chatsArray
+        ? await chatsArray.find((chat) => chat.receiverId === userData.id)
+        : null;
       if (matchedChat) {
+        debugger
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
         const aa = await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
@@ -786,9 +798,22 @@ function Chats() {
           chats: arrayUnion(matchedChat),
         });
         // adding chat in the receiver's chat list
-        updateDoc(doc(db, 'chats', matchedChat.chatId), {
-          messages: arrayUnion(newMsg),
-        });
+        const messages = collection(db, 'chats');
+        const docRef2 = doc(messages, matchedChat.chatId);
+
+        const docSnap = await getDoc(docRef2);
+        // getting the receiver's chat list from chatMessages collection
+        const messagesArray = docSnap.data() ? docSnap.data().messages : [];
+        newMsg.isUserMessage=false
+        newMsg.receiverId = userData.id;
+        if (messagesArray?.length) {
+          updateDoc(doc(db, 'chats', matchedChat.chatId), {
+            messages: arrayUnion(newMsg),
+          });
+        } else {
+          debugger;
+          console.log('chat id not found but entry exist in chatMessages');
+        }
 
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
       } else {
@@ -806,33 +831,41 @@ function Chats() {
         });
 
         // if the receiver has no chats at all then create a new doc else update the existing one
-        if (!chatsArray?.length) {
-          await setDoc(docRef, {
+        if (!chatsArray) {
+          const chatMessagesDoc = collection(db, 'chatMessages');
+          console.log('🚀 ~ addUser ~ chats:', chats);
+          const newChatMessagesRef = doc(chatMessagesDoc, params.id);
+          await setDoc(newChatMessagesRef, {
             chats: [
               {
                 chatId: newChatRef.id,
                 lastMessage: '',
+                hasSentMessage: true,
                 receiverId: userData.id,
                 updatedAt: Date.now(),
               },
             ],
           });
-        }
-        else{
+        } else {
           await updateDoc(docRef, {
             chats: arrayUnion({
               chatId: newChatRef.id,
               receiverId: userData.id,
+              hasSentMessage: true,
               lastMessage: '',
               updatedAt: Date.now(),
             }),
           });
         }
+        newMsg.isUserMessage=false
+        newMsg.receiverId = userData.id;
         updateDoc(doc(db, 'chats', newChatRef.id), {
           messages: arrayUnion(newMsg),
         });
       }
     } catch (error) {
+      setIsForwardDataModalOpen(false);
+      setMessageToForward({});
       console.log('🚀 ~ handleForwardMessage ~ error:', error);
       debugger;
     }
@@ -1114,7 +1147,7 @@ function Chats() {
                       <div
                         title={e.callSign}
                         key={e.id}
-                        className='user p-2 details flex gap-2 items-center justify-center'
+                        className='user p-2 details flex gap-2 items-center justify-center cursor-pointer'
                         onClick={() => {
                           handleForwardMessage(e);
                         }}
@@ -1149,6 +1182,7 @@ function Chats() {
                 <div
                   className='name flex flex-col justify-start items-start'
                   onClick={() => {
+                    dispatch(setMessages([]));
                     dispatch(isChatsVisible(false));
                     dispatch(isDetailsVisible(false));
                     dispatch(isLandingPageVisible(true));

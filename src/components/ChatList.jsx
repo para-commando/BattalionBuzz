@@ -84,6 +84,7 @@ function ChatList() {
             return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
           });
           console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
+          
           setChats(chatData);
           setFilteredUserChats(chatData);
         } else {
@@ -126,15 +127,19 @@ function ChatList() {
         return;
       }
 
-      // deleting user from the redux reducer 
- 
-      for (let key in loggedInUsersChatList) {
-        if (loggedInUsersChatList[key] === userId) {
-          delete loggedInUsersChatList[key];
+      // deleting user from the redux reducer
+      debugger;
+      const newChats = { ...loggedInUsersChatList };
+
+      for (let key in newChats) {
+        debugger;
+        if (key === userId) {
+          delete newChats[key];
         }
       }
+      console.log('🚀 ~ handleDeleteUser ~ newChats:', newChats);
 
-      dispatch(setCurrentUsersChatlist(loggedInUsersChatList));
+      dispatch(setCurrentUsersChatlist(newChats));
 
       // loading the desired collection
       const chatMessagesCollection = collection(db, 'chatMessages');

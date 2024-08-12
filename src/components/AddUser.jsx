@@ -16,9 +16,12 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setCurrentUsersChatlist } from '../redux/reducers/userAuth.js';
 
 function AddUser() {
+
+  const dispatch = useDispatch();
   const [user, setUser] = useState([]);
   const userData = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
@@ -80,9 +83,11 @@ function AddUser() {
         });
       }
    
+      const newList = {...loggedInUsersChatList};
+ 
       // adding new user in the redux reducer 
-      loggedInUsersChatList[currentUserDetails.id] = newChatRef.id;
-      dispatch(setCurrentUsersChatlist(loggedInUsersChatList));
+      newList[currentUserDetails.id] = newChatRef.id;
+      dispatch(setCurrentUsersChatlist(newList));
     } catch (error) {
       debugger;
       console.log('🚀 ~ addUser ~ error:', error);
