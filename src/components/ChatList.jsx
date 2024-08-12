@@ -9,6 +9,7 @@ import {
   isLandingPageVisible,
   setMessages,
 } from '../redux/reducers/toggleViewReducers';
+import { setCurrentUsersChatlist } from '../redux/reducers/userAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   arrayRemove,
@@ -30,14 +31,14 @@ function ChatList() {
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
+
   useEffect(() => {
     document.addEventListener('click', handleClickOutside2, true);
     return () => {
       document.removeEventListener('click', handleClickOutside2, true);
     };
   }, []);
- 
-  
+
   const addUsersRef = useRef(null);
   const addUserComponentRef = useRef(null);
   const handleClickOutside2 = (event) => {
@@ -83,6 +84,7 @@ function ChatList() {
             return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
           });
           console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
+          
           setChats(chatData);
           setFilteredUserChats(chatData);
         } else {
@@ -111,6 +113,9 @@ function ChatList() {
       console.log('🚀 ~ handleSearch ~ error:', error);
     }
   };
+  const loggedInUsersChatList = useSelector(
+    (state) => state.userAuthReducerExport.currentUsersChatList
+  );
   const handleDeleteUser = async (userId) => {
     try {
       const userResponse = confirm(
@@ -121,6 +126,21 @@ function ChatList() {
         // User clicked "OK" (Yes)
         return;
       }
+
+      // deleting user from the redux reducer
+      debugger;
+      const newChats = { ...loggedInUsersChatList };
+
+      for (let key in newChats) {
+        debugger;
+        if (key === userId) {
+          delete newChats[key];
+        }
+      }
+      console.log('🚀 ~ handleDeleteUser ~ newChats:', newChats);
+
+      dispatch(setCurrentUsersChatlist(newChats));
+
       // loading the desired collection
       const chatMessagesCollection = collection(db, 'chatMessages');
       // selecting the document or row in the collection
