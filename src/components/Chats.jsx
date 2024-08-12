@@ -732,7 +732,9 @@ function Chats() {
       const uniqueId = uuidv4();
       const newMsg = { ...messageToForward };
       newMsg.mId = uniqueId;
+      newMsg.isUserMessage =true;
       newMsg.receiverId = params.id;
+      newMsg.senderId = userData.id;
       setMessageToForward(newMsg);
       if (loggedInUsersChatList[params.id]) {
         await updateDoc(doc(db, 'chats', loggedInUsersChatList[params.id]), {
@@ -768,6 +770,8 @@ function Chats() {
         dispatch(setCurrentUsersChatlist(newList));
       }
       setIsForwardDataModalOpen(false);
+
+
       // updating the chats in the receiver's list
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, params.id);
