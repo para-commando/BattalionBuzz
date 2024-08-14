@@ -4,12 +4,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { auth } from '../lib/firebase';
 
 function UserInfo() {
+  // redux state which stores the current logged in user's details
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
   console.log('🚀 ~ UserInfo ~ user:', user);
   const dispatch = useDispatch();
 
+  // displaying logged in user's information post successful authentication
   return (
     <div className='flex items-center gap-1 mb-7 w-full'>
       <div className='user flex items-center w-full'>
@@ -28,6 +30,7 @@ function UserInfo() {
         onClick={() => {
           dispatch(isUserValidated(false));
           dispatch(isUserNew(false));
+          // firebase module to handle user logout
           auth.signOut();
         }}
       >
