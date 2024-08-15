@@ -69,34 +69,17 @@ const customStyles = {
 };
 
 function formatChatTime(date) {
-  const currentDate = new Date();
-  const options = { hour: '2-digit', minute: '2-digit', hour12: false };
-  // const options = { hour: 'numeric', minute: 'numeric', hour12: true };
-
-  // Check if the date is today
-  const isToday = date.toDateString() === currentDate.toDateString();
-
-  // Check if the date is yesterday
-  const yesterday = new Date(currentDate);
-  yesterday.setDate(currentDate.getDate() - 1);
-  const isYesterday = date.toDateString() === yesterday.toDateString();
+  const options = { hour: '2-digit', minute: '2-digit', hour12: true }; //
 
   // Format the time
   const formattedTime = date.toLocaleString('en-US', options);
 
-  if (isToday) {
-    return formattedTime;
-  } else if (isYesterday) {
-    return `${formattedTime}, yesterday`;
-  } else {
-    // If the date is not today or yesterday, include the full date
-    const formattedDate = date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    return `${formattedTime}, ${formattedDate}`;
-  }
+  const formattedDate = date.toLocaleDateString('en-US', {
+    month: 'short', // e.g., 'Jan'
+    day: 'numeric', // e.g., 1
+    year: 'numeric', // e.g., 2023
+  });
+  return `${formattedTime}, ${formattedDate}`;
 }
 function Chats() {
   const [showOptions, setShowOptions] = useState(false);
@@ -177,6 +160,7 @@ function Chats() {
         await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
+        // post the user to chat with is opened, whatever message he has sent must be marked as viewed 
         matchedChat.hasSentMessage = false;
         updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
@@ -186,11 +170,12 @@ function Chats() {
           setOpenedChatId(userChatId.chatId);
         }
       }
-
+      // fetches the realtime chat messages as onSnapshot is used
       const unsubscribe = onSnapshot(
         doc(db, 'chats', userChatId.chatId),
         (res) => {
           const items = res.data().messages;
+          // setting data in the details section, by first clearing of the previous data
           dispatch(setSharedChatData({ items: [], shouldItClear: true }));
           dispatch(setSharedChatData({ items, shouldItClear: false }));
           dispatch(setMessages(items));
@@ -236,7 +221,7 @@ function Chats() {
   const isUserChatsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
-
+  // function facilitating sending of image or video
   const handleSendImage = async (e) => {
     console.log('🚀 ~ handleSendImage ~ e:32rknfkefneor', e.target.files['0']);
     if (e.target.files['0'].size > 10000000) {
@@ -311,6 +296,7 @@ function Chats() {
     setIsSendPdfModalOpen(false);
     setIsSendVoiceModalOpen(false);
     setIsSending(true);
+    // for the blinking effect on send button
     const interval = setInterval(() => {
       setIsInvert((prev) => !prev);
     }, 250);
@@ -336,7 +322,7 @@ function Chats() {
     }
     try {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
-      // adding chat in the current user's chat list
+       // updating message in the senders's chat list so that he is able to see the message sent
       await updateDoc(doc(db, 'chats', openedChatId), {
         messages: arrayUnion({
           mId: uniqueId,
@@ -361,8 +347,11 @@ function Chats() {
           isSeen: false,
         }),
       });
+      // clearing the input box post adding chat in the opened user's window
       setUserInputText('');
 
+
+      // updating message in the receiver's chat list so that he is able to see the message sent
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, currentOpenedUser.id);
       console.log(
@@ -732,7 +721,7 @@ function Chats() {
       const uniqueId = uuidv4();
       const newMsg = { ...messageToForward };
       newMsg.mId = uniqueId;
-      newMsg.isUserMessage =true;
+      newMsg.isUserMessage = true;
       newMsg.receiverId = params.id;
       newMsg.senderId = userData.id;
       setMessageToForward(newMsg);
@@ -756,7 +745,7 @@ function Chats() {
           chats: arrayUnion({
             chatId: newChatRef.id,
             receiverId: params.id,
-            hasSentMessage:false,
+            hasSentMessage: false,
             lastMessage: '',
             updatedAt: Date.now(),
           }),
@@ -771,7 +760,6 @@ function Chats() {
       }
       setIsForwardDataModalOpen(false);
 
-
       // updating the chats in the receiver's list
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, params.id);
@@ -779,9 +767,7 @@ function Chats() {
       const docSnap = await getDoc(docRef);
       // getting the receiver's chat list from chatMessages collection
       const chatsArray =
-        docSnap.data() && docSnap.data().chats
-          ? docSnap.data().chats
-          : null;
+        docSnap.data() && docSnap.data().chats ? docSnap.data().chats : null;
       console.log(
         '🚀 ~ handleForwardMessage ~ docSnap.data():',
         docSnap.data()
@@ -791,7 +777,7 @@ function Chats() {
         ? await chatsArray.find((chat) => chat.receiverId === userData.id)
         : null;
       if (matchedChat) {
-        debugger
+        debugger;
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
         const aa = await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
@@ -808,7 +794,7 @@ function Chats() {
         const docSnap = await getDoc(docRef2);
         // getting the receiver's chat list from chatMessages collection
         const messagesArray = docSnap.data() ? docSnap.data().messages : [];
-        newMsg.isUserMessage=false
+        newMsg.isUserMessage = false;
         newMsg.receiverId = userData.id;
         if (messagesArray?.length) {
           updateDoc(doc(db, 'chats', matchedChat.chatId), {
@@ -861,7 +847,7 @@ function Chats() {
             }),
           });
         }
-        newMsg.isUserMessage=false
+        newMsg.isUserMessage = false;
         newMsg.receiverId = userData.id;
         updateDoc(doc(db, 'chats', newChatRef.id), {
           messages: arrayUnion(newMsg),

@@ -20,7 +20,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentUsersChatlist } from '../redux/reducers/userAuth.js';
 
 function AddUser() {
-
   const dispatch = useDispatch();
   const [user, setUser] = useState([]);
   const userData = useSelector(
@@ -82,10 +81,10 @@ function AddUser() {
           ],
         });
       }
-   
-      const newList = {...loggedInUsersChatList};
- 
-      // adding new user in the redux reducer 
+
+      const newList = { ...loggedInUsersChatList };
+
+      // adding new user in the redux reducer
       newList[currentUserDetails.id] = newChatRef.id;
       dispatch(setCurrentUsersChatlist(newList));
     } catch (error) {
@@ -99,7 +98,7 @@ function AddUser() {
 
       const formData = new FormData(e.target);
       console.log('🚀 ~ handleSearch ~ formData:', formData);
-      const username = formData.get('callSignAddUser');
+      const username = formData.get('callSignAddUser').toLowerCase();
       console.log('🚀 ~ handleSearch ~ username:2344444444444444444', username);
 
       const querySnapshot = usersList;
@@ -114,7 +113,10 @@ function AddUser() {
         );
 
         // not showing the current user in the add user list
-        if (doc.id !== userData.id && doc.callSign.includes(username)) {
+        if (
+          doc.id !== userData.id &&
+          doc.callSign.toLowerCase().includes(username)
+        ) {
           uniqueUsers.add(JSON.stringify(doc)); // Add new user data to the Set as string
         }
       });
