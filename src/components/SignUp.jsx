@@ -67,8 +67,8 @@ function SignUp() {
       setDoc(doc(db, 'users', data.id), {
         ...data,
       });
-      // creating user document in firestore db's chats collection with the user's id
-      setDoc(doc(db, 'chats', data.id), {
+      // creating user document in firestore db's chatMessages collection with the user's id
+      setDoc(doc(db, 'chatMessages', data.id), {
         chats: [],
       });
       dispatch(isUserValidated(true));

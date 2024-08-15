@@ -19,11 +19,10 @@ function Details() {
   ] = useState(false);
   const [toggleAudioListDetailsSection, setToggleAudioListDetailsSection] =
     useState(false);
-  const [isNotRadioSilenced, setIsNotRadioSilenced] = useState(true);
   const currentOpenedUser = useSelector((state) => {
     return state.toggleViewReducersExport.currentOpenedUser;
   });
-  const radioSilenceRef = useRef(null);
+  // getting data from redux store for the media shared between sender and receiver
   const sharedVideosList = useSelector((state) => {
     return state.userAuthReducerExport.sharedVideos;
   });
@@ -37,19 +36,7 @@ function Details() {
     return state.userAuthReducerExport.sharedDocuments;
   });
 
-  const radioSilenceChat = (params) => {
-    if (isNotRadioSilenced) {
-      alert('Radio silenced...');
-      radioSilenceRef.current.innerText = 'Radio-Silenced';
-      radioSilenceRef.current.style.backgroundColor = 'black';
-      setIsNotRadioSilenced(false);
-      return;
-    }
-    radioSilenceRef.current.innerText = 'Radio-Silence';
-    radioSilenceRef.current.style.backgroundColor = 'rgb(153 27 27 / 1)';
-    setIsNotRadioSilenced(true);
-    return;
-  };
+
   const isUserDetailsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsDetailsVisible;
   });
@@ -208,13 +195,6 @@ function Details() {
               </div>
             )}
           </div>
-          {/* <div
-            ref={radioSilenceRef}
-            className='radioSilence bg-red-800 rounded-xl px-[9px] py-[11px] text-center absolute bottom-3 w-full mx-3'
-            onClick={() => radioSilenceChat()}
-          >
-            Radio Silence
-          </div> */}
         </div>
       )}
     </>
