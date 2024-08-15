@@ -69,34 +69,17 @@ const customStyles = {
 };
 
 function formatChatTime(date) {
-  const currentDate = new Date();
-  const options = { hour: '2-digit', minute: '2-digit', hour12: false };
-  // const options = { hour: 'numeric', minute: 'numeric', hour12: true };
-
-  // Check if the date is today
-  const isToday = date.toDateString() === currentDate.toDateString();
-
-  // Check if the date is yesterday
-  const yesterday = new Date(currentDate);
-  yesterday.setDate(currentDate.getDate() - 1);
-  const isYesterday = date.toDateString() === yesterday.toDateString();
+  const options = { hour: '2-digit', minute: '2-digit', hour12: true }; //
 
   // Format the time
   const formattedTime = date.toLocaleString('en-US', options);
 
-  if (isToday) {
-    return formattedTime;
-  } else if (isYesterday) {
-    return `${formattedTime}, yesterday`;
-  } else {
-    // If the date is not today or yesterday, include the full date
-    const formattedDate = date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    return `${formattedTime}, ${formattedDate}`;
-  }
+  const formattedDate = date.toLocaleDateString('en-US', {
+    month: 'short', // e.g., 'Jan'
+    day: 'numeric', // e.g., 1
+    year: 'numeric', // e.g., 2023
+  });
+  return `${formattedTime}, ${formattedDate}`;
 }
 function Chats() {
   const [showOptions, setShowOptions] = useState(false);
@@ -177,6 +160,7 @@ function Chats() {
         await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
+        // post the user to chat with is opened, whatever message he has sent must be marked as viewed
         matchedChat.hasSentMessage = false;
         updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
@@ -186,11 +170,12 @@ function Chats() {
           setOpenedChatId(userChatId.chatId);
         }
       }
-
+      // fetches the realtime chat messages as onSnapshot is used
       const unsubscribe = onSnapshot(
         doc(db, 'chats', userChatId.chatId),
         (res) => {
           const items = res.data().messages;
+          // setting data in the details section, by first clearing of the previous data
           dispatch(setSharedChatData({ items: [], shouldItClear: true }));
           dispatch(setSharedChatData({ items, shouldItClear: false }));
           dispatch(setMessages(items));
@@ -236,7 +221,7 @@ function Chats() {
   const isUserChatsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsChatsVisible;
   });
-
+  // function facilitating sending of image or video
   const handleSendImage = async (e) => {
     console.log('🚀 ~ handleSendImage ~ e:32rknfkefneor', e.target.files['0']);
     if (e.target.files['0'].size > 10000000) {
@@ -311,6 +296,7 @@ function Chats() {
     setIsSendPdfModalOpen(false);
     setIsSendVoiceModalOpen(false);
     setIsSending(true);
+    // for the blinking effect on send button
     const interval = setInterval(() => {
       setIsInvert((prev) => !prev);
     }, 250);
@@ -336,7 +322,7 @@ function Chats() {
     }
     try {
       console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
-      // adding chat in the current user's chat list
+      // updating message in the senders's chat list so that he is able to see the message sent
       await updateDoc(doc(db, 'chats', openedChatId), {
         messages: arrayUnion({
           mId: uniqueId,
@@ -361,8 +347,10 @@ function Chats() {
           isSeen: false,
         }),
       });
+      // clearing the input box post adding chat in the opened user's window
       setUserInputText('');
 
+      // updating message in the receiver's chat list so that he is able to see the message sent
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, currentOpenedUser.id);
       console.log(
@@ -378,22 +366,23 @@ function Chats() {
       const matchedChat = await chatsArray.find(
         (chat) => chat.receiverId === userData.id
       );
+      // if user is already added in the receiver's chat list then below conditional will be true, else false
       if (matchedChat) {
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
-        const aa = await updateDoc(docRef, {
+        // to make turn on message received indicator in receiver's chat list
+        await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
         matchedChat.hasSentMessage = true;
         matchedChat.updatedAt = Date.now();
-        const op = await updateDoc(docRef, {
+        await updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
         });
+
         // adding chat in the receiver's chat list
         updateDoc(doc(db, 'chats', matchedChat.chatId), {
           messages: arrayUnion({
             mId: uniqueId,
-            senderId: userData.id,
-            receiverId: currentOpenedUser.id,
             image: imgUrl ? imgUrl : '',
             imageName: imgToSend?.name ? imgToSend?.name : '',
             video: videoUrl ? videoUrl : '',
@@ -405,9 +394,6 @@ function Chats() {
             pdf: pdfUrl ? pdfUrl : '',
             fileName: pdfFileToSend?.fileName ? pdfFileToSend?.fileName : '',
             isUserMessage: false,
-            username: currentOpenedUser.callSign
-              ? currentOpenedUser.callSign
-              : '',
             message: userInputText ? userInputText : '',
             time: formatChatTime(new Date()),
             updatedAt: Date.now(),
@@ -418,30 +404,31 @@ function Chats() {
 
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
       } else {
-        debugger;
+        // if the user is not present in the receiver's chat list then below conditional will be true
+
         const chats = collection(db, 'chats');
         console.log('🚀 ~ addUser ~ chats:', chats);
         const newChatRef = doc(chats);
+        // creating a new chat document
         await setDoc(newChatRef, {
           createdAt: Date.now(),
           messages: [],
         });
 
-        await setDoc(docRef, {
-          chats: [
-            {
-              chatId: newChatRef.id,
-              lastMessage: '',
-              receiverId: userData.id,
-              updatedAt: Date.now(),
-            },
-          ],
+        // updating a document with the receiver's id in the chatMessages collection and adding the newly created chat in the receiver's chat list
+
+        await updateDoc(docRef, {
+          chats: arrayUnion({
+            chatId: newChatRef.id,
+            hasSentMessage: true,
+            lastMessage: '',
+            receiverId: userData.id,
+            updatedAt: Date.now(),
+          }),
         });
         updateDoc(doc(db, 'chats', newChatRef.id), {
           messages: arrayUnion({
             mId: uniqueId,
-            senderId: userData.id,
-            receiverId: currentOpenedUser.id,
             image: imgUrl ? imgUrl : '',
             imageName: imgToSend?.name ? imgToSend?.name : '',
             video: videoUrl ? videoUrl : '',
@@ -453,9 +440,6 @@ function Chats() {
             pdf: pdfUrl ? pdfUrl : '',
             fileName: pdfFileToSend?.fileName ? pdfFileToSend?.fileName : '',
             isUserMessage: false,
-            username: currentOpenedUser.callSign
-              ? currentOpenedUser.callSign
-              : '',
             message: userInputText ? userInputText : '',
             time: formatChatTime(new Date()),
             updatedAt: Date.now(),
@@ -464,6 +448,7 @@ function Chats() {
           }),
         });
       }
+      return;
     } catch (error) {
       debugger;
     } finally {
@@ -732,14 +717,18 @@ function Chats() {
       const uniqueId = uuidv4();
       const newMsg = { ...messageToForward };
       newMsg.mId = uniqueId;
-      newMsg.receiverId = params.id;
+      newMsg.isUserMessage = true;
       setMessageToForward(newMsg);
+
+      // receiver is already present in the list of chats of the user then below conditional will be true
       if (loggedInUsersChatList[params.id]) {
         await updateDoc(doc(db, 'chats', loggedInUsersChatList[params.id]), {
           messages: arrayUnion(newMsg),
         });
       } else {
+        // receiver is not present in the list of chats of the user then this will be executed
         debugger;
+        // creating a new chat id for the receiver
         const chats = collection(db, 'chats');
         console.log('🚀 ~ addUser ~ chats:', chats);
         const newChatRef = doc(chats);
@@ -749,12 +738,12 @@ function Chats() {
         });
         const chatMessages = collection(db, 'chatMessages');
         const docRef = doc(chatMessages, userData.id);
-
+        // adding that newly created chatId in the chatMessages collection so that he will be visible in the list of chats of the user
         await updateDoc(docRef, {
           chats: arrayUnion({
             chatId: newChatRef.id,
             receiverId: params.id,
-            hasSentMessage:false,
+            hasSentMessage: false,
             lastMessage: '',
             updatedAt: Date.now(),
           }),
@@ -767,61 +756,46 @@ function Chats() {
         newList[params.id] = newChatRef.id;
         dispatch(setCurrentUsersChatlist(newList));
       }
+
       setIsForwardDataModalOpen(false);
+      debugger;
       // updating the chats in the receiver's list
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, params.id);
 
       const docSnap = await getDoc(docRef);
       // getting the receiver's chat list from chatMessages collection
-      const chatsArray =
-        docSnap.data() && docSnap.data().chats
-          ? docSnap.data().chats
-          : null;
+      const chatsArray = docSnap.data().chats;
       console.log(
         '🚀 ~ handleForwardMessage ~ docSnap.data():',
         docSnap.data()
       );
 
-      const matchedChat = chatsArray
+      // checking if the sender's chat is already present in the chatMessages document of the receiver
+      const matchedChat = chatsArray.length
         ? await chatsArray.find((chat) => chat.receiverId === userData.id)
         : null;
       if (matchedChat) {
-        debugger
+        // updating chatMessages collection for the document to turn on the latest message identification
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
-        const aa = await updateDoc(docRef, {
+        await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
         matchedChat.hasSentMessage = true;
         matchedChat.updatedAt = Date.now();
-        const op = await updateDoc(docRef, {
+        await updateDoc(docRef, {
           chats: arrayUnion(matchedChat),
         });
         // adding chat in the receiver's chat list
-        const messages = collection(db, 'chats');
-        const docRef2 = doc(messages, matchedChat.chatId);
-
-        const docSnap = await getDoc(docRef2);
-        // getting the receiver's chat list from chatMessages collection
-        const messagesArray = docSnap.data() ? docSnap.data().messages : [];
-        newMsg.isUserMessage=false
-        newMsg.receiverId = userData.id;
-        if (messagesArray?.length) {
-          updateDoc(doc(db, 'chats', matchedChat.chatId), {
-            messages: arrayUnion(newMsg),
-          });
-        } else {
-          debugger;
-          console.log('chat id not found but entry exist in chatMessages');
-        }
+        // since the message will now be sent to receiver hence its receiverId needs to be changed
+        newMsg.isUserMessage = false;
+        updateDoc(doc(db, 'chats', matchedChat.chatId), {
+          messages: arrayUnion(newMsg),
+        });
 
         console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
       } else {
-        // TODO add logic to create a new user in the receiver's chat list
-        console.log(
-          " // TODO add logic to create a new user in the receiver's chat list"
-        );
-
+        // creating a new chat and then adding it in the chatMessages collection's document matching the receiver's id
         const chats = collection(db, 'chats');
         console.log('🚀 ~ addUser ~ chats:', chats);
         const newChatRef = doc(chats);
@@ -830,35 +804,21 @@ function Chats() {
           messages: [],
         });
 
-        // if the receiver has no chats at all then create a new doc else update the existing one
-        if (!chatsArray) {
-          const chatMessagesDoc = collection(db, 'chatMessages');
-          console.log('🚀 ~ addUser ~ chats:', chats);
-          const newChatMessagesRef = doc(chatMessagesDoc, params.id);
-          await setDoc(newChatMessagesRef, {
-            chats: [
-              {
-                chatId: newChatRef.id,
-                lastMessage: '',
-                hasSentMessage: true,
-                receiverId: userData.id,
-                updatedAt: Date.now(),
-              },
-            ],
-          });
-        } else {
-          await updateDoc(docRef, {
-            chats: arrayUnion({
-              chatId: newChatRef.id,
-              receiverId: userData.id,
-              hasSentMessage: true,
-              lastMessage: '',
-              updatedAt: Date.now(),
-            }),
-          });
-        }
-        newMsg.isUserMessage=false
-        newMsg.receiverId = userData.id;
+        const chatMessagesDoc = collection(db, 'chatMessages');
+        console.log('🚀 ~ addUser ~ chats:', chats);
+        const newChatMessagesRef = doc(chatMessagesDoc, params.id);
+
+        await updateDoc(newChatMessagesRef, {
+          chats: arrayUnion({
+            chatId: newChatRef.id,
+            receiverId: userData.id,
+            hasSentMessage: true,
+            lastMessage: '',
+            updatedAt: Date.now(),
+          }),
+        });
+        // since the message will now be sent to receiver hence its receiverId needs to be changed
+        newMsg.isUserMessage = false;
         updateDoc(doc(db, 'chats', newChatRef.id), {
           messages: arrayUnion(newMsg),
         });

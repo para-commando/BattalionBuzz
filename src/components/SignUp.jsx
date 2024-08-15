@@ -37,10 +37,12 @@ function SignUp() {
 
   const onSubmit = async (data) => {
     try {
+      // handling states related to signup UX
       dispatch(isUserSubmitting(true));
       setShowSubmit(false);
       setShowLoading(true);
       data.email = data.callSign + '.' + data.regiment + '@gmail.com';
+      // creates a new user with validated data using firebase createUserWithEmailAndPassword module for email authentication methodology
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
@@ -50,6 +52,7 @@ function SignUp() {
       data.radioSilencedUsers = [];
 
       if (data?.profilePic && data.profilePic.length) {
+        // uploading data to firebase storage
         const imgUrl = await uploadData(data.profilePic[0]);
         data.imgUrl = imgUrl;
 
@@ -60,15 +63,17 @@ function SignUp() {
         data.imgUrl =
           'https://preview.redd.it/a-commando-from-the-elite-garud-special-forces-of-the-air-v0-ubqtdla4toja1.jpg?width=1080&crop=smart&auto=webp&s=c5dbb3466fef9dd74a111bf9df83e470c8917f43';
       }
-
+      // creating user document in firestore db's users collection with the user's id
       setDoc(doc(db, 'users', data.id), {
         ...data,
       });
-      setDoc(doc(db, 'chats', data.id), {
+      // creating user document in firestore db's chatMessages collection with the user's id
+      setDoc(doc(db, 'chatMessages', data.id), {
         chats: [],
       });
       dispatch(isUserValidated(true));
     } catch (error) {
+      // error handling to display specific error message
       let errorMessage = 'Something went wrong, please try again';
       if ((error.code = 'auth/email-already-in-use')) {
         errorMessage =
@@ -92,12 +97,14 @@ function SignUp() {
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col justify-center items-center'
           >
+           {/* this div block handles the user profile image selection */}
             <div className='flex gap-2 pb-2'>
               <img
                 className='w-16 h-16 mx-2 rounded-full cursor-pointer object-cover object-top'
                 src={avatar.url}
                 alt=''
               />
+             
               {showDefaultImageUpload && (
                 <span
                   onClick={() => {
@@ -124,7 +131,7 @@ function SignUp() {
                 upload image
               </span>
             </div>
-
+            {/* handling code blocks based on the users action in selecting the profile image */}
             {showImgUpload && (
               <div
                 ref={first}
@@ -188,6 +195,7 @@ function SignUp() {
                 })}
                 disabled={isSubmitting}
               />
+              {/* displaying validation error related to the form fields */}
               <div className='text-red-500 w[548px] flex justify-center items-center'>
                 {errors.callSign && <span>Invalid Call Sign</span>}
               </div>

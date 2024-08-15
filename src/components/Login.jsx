@@ -23,9 +23,11 @@ function Login() {
     (state) => state.userAuthReducerExport.valueIsSubmitting
   );
 
+  // includes firebase authentication module for email and password authentication
   const onSubmit = async (data) => {
     console.log('🚀 ~ onSubmit ~ data:', data);
     try {
+      // state handlings
       dispatch(isUserSubmitting(true));
       setShowSubmit(false);
       setShowLoading(true);
@@ -46,11 +48,14 @@ function Login() {
       console.log('🚀 ~ onSubmit ~ error:', JSON.stringify(error));
       alert(errorMessage);
      } finally {
+      // state handlings
       setShowSubmit(true);
       setShowLoading(false);
       dispatch(isUserSubmitting(false));
     }
   };
+
+  // returns a component created using react-hook-form
 
   return (
     <>
@@ -73,6 +78,7 @@ function Login() {
                     max: 30,
                     pattern: /^(?=.*[a-z])(?=.*[A-Z])[A-Za-z\d.]+$/,
                   })}
+                // disabling from using post submit
                   disabled={isSubmitting}
                 />
                 <div className='text-red-500 w[548px] flex justify-center items-center'>
@@ -92,6 +98,7 @@ function Login() {
                   })}
                   placeholder='Password'
                   type='password'
+                  // disabling from using post submit
                   disabled={isSubmitting}
                 />
                 <div className='flex justify-center items-center'>
@@ -103,6 +110,7 @@ function Login() {
                   )}
                 </div>
               </div>
+              {/* disabling the submit button post once clicked, till either success or failure is returned */}
               {showSubmit && (
                 <div className='flex justify-center'>
                   <input
@@ -111,6 +119,7 @@ function Login() {
                   />
                 </div>
               )}
+              {/* for showing loading indicator */}
               {showLoading && (
                 <div className='flex items-center  w-15 h-15 '>
                   <div className='loader'></div>

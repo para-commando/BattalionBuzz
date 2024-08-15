@@ -31,7 +31,8 @@ function ChatList() {
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
-
+ 
+  // handle the click outside event for closing the add user popup
   useEffect(() => {
     document.addEventListener('click', handleClickOutside2, true);
     return () => {
@@ -49,21 +50,25 @@ function ChatList() {
       setAddUsersButtonDisplay(false);
     }
   };
+  // handles real time fetching of data from the firestore database using the module onSnapshot for the document specified
   useEffect(() => {
+    // prevent the process from going forward until the user id is available
+     
     if (!user || !user.id) {
       console.log('User ID is not available yet.');
       return;
     }
-
+ 
     // listener for any changes on the specified document in the given collection
     const latestChats = onSnapshot(
       doc(db, 'chatMessages', user.id),
       async (res) => {
         // obtained the chat data
-
+         
         if (res && res.data()) {
           const items = res.data().chats;
           console.log('🚀 ~ items:', items);
+
           const promises = items.map(async (item) => {
             console.log('🚀 ~ promises ~ item:', item);
             if (item.receiverId) {
@@ -75,8 +80,10 @@ function ChatList() {
               return user;
             }
           });
+
           let chatData = await Promise.all(promises);
-          console.log('🚀 ~ latestChats ~ chatData:', chatData);
+
+          // sorting logic on displaying the chats, first pref is the most recent text message, else its updated chat
           chatData = chatData.sort((a, b) => {
             if (a.hasSentMessage === b.hasSentMessage) {
               return b.updatedAt - a.updatedAt; // Sort by updatedAt if hasSentMessage is the same
@@ -84,26 +91,28 @@ function ChatList() {
             return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
           });
           console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
-          
+           
           setChats(chatData);
+          // to handle the filter chats func
           setFilteredUserChats(chatData);
         } else {
           console.log('user chats are loading, please wait...');
         }
       }
     );
-
+    // cleanup function which is run whenever user.id is changed
     return () => {
       latestChats();
     };
+    // the first conditional in this useEffect is to prevent the process from going forward until the user id is available but we want the function below it to be executed once user.id is available so in dependency array we pass user.id
   }, [user?.id]);
 
   const dispatch = useDispatch();
+  // to search among existing chats
   const handleSearch = async (e) => {
     console.log('🚀 ~ handleSearch ~ e:', e.target.value);
     try {
-      console.log(chats);
-      const filteredChats = chats.filter((chat) => {
+       const filteredChats = chats.filter((chat) => {
         return chat.user.callSign
           .toLowerCase()
           .includes(e.target.value.toLowerCase());
@@ -130,15 +139,15 @@ function ChatList() {
       // deleting user from the redux reducer
       debugger;
       const newChats = { ...loggedInUsersChatList };
-
+      // deleting the user data from redux store
       for (let key in newChats) {
-        debugger;
         if (key === userId) {
           delete newChats[key];
         }
       }
       console.log('🚀 ~ handleDeleteUser ~ newChats:', newChats);
 
+      // updating the user's chat list
       dispatch(setCurrentUsersChatlist(newChats));
 
       // loading the desired collection
@@ -150,7 +159,7 @@ function ChatList() {
 
       if (!docResponse.exists()) {
         console.log(
-          `User with ID ${userId} does not exist in the chatMessages collection.`
+          `Current logged in User ID ${userId} does not exist in the chatMessages collection.`
         );
         return;
       }
@@ -160,9 +169,11 @@ function ChatList() {
         (chat) => chat.receiverId === userId
       );
       const matchedUserChatId = matchedUserChat?.chatId;
+      // deleting the object matched
       await updateDoc(docSelectCondition, {
         chats: arrayRemove(matchedUserChat),
       });
+      // cleaning the current opened chat details in the redux store
       dispatch(currentOpenedUser(''));
       dispatch(setMessages([]));
 
@@ -170,6 +181,7 @@ function ChatList() {
       const chatsCollection = collection(db, 'chats');
       // selecting the document or row in the collection
       const chatsDocSelectCondition = doc(chatsCollection, matchedUserChatId);
+      // deleting the matched chat id
       deleteDoc(chatsDocSelectCondition);
     } catch (error) {
       debugger;
