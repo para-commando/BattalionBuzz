@@ -675,29 +675,46 @@ function Chats() {
   const handleMicrophoneClick = () => {
     setIsSendVoiceModalOpen(true);
   };
+  const streamRef = useRef(null); // To store the media stream
 
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder.current = new MediaRecorder(stream);
+  const startRecording = async (e) => {
+    try {
+      debugger;
+      console.log('🚀 ~ startRecording ~ e:', e);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream; // Store the stream to stop it later
 
-    mediaRecorder.current.ondataavailable = (event) => {
-      audioChunks.current.push(event.data);
-    };
-    mediaRecorder.current.onstop = () => {
-      const blob = new Blob(audioChunks.current, { type: 'audio/wav' });
-      setAudioBlob({
-        audioBlob: blob,
-        audioFileName: new Date().toISOString(),
-      });
-      setAudioURL(URL.createObjectURL(blob));
-      audioChunks.current = [];
-    };
-    mediaRecorder.current.start();
-    setIsRecording(true);
+      mediaRecorder.current = new MediaRecorder(stream);
+      mediaRecorder.current.ondataavailable = (event) => {
+        audioChunks.current.push(event.data);
+      };
+      mediaRecorder.current.onstop = () => {
+        const blob = new Blob(audioChunks.current, { type: 'audio/wav' });
+        setAudioBlob({
+          audioBlob: blob,
+          audioFileName: new Date().toISOString(),
+        });
+        setAudioURL(URL.createObjectURL(blob));
+        audioChunks.current = [];
+      };
+
+      mediaRecorder.current.start();
+      setIsRecording(true);
+    } catch (error) {
+      alert('something went wrong, please check microphone access');
+    }
   };
 
   const stopRecording = () => {
-    mediaRecorder.current.stop();
+    if (mediaRecorder.current) {
+      mediaRecorder.current.stop();
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop()); // Stop the media stream
+      streamRef.current = null; // Clear the reference
+    }
+    setShowSendButton(true);
     setIsRecording(false);
   };
   const handleDeleteMessageModal = async (mId) => {
@@ -830,7 +847,7 @@ function Chats() {
       debugger;
     }
   };
-
+  const [showSendButton, setShowSendButton] = useState(false);
   return (
     <>
       {isUserChatsVisible && (
@@ -1027,19 +1044,23 @@ function Chats() {
                     Recorded Audio:
                   </span>
                   <div className='w-full max-w-sm p-4 border rounded-lg shadow-md bg-gray-50'>
-                    <audio controls src={audioURL} className='w-full mb-2' />
+                    <audio controls src={audioURL} className='w-full mb-2'>
+                      Your browser does not support the audio element.
+                    </audio>
                     <span className='text-xs text-gray-600'>
                       file name: {audioBlob.audioFileName}
                     </span>
                   </div>
                 </div>
               )}
-              <div
-                className='bg-emerald-950 text-white px-6 py-1 text-center rounded-2xl cursor-pointer mt-2'
-                onClick={handleSendMessage}
-              >
-                Send
-              </div>
+              {!isRecording && showSendButton && (
+                <div
+                  className='bg-emerald-950 text-white px-6 py-1 text-center rounded-2xl cursor-pointer mt-2'
+                  onClick={handleSendMessage}
+                >
+                  Send
+                </div>
+              )}
             </div>
           </Modal>
           <Modal
