@@ -1191,7 +1191,7 @@ function Chats() {
               </div>
             </div>
 
-            <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[525px] mt-2'>
+            <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[525px] mt-2 pb-2'>
               {messages.map((message, index) => {
                 console.log(
                   '🚀 ~ {messages.map ~ messagepppppppppppppppddddddffff:',
@@ -1232,7 +1232,7 @@ function Chats() {
                         </div>
                       )}
                       {message?.audioURL && (
-                        <div className='mt-4 flex flex-col items-center w-96'>
+                        <div className='mt-4 flex flex-col items-center w-96 pb-2'>
                           <div className='w-full max-w-sm p-4 border rounded-lg shadow-md bg-gray-50'>
                             <audio
                               controls
@@ -1246,10 +1246,12 @@ function Chats() {
                         </div>
                       )}
                       {message?.video && (
-                        <video width='600' controls>
-                          <source src={message.video} type='video/mp4' />
-                          Your browser does not support the video tag.
-                        </video>
+                        <div className='pb-2'>
+                          <video width='600' controls>
+                            <source src={message.video} type='video/mp4' />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
                       )}
                       {message?.image && (
                         <div className='flex flex-col gap-[2px]'>
@@ -1260,7 +1262,7 @@ function Chats() {
                             onClick={() => handleViewImage(message.image)}
                             alt='image in chats'
                           />
-                          <div className='self-center'>
+                          <div className='self-center mb-1'>
                             <a
                               href={message?.image}
                               download={message?.image}
@@ -1293,7 +1295,7 @@ function Chats() {
                               </span>
                             </div>
                           </div>
-                          <div className=' '>
+                          <div className='mb-1'>
                             <a
                               href={message?.pdf}
                               download={message?.fileName}
