@@ -11,7 +11,7 @@ import { auth } from './lib/firebase';
 import {
   getAllUserIds,
   fetchUserDetails,
-  getCurrentUsersChatList
+  getCurrentUsersChatList,
 } from './redux/reducers/userAuth';
 import turbine from './assets/turbine.gif';
 import combatChopper from './assets/combatChopper.png';
@@ -26,22 +26,19 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-   // Adds an observer for changes to the user's sign-in state.
+    // Adds an observer for changes to the user's sign-in state.
 
     const userAuthState = auth.onAuthStateChanged((user) => {
-      console.log('🚀 ~ userAuthState ~ user:useeffffectttt', user);
-      if (user) {
+       if (user) {
         // User is signed in, fetch and dispatch user details
-        console.log('User signed in:', user);
-        dispatch(fetchUserDetails(user));
+         dispatch(fetchUserDetails(user));
         // storing all the user Id for better search results
         dispatch(getAllUserIds());
         // fetching current users chat list
         dispatch(getCurrentUsersChatList(user.uid));
       } else {
         // User is signed out, dispatch an action to handle this state
-        console.log('User signed out or session expired');
-        dispatch(fetchUserDetails(null)); // This action should handle the null case appropriately
+         dispatch(fetchUserDetails(null)); // This action should handle the null case appropriately
       }
     });
     // cleanup function
@@ -57,14 +54,23 @@ function App() {
       <div className='bodyContainer-base-styles'>
         <div className='background-overlay'></div>
         <div className='content flex justify-center'>
-         {/* the below conditionals decide whether user is authenticated. */}
+          {/* the below conditionals decide whether user is authenticated. */}
           {isLoading ? (
             <>
-              <div className='loading text-white text-8xl mt-60 relative flex flex-col items-center'>
-                <img src={turbine} className='absolute bottom-[268px]' alt='' />
-                <img src={combatChopper} className='w-44 h-44' alt='' />
+              <div className='loading text-white text-3xl mt-60 relative flex flex-col items-center'>
+                <div className='relative'>
+                {/* left-1/2 puts the left edge of the element at the middle of the parent container.
+                transform: translateX(-50%) shifts the whole element back, placing the center of the element in the middle of the container. */}
+                  <img
+                    src={turbine}
+                    className='absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-32'
+                    alt=''
+                  />
+                  <img src={combatChopper} className='w-40 h-40' alt='' />
+                </div>
                 <p>Loading...</p>
               </div>
+              
             </>
           ) : isUserValidated ? (
             <>

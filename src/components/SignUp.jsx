@@ -59,8 +59,7 @@ function SignUp() {
         // deleting profile pic after use
         delete data.profilePic;
       } else {
-        console.log('no profile pic uploaded');
-        data.imgUrl =
+         data.imgUrl =
           'https://preview.redd.it/a-commando-from-the-elite-garud-special-forces-of-the-air-v0-ubqtdla4toja1.jpg?width=1080&crop=smart&auto=webp&s=c5dbb3466fef9dd74a111bf9df83e470c8917f43';
       }
       // creating user document in firestore db's users collection with the user's id
@@ -79,8 +78,7 @@ function SignUp() {
         errorMessage =
           'Either Call-Sign or regiment name already taken, please change either or both';
       }
-      console.log('🚀 ~ onSubmit ~ error:', JSON.stringify(error));
-      alert(errorMessage);
+       alert(errorMessage);
       throw error;
     } finally {
       setShowSubmit(true);
@@ -144,8 +142,7 @@ function SignUp() {
                     required: false,
                     validate: {
                       validFileType: (value) => {
-                        console.log('🚀 ~ SignUp ~ value:', value);
-                        if (value.length) {
+                         if (value.length) {
                           if (value[0].size > 10000000) {
                             return 'File size should be less than 10MB';
                           }
@@ -159,8 +156,7 @@ function SignUp() {
                     },
                   })}
                   onChange={(e) => {
-                    console.log('🚀 ~ SignUp ~ e:', e.target.files);
-                    if (e.target.files.length) {
+                     if (e.target.files.length) {
                       if (
                         e.target.files[0].size <= 1000000 &&
                         e.target.files[0].type.includes('image/')

@@ -36,10 +36,37 @@ function Details() {
     return state.userAuthReducerExport.sharedDocuments;
   });
 
-
   const isUserDetailsVisible = useSelector((state) => {
     return state.toggleViewReducersExport.valueIsDetailsVisible;
   });
+  const handleShowSharedDocs = (params) => {
+    if (!sharedDocumentsList?.length) {
+      alert('No shared documents found');
+      return;
+    }
+    setToggleDocumentsListDetailsSection(!toggleDocumentsListDetailsSection);
+  };
+  const handleShowSharedImages = (params) => {
+    if (!sharedImagesList?.length) {
+      alert('No shared images found');
+      return;
+    }
+    setToggleImgListDetailsSection(!toggleImgListDetailsSection);
+  };
+  const handleShowSharedVideos = (params) => {
+    if (!sharedVideosList?.length) {
+      alert('No shared videos found');
+      return;
+    }
+    setToggleVideosListDetailsSection(!toggleVideosListDetailsSection);
+  };
+  const handleShowSharedAudios = (params) => {
+    if (!sharedAudiosList?.length) {
+      alert('No shared audios found');
+      return;
+    }
+    setToggleAudioListDetailsSection(!toggleAudioListDetailsSection);
+  };
   return (
     <>
       {isUserDetailsVisible && (
@@ -61,78 +88,104 @@ function Details() {
           </div>
           <div className='border-b-2 p-2 mx-2'></div>
           <div className='options pt-3 mx-1 overflow-y-auto h-[470px] w-full'>
-            <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
+            <div
+              className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3 cursor-pointer'
+              onClick={handleShowSharedDocs}
+            >
               <div className='title flex justify-between items-center'>
                 <span className='text-lg'>Shared Docs</span>
                 <img
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''
-                  onClick={(e) =>
-                    setToggleDocumentsListDetailsSection(
-                      !toggleDocumentsListDetailsSection
-                    )
-                  }
                 />
               </div>
             </div>
             {toggleDocumentsListDetailsSection && (
               <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedDocumentsList.map((item, index) => {
+ 
                   return (
-                    <div
-                      key={index}
-                      className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72 cursor-pointer'
-                    >
-                      <img src={documentsIcon} className='w-6 h-6  ' alt='' />
-                      <span className='text-[12px]'>{item.fileName}</span>
+                    <div className=' flex items-center'>
+                      <a
+                        href={item?.pdf}
+                        download={item?.pdf}
+                        className='text-white'
+                        target='_blank'
+                      >
+                        <div
+                          key={index}
+                          className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-full cursor-pointer p-1'
+                        >
+                          <img
+                            src={documentsIcon}
+                            className='w-6 h-6 invert '
+                            alt=''
+                          />
+                          <span className='text-[12px]'>
+                            {item.fileName.slice(0, 40)}
+                          </span>
+                        </div>
+                      </a>
                     </div>
                   );
                 })}
               </div>
             )}
-            <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
+            <div
+              className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3 cursor-pointer'
+              onClick={handleShowSharedAudios}
+            >
               <div className='title flex justify-between items-center'>
                 <span className='text-lg'>Shared Audios</span>
                 <img
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''
-                  onClick={(e) =>
-                    setToggleAudioListDetailsSection(
-                      !toggleAudioListDetailsSection
-                    )
-                  }
                 />
               </div>
             </div>
             {toggleAudioListDetailsSection && (
               <div className=' ml-4 photos overflow-y-auto max-h-[200px] cursor-pointer'>
                 {sharedAudiosList.map((item, index) => {
+ 
                   return (
-                    <div
-                      key={index}
-                      className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
-                    >
-                      <img src={microphoneIcon} className='w-6 h-6  ' alt='' />
-                      <span className='text-[14px] break-words '>
-                        {item.audioFileName || 'untitled'}
-                      </span>
+                    <div className=' flex items-center'>
+                      <a
+                        href={item?.audioURL}
+                        download={item?.audioURL}
+                        className='text-white'
+                        target='_blank'
+                      >
+                        <div
+                          key={index}
+                          className='photoItem border-2 border-black flex items-center gap-2 mb-1 w-72'
+                        >
+                          <img
+                            src={microphoneIcon}
+                            className='w-6 h-6  '
+                            alt=''
+                          />
+                          <span className='text-[14px] break-words '>
+                            {item.audioFileName || 'untitled'}
+                          </span>
+                        </div>
+                      </a>
                     </div>
                   );
                 })}
               </div>
             )}
-            <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
+            <div
+              className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3 cursor-pointer'
+              onClick={handleShowSharedImages}
+            >
               <div className='title flex justify-between items-center'>
                 <span className='text-lg'>Shared Images</span>
                 <img
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''
-                  onClick={(e) =>
-                    setToggleImgListDetailsSection(!toggleImgListDetailsSection)
-                  }
                 />
               </div>
             </div>
@@ -141,42 +194,57 @@ function Details() {
               <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedImagesList.map((item, index) => {
                   return (
-                    <div
-                      key={index}
-                      className='photoItem flex items-center gap-8 mb-2 w-72 cursor-pointer'
-                    >
-                      <img
-                        src={item.image}
-                        className='w-8 h-8 rounded-full object-cover'
-                        alt=''
-                      />
-                      <span className='text-[14px]'>
-                        {item?.imageName || 'untitled'}
-                      </span>
+                    <div className=' flex items-center'>
+                      <a
+                        href={item?.image}
+                        download={item?.image}
+                        className='text-white'
+                        target='_blank'
+                      >
+                        <div
+                          key={index}
+                          className='photoItem flex items-center gap-8 mb-2 w-72 cursor-pointer'
+                        >
+                          <img
+                            src={item.image}
+                            className='w-8 h-8 rounded-full object-cover'
+                            alt=''
+                          />
+                          <span className='text-[14px]'>
+                            {item?.imageName || 'untitled'}
+                          </span>
+                        </div>
+                      </a>
                     </div>
                   );
                 })}
               </div>
             )}
-            <div className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3'>
+            <div
+              className='option bg-green-900 rounded-full px-[9px] py-[15px] mb-3 cursor-pointer'
+              onClick={handleShowSharedVideos}
+            >
               <div className='title flex justify-between items-center'>
                 <span className='text-lg'>Shared Videos</span>
                 <img
                   src={toggleViewIcon}
                   className='invert w-6 h-6 mx-2 cursor-pointer'
                   alt=''
-                  onClick={(e) =>
-                    setToggleVideosListDetailsSection(
-                      !toggleVideosListDetailsSection
-                    )
-                  }
                 />
               </div>
             </div>
             {toggleVideosListDetailsSection && (
               <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedVideosList.map((item, index) => {
+ 
                   return (
+                    <div className=' flex items-center'>
+                    <a
+                      href={item?.video}
+                      download={item?.video}
+                      className='text-white'
+                      target='_blank'
+                    >
                     <div
                       key={index}
                       className='photoItem flex items-center gap-2 mb-2 cursor-pointer'
@@ -190,6 +258,8 @@ function Details() {
                         {item.videoName || 'untitled'}
                       </span>
                     </div>
+                    </a>
+                  </div>
                   );
                 })}
               </div>

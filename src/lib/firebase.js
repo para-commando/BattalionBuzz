@@ -26,6 +26,7 @@ try {
   console.log('Firebase app initialized:', app);
 
 } catch (error) {
+  alert("something went wrong, please try again");
   console.error('Error initializing Firebase:', error);
 }
 

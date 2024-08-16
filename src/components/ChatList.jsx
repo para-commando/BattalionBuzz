@@ -31,7 +31,7 @@ function ChatList() {
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
- 
+
   // handle the click outside event for closing the add user popup
   useEffect(() => {
     document.addEventListener('click', handleClickOutside2, true);
@@ -53,24 +53,22 @@ function ChatList() {
   // handles real time fetching of data from the firestore database using the module onSnapshot for the document specified
   useEffect(() => {
     // prevent the process from going forward until the user id is available
-     
+
     if (!user || !user.id) {
       console.log('User ID is not available yet.');
       return;
     }
- 
+
     // listener for any changes on the specified document in the given collection
     const latestChats = onSnapshot(
       doc(db, 'chatMessages', user.id),
       async (res) => {
         // obtained the chat data
-         
+
         if (res && res.data()) {
           const items = res.data().chats;
-          console.log('🚀 ~ items:', items);
 
           const promises = items.map(async (item) => {
-            console.log('🚀 ~ promises ~ item:', item);
             if (item.receiverId) {
               const userDocRef = doc(db, 'users', item.receiverId);
               const userDocSnap = await getDoc(userDocRef);
@@ -90,8 +88,7 @@ function ChatList() {
             }
             return b.hasSentMessage - a.hasSentMessage; // Sort by hasSentMessage (true first)
           });
-          console.log('🚀 ~ chatData:sorteddddddddddd', chatData);
-           
+
           setChats(chatData);
           // to handle the filter chats func
           setFilteredUserChats(chatData);
@@ -110,16 +107,15 @@ function ChatList() {
   const dispatch = useDispatch();
   // to search among existing chats
   const handleSearch = async (e) => {
-    console.log('🚀 ~ handleSearch ~ e:', e.target.value);
     try {
-       const filteredChats = chats.filter((chat) => {
+      const filteredChats = chats.filter((chat) => {
         return chat.user.callSign
           .toLowerCase()
           .includes(e.target.value.toLowerCase());
       });
       setFilteredUserChats(filteredChats);
     } catch (error) {
-      console.log('🚀 ~ handleSearch ~ error:', error);
+      alert('something went wrong, please try again');
     }
   };
   const loggedInUsersChatList = useSelector(
@@ -137,7 +133,7 @@ function ChatList() {
       }
 
       // deleting user from the redux reducer
-      debugger;
+
       const newChats = { ...loggedInUsersChatList };
       // deleting the user data from redux store
       for (let key in newChats) {
@@ -145,7 +141,6 @@ function ChatList() {
           delete newChats[key];
         }
       }
-      console.log('🚀 ~ handleDeleteUser ~ newChats:', newChats);
 
       // updating the user's chat list
       dispatch(setCurrentUsersChatlist(newChats));
@@ -184,7 +179,7 @@ function ChatList() {
       // deleting the matched chat id
       deleteDoc(chatsDocSelectCondition);
     } catch (error) {
-      debugger;
+      alert('something went wrong, please try again');
     }
   };
   return (
@@ -231,11 +226,6 @@ function ChatList() {
         <div className='overflow-y-auto max-h-[85%] pb-5'>
           {filteredUserChats &&
             filteredUserChats.map((currUser) => {
-              console.log('🚀 ~ ChatList ~ currUser:', currUser);
-              console.log(
-                '🚀 ~ ChatList ~ currUser.hasSentMessage:',
-                currUser.hasSentMessage
-              );
               return (
                 <div
                   className='Users flex items-center border-2 relative py-1 rounded-full mb-2 cursor-pointer'

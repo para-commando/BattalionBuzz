@@ -36,15 +36,11 @@ function AddUser() {
       const chatMessages = collection(db, 'chatMessages');
 
       const chats = collection(db, 'chats');
-      console.log('🚀 ~ addUser ~ chats:', chats);
-      const newChatRef = doc(chats);
+       const newChatRef = doc(chats);
       await setDoc(newChatRef, {
         createdAt: Date.now(),
         messages: [],
       });
-      console.log('🚀 ~ addUser ~ newChatRef.id:', newChatRef.id);
-
-      console.log('🚀 ~ awaitupdateDoc ~ userData.id:', userData.id);
 
       const docRef = doc(chatMessages, userData.id);
       const docSnap = await getDoc(docRef);
@@ -88,29 +84,23 @@ function AddUser() {
       newList[currentUserDetails.id] = newChatRef.id;
       dispatch(setCurrentUsersChatlist(newList));
     } catch (error) {
-      debugger;
-      console.log('🚀 ~ addUser ~ error:', error);
-    }
+      alert("something went wrong, please try again");
+      }
   };
   const handleSearch = async (e) => {
     try {
       e.preventDefault();
 
       const formData = new FormData(e.target);
-      console.log('🚀 ~ handleSearch ~ formData:', formData);
-      const username = formData.get('callSignAddUser').toLowerCase();
-      console.log('🚀 ~ handleSearch ~ username:2344444444444444444', username);
-
+       const username = formData.get('callSignAddUser').toLowerCase();
+ 
       const querySnapshot = usersList;
 
       // Use a Set to ensure unique users
       const uniqueUsers = new Set(); // Convert existing users to string to use in Set
 
       querySnapshot.forEach((doc) => {
-        console.log(
-          '🚀 ~ querySnapshot.forEach ~ docsdddddddddddddddddd:',
-          doc
-        );
+         
 
         // not showing the current user in the add user list
         if (
@@ -128,7 +118,7 @@ function AddUser() {
 
       setUser(uniqueUsersArray);
     } catch (error) {
-      console.log('🚀 ~ handleSearch ~ error:', error);
+      alert("something went wrong, please try again");
     }
   };
 

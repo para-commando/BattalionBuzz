@@ -25,8 +25,7 @@ function Login() {
 
   // includes firebase authentication module for email and password authentication
   const onSubmit = async (data) => {
-    console.log('🚀 ~ onSubmit ~ data:', data);
-    try {
+     try {
       // state handlings
       dispatch(isUserSubmitting(true));
       setShowSubmit(false);
@@ -37,16 +36,13 @@ function Login() {
         data.email,
         data.password
       );
-      console.log('🚀 ~ onSubmit ~ aa:', aa);
-      console.log(data);
-      dispatch(isUserValidated(true));
+       dispatch(isUserValidated(true));
      } catch (error) {
       let errorMessage = 'Something went wrong, please try again';
       if ((error.code = 'auth/invalid-credential')) {
         errorMessage = 'Invalid credentials, please check your credentials';
       }
-      console.log('🚀 ~ onSubmit ~ error:', JSON.stringify(error));
-      alert(errorMessage);
+       alert(errorMessage);
      } finally {
       // state handlings
       setShowSubmit(true);

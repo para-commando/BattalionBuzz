@@ -22,8 +22,7 @@ export const userAuthReducers = createSlice({
     },
     currentOpenedUser: (state, action) => {
       state.currentOpenedUser = action.payload;
-      console.log('🚀 ~ action.payload234234353245345:', action.payload);
-    },
+     },
     setMessages: (state, action) => {
       state.messages = action.payload;
     },

@@ -30,7 +30,7 @@ export const uploadData = async (file) => {
         }
       },
       (error) => {
-        console.log('🚀 ~ uploadData ~ error:', error);
+        alert("something went wrong, please try again");
         reject(error);
       },
       () => {
@@ -39,8 +39,7 @@ export const uploadData = async (file) => {
             resolve(downloadURL);
           })
           .catch((error) => {
-            debugger;
-            console.log('🚀 ~ Failed to get download URL:', error);
+            alert("something went wrong, please try again");
             reject(error);
           });
       }
