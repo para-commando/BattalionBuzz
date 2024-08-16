@@ -1,6 +1,6 @@
 # 🚁 BattalionBuzz 🚁
 
-### A feature-rich chat application whose design is inspired by Indian Special Forces which supports real-time communication, user authentication, file sharing, image/video sharing, documents sharing, audio recording, forwarding of chat data and much more.
+## A feature-rich chat application whose design is inspired by Indian Special Forces which supports real-time communication, user authentication, file sharing, image/video sharing, documents sharing, audio recording, forwarding of chat data and much more.
 
 ## 📑 Table of Contents
 
@@ -61,7 +61,7 @@ To run this project locally, you need to have the following installed:
 
 - Node.js (version 14 or later)
 - npm
-- Firebase account for Firestore and storage configuration along with with email/password Authentication
+- Firebase account for Firestore and storage configuration along with email/password Authentication
 
 ### 🔧 Installation
 
