@@ -8,8 +8,7 @@ function UserInfo() {
   const user = useSelector(
     (state) => state.userAuthReducerExport.valueUserData
   );
-  console.log('🚀 ~ UserInfo ~ user:', user);
-  const dispatch = useDispatch();
+   const dispatch = useDispatch();
 
   // displaying logged in user's information post successful authentication
   return (

@@ -104,7 +104,7 @@ function Details() {
             {toggleDocumentsListDetailsSection && (
               <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedDocumentsList.map((item, index) => {
-                  console.log('🚀 ~ {sharedDocumentsList.map ~ item:', item);
+ 
                   return (
                     <div className=' flex items-center'>
                       <a
@@ -148,7 +148,7 @@ function Details() {
             {toggleAudioListDetailsSection && (
               <div className=' ml-4 photos overflow-y-auto max-h-[200px] cursor-pointer'>
                 {sharedAudiosList.map((item, index) => {
-                  console.log('🚀 ~ {sharedAudiosList.map ~ item12334:', item);
+ 
                   return (
                     <div className=' flex items-center'>
                       <a
@@ -236,7 +236,7 @@ function Details() {
             {toggleVideosListDetailsSection && (
               <div className=' ml-4 photos overflow-y-auto max-h-[200px]'>
                 {sharedVideosList.map((item, index) => {
-                  console.log("🚀 ~ {sharedVideosList.map ~ itemEWEEWEEWWEEWEE:", item)
+ 
                   return (
                     <div className=' flex items-center'>
                     <a

@@ -29,19 +29,16 @@ function App() {
     // Adds an observer for changes to the user's sign-in state.
 
     const userAuthState = auth.onAuthStateChanged((user) => {
-      console.log('🚀 ~ userAuthState ~ user:useeffffectttt', user);
-      if (user) {
+       if (user) {
         // User is signed in, fetch and dispatch user details
-        console.log('User signed in:', user);
-        dispatch(fetchUserDetails(user));
+         dispatch(fetchUserDetails(user));
         // storing all the user Id for better search results
         dispatch(getAllUserIds());
         // fetching current users chat list
         dispatch(getCurrentUsersChatList(user.uid));
       } else {
         // User is signed out, dispatch an action to handle this state
-        console.log('User signed out or session expired');
-        dispatch(fetchUserDetails(null)); // This action should handle the null case appropriately
+         dispatch(fetchUserDetails(null)); // This action should handle the null case appropriately
       }
     });
     // cleanup function

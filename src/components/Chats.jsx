@@ -148,7 +148,6 @@ function Chats() {
       let userChatId = { chatId: '' };
 
       if (currentOpenedUser.id) {
-        console.log('🚀 ~ fetchData ~ currentOpenedUser:', currentOpenedUser);
         const chatMessages = collection(db, 'chatMessages');
         const docRef = doc(chatMessages, userData.id);
         const docSnap = await getDoc(docRef);
@@ -197,7 +196,6 @@ function Chats() {
   }, [currentOpenedUser, userData.id]);
 
   const handleEmojiClick = (params) => {
-    console.log('🚀 ~ handleEmojiClick ~ params:', params);
     setUserInputText(userInputText + params.emoji);
 
     return;
@@ -210,7 +208,6 @@ function Chats() {
   }, []);
 
   const handleClickOutside = (event) => {
-    console.log('🚀 ~ handleClickOutside ~ event:', event);
     if (
       emojiPickerRef.current &&
       !emojiPickerRef.current.contains(event.target)
@@ -223,7 +220,6 @@ function Chats() {
   });
   // function facilitating sending of image or video
   const handleSendImage = async (e) => {
-    console.log('🚀 ~ handleSendImage ~ e:32rknfkefneor', e.target.files['0']);
     if (e.target.files['0'].size > 10000000) {
       alert('File size should be less than 10MB');
 
@@ -258,8 +254,6 @@ function Chats() {
     }
   };
   const handleSendPdfFiles = async (e) => {
-    console.log('🚀 ~ handleSendImage ~ e:34543543543534', e.target.files['0']);
-
     if (e.target.files['0'].size > 10000000) {
       alert('File size should be less than 10MB');
 
@@ -306,22 +300,17 @@ function Chats() {
     let audioUploadUrl = '';
     if (imgToSend.file) {
       imgUrl = await uploadData(imgToSend.file);
-      console.log('🚀 ~ handleSendMessage ~ imgUrl:', imgUrl);
     }
     if (videoToSend.file) {
       videoUrl = await uploadData(videoToSend.file);
-      console.log('🚀 ~ handleSendMessage ~ videoUrl:', videoUrl);
     }
     if (pdfFileToSend.file) {
       pdfUrl = await uploadData(pdfFileToSend.file);
-      console.log('🚀 ~ handleSendMessage ~ pdfUrl:', pdfUrl);
     }
     if (audioURL) {
       audioUploadUrl = await uploadData(audioBlob.audioBlob);
-      console.log('🚀 ~ handleSendMessage ~ audioUploadUrl:', audioUploadUrl);
     }
     try {
-      console.log('🚀 ~ handleSendMessage ~ currentOpenedUser:', openedChatId);
       // updating message in the senders's chat list so that he is able to see the message sent
       await updateDoc(doc(db, 'chats', openedChatId), {
         messages: arrayUnion({
@@ -353,22 +342,16 @@ function Chats() {
       // updating message in the receiver's chat list so that he is able to see the message sent
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, currentOpenedUser.id);
-      console.log(
-        '🚀 ~ handleSendMessage ~ currentOpenedUser.id:',
-        currentOpenedUser.id
-      );
 
       const docSnap = await getDoc(docRef);
 
       const chatsArray = docSnap.data() ? docSnap.data().chats : [];
-      console.log('🚀 ~ handleSendMessage ~ chatsArray:', chatsArray);
-      console.log('🚀 ~ handleSendMessage ~ docSnap.data() :', docSnap.data());
+
       const matchedChat = await chatsArray.find(
         (chat) => chat.receiverId === userData.id
       );
       // if user is already added in the receiver's chat list then below conditional will be true, else false
       if (matchedChat) {
-        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
         // to make turn on message received indicator in receiver's chat list
         await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
@@ -401,13 +384,10 @@ function Chats() {
             isSeen: false,
           }),
         });
-
-        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
       } else {
         // if the user is not present in the receiver's chat list then below conditional will be true
 
         const chats = collection(db, 'chats');
-        console.log('🚀 ~ addUser ~ chats:', chats);
         const newChatRef = doc(chats);
         // creating a new chat document
         await setDoc(newChatRef, {
@@ -450,7 +430,7 @@ function Chats() {
       }
       return;
     } catch (error) {
-      debugger;
+      alert('something went wrong, please try again');
     } finally {
       setUserInputText('');
       clearInterval(interval);
@@ -504,7 +484,6 @@ function Chats() {
   const handleCancelImageSending = () => {
     setIsSendImageModalOpen(false);
     setSelectedImage('');
-    console.log('wefffffffffffffffffrwerwerweeeeeeeeeeeeeeeeeeeeeeee');
     setImgToSend({
       file: '',
       url: '',
@@ -659,7 +638,6 @@ function Chats() {
   };
 
   const handleForwardDataModal = (url) => {
-    console.log('🚀 ~ handleForwardDataModal ~ url:', url);
     setMessageToForward(url);
     setIsForwardDataModalOpen(true);
   };
@@ -679,8 +657,6 @@ function Chats() {
 
   const startRecording = async (e) => {
     try {
-      debugger;
-      console.log('🚀 ~ startRecording ~ e:', e);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream; // Store the stream to stop it later
 
@@ -726,11 +702,6 @@ function Chats() {
   );
   const handleForwardMessage = async (params) => {
     try {
-      debugger;
-      console.log(
-        '🚀 ~ handleForwardMessage ~ params:6777777777777777777777777',
-        params
-      );
       const uniqueId = uuidv4();
       const newMsg = { ...messageToForward };
       newMsg.mId = uniqueId;
@@ -744,10 +715,9 @@ function Chats() {
         });
       } else {
         // receiver is not present in the list of chats of the user then this will be executed
-        debugger;
+
         // creating a new chat id for the receiver
         const chats = collection(db, 'chats');
-        console.log('🚀 ~ addUser ~ chats:', chats);
         const newChatRef = doc(chats);
         await setDoc(newChatRef, {
           createdAt: Date.now(),
@@ -775,7 +745,7 @@ function Chats() {
       }
 
       setIsForwardDataModalOpen(false);
-      debugger;
+
       // updating the chats in the receiver's list
       const chatMessages = collection(db, 'chatMessages');
       const docRef = doc(chatMessages, params.id);
@@ -794,7 +764,6 @@ function Chats() {
         : null;
       if (matchedChat) {
         // updating chatMessages collection for the document to turn on the latest message identification
-        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
         await updateDoc(docRef, {
           chats: arrayRemove(matchedChat),
         });
@@ -809,12 +778,9 @@ function Chats() {
         updateDoc(doc(db, 'chats', matchedChat.chatId), {
           messages: arrayUnion(newMsg),
         });
-
-        console.log('🚀 ~ handleSendMessage ~ matchedChat:', matchedChat);
       } else {
         // creating a new chat and then adding it in the chatMessages collection's document matching the receiver's id
         const chats = collection(db, 'chats');
-        console.log('🚀 ~ addUser ~ chats:', chats);
         const newChatRef = doc(chats);
         await setDoc(newChatRef, {
           createdAt: Date.now(),
@@ -822,7 +788,6 @@ function Chats() {
         });
 
         const chatMessagesDoc = collection(db, 'chatMessages');
-        console.log('🚀 ~ addUser ~ chats:', chats);
         const newChatMessagesRef = doc(chatMessagesDoc, params.id);
 
         await updateDoc(newChatMessagesRef, {
@@ -841,10 +806,9 @@ function Chats() {
         });
       }
     } catch (error) {
+      alert('something went wrong, please try again');
       setIsForwardDataModalOpen(false);
       setMessageToForward({});
-      console.log('🚀 ~ handleForwardMessage ~ error:', error);
-      debugger;
     }
   };
   const [showSendButton, setShowSendButton] = useState(false);
@@ -1214,11 +1178,6 @@ function Chats() {
 
             <div className='UserChatDetailsInChatsWindow relative w-full flex flex-col gap-2 overflow-y-auto   rounded-xl h-[525px] mt-2 pb-2'>
               {messages.map((message, index) => {
-                console.log(
-                  '🚀 ~ {messages.map ~ messagepppppppppppppppddddddffff:',
-                  message
-                );
-
                 return (
                   <div
                     key={index}

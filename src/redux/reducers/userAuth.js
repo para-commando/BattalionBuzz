@@ -7,15 +7,13 @@ export const getAllUserIds = createAsyncThunk(
     const querySnapshot = await getDocs(collection(db, 'users'));
 
     const docIds = querySnapshot.docs.map((doc) => {
-      console.log('🚀 ~ docIds ~ doc:', doc.data());
-
       return {
         id: doc.data().id,
         callSign: doc.data().callSign,
         img: doc.data().imgUrl,
       };
     });
-    console.log('🚀 ~ returnnewPromise ~ documentIds:', docIds);
+
     return docIds;
   }
 );
@@ -42,7 +40,7 @@ export const fetchUserDetails = createAsyncThunk(
 
         const docRef = doc(db, 'users', data.uid);
         const docSnap = await getDoc(docRef);
-        console.log('🚀 ~ returnnewPromise ~ docSnap:', docSnap);
+
         if (docSnap.exists()) {
           return resolve({
             data: docSnap.data(),
@@ -53,7 +51,7 @@ export const fetchUserDetails = createAsyncThunk(
           });
         }
       } catch (error) {
-        debugger;
+        alert('something went wrong, please try again');
       }
     });
   }
@@ -131,10 +129,7 @@ export const userAuthReducers = createSlice({
 
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUserDetails.pending, (state) => {
-        console.log('🚀 ~ .addCase ~ state1:', state);
-        // state.valueIsSubmitting = true;
-      })
+      .addCase(fetchUserDetails.pending, (state) => {})
       .addCase(fetchUserDetails.fulfilled, (state, action) => {
         if (action.payload.data.id) {
           state.valueUserData = action.payload.data;
@@ -147,9 +142,6 @@ export const userAuthReducers = createSlice({
         state.valueScreenLoading = false;
       })
       .addCase(fetchUserDetails.rejected, (state) => {
-        debugger;
-        console.log('promise rejected in fetchUserDetails');
-        console.log('🚀 ~ .addCase ~ state2:', state);
         state.valueUserData = {};
         state.valueIsUserValidated = false;
         state.valueIsSubmitting = false;
@@ -157,32 +149,25 @@ export const userAuthReducers = createSlice({
         alert('Something went wrong, please try again');
         //  state.valueIsSubmitting = false;
       })
-      .addCase(getAllUserIds.pending, (state) => {
-        console.log('🚀 ~ .addCase ~ state1:', state);
-      })
+      .addCase(getAllUserIds.pending, (state) => {})
       .addCase(getAllUserIds.fulfilled, (state, action) => {
-        
         // making sure the logged in user is not present in the list
-        action.payload = action.payload.filter((user) => user.id !== state.valueUserData.id);
+        action.payload = action.payload.filter(
+          (user) => user.id !== state.valueUserData.id
+        );
         state.allUserIds = action.payload;
       })
-      .addCase(getAllUserIds.rejected, (state) => {
-        debugger;
-      })
-      .addCase(getCurrentUsersChatList.pending, (state) => {
-        console.log('🚀 ~ .addCase ~ state1:', state);
-      })
+      .addCase(getAllUserIds.rejected, (state) => {})
+      .addCase(getCurrentUsersChatList.pending, (state) => {})
       .addCase(getCurrentUsersChatList.fulfilled, (state, action) => {
         const obje = action.payload.reduce((accumulator, currentValue) => {
           accumulator[currentValue.receiverId] = currentValue.chatId;
           return accumulator;
-        },{});
-        
-        state.currentUsersChatList =obje;
+        }, {});
+
+        state.currentUsersChatList = obje;
       })
-      .addCase(getCurrentUsersChatList.rejected, (state) => {
-        debugger;
-      });
+      .addCase(getCurrentUsersChatList.rejected, (state) => {});
   },
 });
 
@@ -192,6 +177,6 @@ export const {
   isUserSubmitting,
   currentLoggedInUser,
   setSharedChatData,
-  setCurrentUsersChatlist
+  setCurrentUsersChatlist,
 } = userAuthReducers.actions;
 export default userAuthReducers.reducer;
