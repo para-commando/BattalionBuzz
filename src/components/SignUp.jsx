@@ -42,26 +42,28 @@ function SignUp() {
       setShowSubmit(false);
       setShowLoading(true);
       data.email = data.callSign + '.' + data.regiment + '@gmail.com';
+
+      // uploading image has been moved first bcs it takes time and onAuthStateChange Will be called faster if createUserWithEmailAndPassword is called before image upload
+      if (data?.profilePic && data.profilePic.length) {
+        // uploading data to firebase storage
+        const imgUrl = await uploadData(data.profilePic[0]);
+        data.imgUrl = imgUrl;
+      } else {
+        data.imgUrl =
+          'https://preview.redd.it/a-commando-from-the-elite-garud-special-forces-of-the-air-v0-ubqtdla4toja1.jpg?width=1080&crop=smart&auto=webp&s=c5dbb3466fef9dd74a111bf9df83e470c8917f43';
+      }
+      // deleting profile pic after use
+      delete data.profilePic;
+
       // creates a new user with validated data using firebase createUserWithEmailAndPassword module for email authentication methodology
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password
       );
       data.id = userCredential.user.uid;
-      data.radioSilencedUsers = [];
 
-      if (data?.profilePic && data.profilePic.length) {
-        // uploading data to firebase storage
-        const imgUrl = await uploadData(data.profilePic[0]);
-        data.imgUrl = imgUrl;
-
-        // deleting profile pic after use
-        delete data.profilePic;
-      } else {
-         data.imgUrl =
-          'https://preview.redd.it/a-commando-from-the-elite-garud-special-forces-of-the-air-v0-ubqtdla4toja1.jpg?width=1080&crop=smart&auto=webp&s=c5dbb3466fef9dd74a111bf9df83e470c8917f43';
-      }
       // creating user document in firestore db's users collection with the user's id
       setDoc(doc(db, 'users', data.id), {
         ...data,
@@ -74,11 +76,11 @@ function SignUp() {
     } catch (error) {
       // error handling to display specific error message
       let errorMessage = 'Something went wrong, please try again';
-      if ((error.code = 'auth/email-already-in-use')) {
+      if (error.code === 'auth/email-already-in-use') {
         errorMessage =
           'Either Call-Sign or regiment name already taken, please change either or both';
       }
-       alert(errorMessage);
+      alert(errorMessage);
       throw error;
     } finally {
       setShowSubmit(true);
@@ -95,14 +97,14 @@ function SignUp() {
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col justify-center items-center'
           >
-           {/* this div block handles the user profile image selection */}
+            {/* this div block handles the user profile image selection */}
             <div className='flex gap-2 pb-2'>
               <img
                 className='w-16 h-16 mx-2 rounded-full cursor-pointer object-cover object-top'
                 src={avatar.url}
                 alt=''
               />
-             
+
               {showDefaultImageUpload && (
                 <span
                   onClick={() => {
@@ -142,7 +144,7 @@ function SignUp() {
                     required: false,
                     validate: {
                       validFileType: (value) => {
-                         if (value.length) {
+                        if (value.length) {
                           if (value[0].size > 10000000) {
                             return 'File size should be less than 10MB';
                           }
@@ -156,7 +158,7 @@ function SignUp() {
                     },
                   })}
                   onChange={(e) => {
-                     if (e.target.files.length) {
+                    if (e.target.files.length) {
                       if (
                         e.target.files[0].size <= 1000000 &&
                         e.target.files[0].type.includes('image/')

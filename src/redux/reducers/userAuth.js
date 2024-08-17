@@ -131,6 +131,7 @@ export const userAuthReducers = createSlice({
     builder
       .addCase(fetchUserDetails.pending, (state) => {})
       .addCase(fetchUserDetails.fulfilled, (state, action) => {
+
         if (action.payload.data.id) {
           state.valueUserData = action.payload.data;
           state.valueIsUserValidated = true;
@@ -142,6 +143,7 @@ export const userAuthReducers = createSlice({
         state.valueScreenLoading = false;
       })
       .addCase(fetchUserDetails.rejected, (state) => {
+  
         state.valueUserData = {};
         state.valueIsUserValidated = false;
         state.valueIsSubmitting = false;
