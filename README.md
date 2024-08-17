@@ -1,21 +1,21 @@
-# 🚁 BattalionBuzz 🚁
+# <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Helicopter.png" alt="Helicopter" width="60" height="60" /> BattalionBuzz <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Helicopter.png" alt="Helicopter" width="60" height="60" />
 
 ## A feature-rich chat application whose design is inspired by Indian Special Forces which supports real-time communication, user authentication, file sharing, image/video sharing, documents sharing, audio recording, forwarding of chat data and much more.
 
 ## 📑 Table of Contents
 
 1. [📜 Project Description](#project-description)
-2. [✨ Features](#features)
-3. [🛠️ Technologies Used](#technologies-used)
-4. [🚀 Getting Started](#getting-started)
+2. [📸 ScreenShots](#screen-shots)
+3. [✨ Features](#features)
+4. [🛠️ Technologies Used](#technologies-used)
+5. [🚀 Getting Started](#getting-started)
    - [🔧 Installation](#installation)
    - [🔐 Environment Variables](#environment-variables)
-5. [📚 Usage](#usage)
-6. [🏗️ Architecture](#architecture)
-7. [🤝 Contributing](#contributing)
-8. [⚖️ License](#license)
-9. [📞 Contact](#contact)
-
+6. [📚 Usage](#usage)
+7. [🏗️ Architecture](#architecture)
+8. [🤝 Contributing](#contributing)
+9. [⚖️ License](#license)
+ 
 ---
 
 ## 📝 Project Description
@@ -23,7 +23,24 @@
 **BattalionBuzz** is a, real-time communication platform. The application provides a highly intuitive interface for managing user chats, file sharing, voice messages, images/videos sharing, documents sharing, message forwarding, option to delete the sent message, download them to local device and many more. Built using modern web technologies like React, Firebase, and TailwindCSS.
 
 ---
+## 📸 screen-shots
 
+Login page component
+![image](https://github.com/user-attachments/assets/4061b929-f391-4faf-b7e3-fb67d3f304d5)
+
+Register new user component
+![image](https://github.com/user-attachments/assets/3a69f9fb-a1c4-44ad-a95b-b799e6e10975)
+
+ChatList component
+![image](https://github.com/user-attachments/assets/2d449f6c-2a02-4f68-86c8-aa126256f09d)
+
+Chat messages component
+![image](https://github.com/user-attachments/assets/e8dafdb3-96af-4ebf-8627-b9bf59bd8cf9)
+
+user details and shared data component
+![image](https://github.com/user-attachments/assets/14047ade-d69e-45b9-9b66-d5b762680f45)
+
+---
 ## ✨ Features
 
 - **🔐 User Authentication**: Secure login and session management.
@@ -86,20 +103,21 @@ To run this project locally, you need to have the following installed:
 
 ### 🔐  Environment Variables
 Create a .env.local file in the root directory and provide the following environment variables:
-     ```bash
+ ```bash
     REACT_APP_FIREBASE_API_KEY=<your_firebase_api_key>
     REACT_APP_FIREBASE_AUTH_DOMAIN=<your_firebase_auth_domain>
     REACT_APP_FIREBASE_PROJECT_ID=<your_firebase_project_id>
     REACT_APP_FIREBASE_STORAGE_BUCKET=<your_firebase_storage_bucket>
     REACT_APP_FIREBASE_MESSAGING_SENDER_ID=<your_firebase_messaging_sender_id>
     REACT_APP_FIREBASE_APP_ID=<your_firebase_app_id>
+```
 
 ### 🏃 Running the app
-    ```bash
+ ```bash
     npm run dev
-
+ ```
 This will start the app on http://localhost:5173/
-    ```
+ 
 ## 📚 Usage
 
 - **User Registration**: Users can sign up with their credentials.🔑
