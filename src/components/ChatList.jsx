@@ -108,8 +108,9 @@ function ChatList() {
   // to search among existing chats
   const handleSearch = async (e) => {
     try {
+      
       const filteredChats = chats.filter((chat) => {
-        return chat.user.callSign
+        return chat.callSign
           .toLowerCase()
           .includes(e.target.value.toLowerCase());
       });
