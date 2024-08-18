@@ -144,6 +144,7 @@ function SignUp() {
                     required: false,
                     validate: {
                       validFileType: (value) => {
+                        
                         if (value.length) {
                           if (value[0].size > 10000000) {
                             return 'File size should be less than 10MB';
@@ -158,15 +159,19 @@ function SignUp() {
                     },
                   })}
                   onChange={(e) => {
+                    
                     if (e.target.files.length) {
                       if (
-                        e.target.files[0].size <= 1000000 &&
+                        e.target.files[0].size <= 10000000 &&
                         e.target.files[0].type.includes('image/')
                       ) {
                         setAvatar({
                           file: e.target.files[0],
                           url: URL.createObjectURL(e.target.files[0]),
                         });
+                      }
+                      else{
+                        alert('File size should be less than 10MB');
                       }
                     }
                   }}
@@ -301,6 +306,7 @@ function SignUp() {
                 <input
                   className='bg-green-800 px-9 py-2 rounded-3xl cursor-pointer hover:bg-green-900'
                   type='submit'
+                  value='submit'
                 />
               </div>
             )}

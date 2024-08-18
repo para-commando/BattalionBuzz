@@ -112,6 +112,7 @@ function Login() {
                   <input
                     className='bg-green-800 px-9 py-2 rounded-3xl cursor-pointer hover:bg-green-900'
                     type='submit'
+                    value='submit'
                   />
                 </div>
               )}
