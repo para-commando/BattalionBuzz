@@ -2,6 +2,9 @@
 
 ## A feature-rich chat application whose design is inspired by Indian Special Forces which supports real-time communication, user authentication, file sharing, image/video sharing, documents sharing, audio recording, forwarding of chat data and much more.
 
+## Demo
+
+
 ## 📑 Table of Contents
 
 1. [📜 Project Description](#project-description)
